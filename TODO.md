@@ -6,6 +6,7 @@ Project Description
 
 ### Todo
 
+- [ ] Lean how to debug in VS  
 - [ ] Add all libraries  
 - [ ] Set up routing  
 
