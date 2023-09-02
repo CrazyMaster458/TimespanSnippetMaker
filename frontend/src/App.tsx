@@ -1,25 +1,20 @@
 import { Routes, Route } from "react-router-dom";
-import { Navbar } from "./components/Navbar";
 import DemoPage from "./payments/page";
-import { Video } from "./components/video";
+import ListView from "./pages/___tests___/ListView";
+import Detail from "./pages/___tests___/Detail";
+import { VideoPlayer } from "./pages/___tests___/VideoPlayer";
+import { TestPage } from "./pages/___tests___/test";
 
 function App() {
   return (
     <>
       <Routes>
         <Route path="/page" element={<DemoPage />} />
+        <Route path="/listview" element={<ListView />} />
+        <Route path="/detail" element={<Detail />} />
+        <Route path="/videoplayer" element={<VideoPlayer />} />
+        <Route path="/testpage" element={<TestPage />} />
       </Routes>
-
-      <Navbar></Navbar>
-
-      <div className="grid grid-cols-2 gap-4 mx-4 content-center">
-        <div className="justify-self-center">
-          <Video></Video>
-        </div>
-        <div>
-          <DemoPage />
-        </div>
-      </div>
     </>
   );
 }

@@ -16,14 +16,14 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
-export type Payment = {
+export type Snippet = {
   id: string;
-  amount: number;
-  status: "pending" | "processing" | "success" | "failed" | string;
-  email: string;
+  start: string;
+  end: string;
+  description: string;
 };
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Snippet>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -44,38 +44,45 @@ export const columns: ColumnDef<Payment>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "status",
-    header: "Status",
-  },
-  {
-    accessorKey: "email",
+    accessorKey: "start",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Email
+          Start
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
   },
   {
-    accessorKey: "amount",
-    header: "Amount",
+    accessorKey: "end",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          End
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
   {
-    accessorKey: "amount",
-    header: () => <div className="text-right">Amount</div>,
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"));
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount);
-
-      return <div className="text-right font-medium">{formatted}</div>;
+    accessorKey: "description",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Description
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
     },
   },
   {
