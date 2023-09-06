@@ -1,21 +1,32 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable no-fallthrough */
 import React, { ChangeEvent, useEffect, useState } from "react";
 
 export const VideoPlayer = () => {
+  // Video player
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
   const videoContainerRef = React.useRef<HTMLDivElement | null>(null);
+  // View mode
   const fullScreenRef = React.useRef<HTMLButtonElement | null>(null);
   const miniPlayerRef = React.useRef<HTMLButtonElement | null>(null);
-  const muteBtn = React.useRef<HTMLButtonElement | null>(null);
-  const volumeSlider = React.useRef<HTMLInputElement | null>(null);
+  // Volume
+  const muteBtnRef = React.useRef<HTMLButtonElement | null>(null);
+  const volumeSliderRef = React.useRef<HTMLInputElement | null>(null);
+  // Time
+  const currentTimeRef = React.useRef<HTMLDivElement | null>(null);
+  const totalTimeRef = React.useRef<HTMLDivElement | null>(null);
+  // Captions
+  const captionsBtnRef = React.useRef<HTMLButtonElement | null>(null);
+  // Speed
+  const speedBtnRef = React.useRef<HTMLButtonElement | null>(null);
+  // Timeline
+  const thumbnailImgRef = React.useRef<HTMLImageElement | null>(null);
+  const previewImgRef = React.useRef<HTMLImageElement | null>(null);
+  const timelineContainerRef = React.useRef<HTMLDivElement | null>(null);
 
   const [sliderValue, setSliderValue] = useState(1);
 
-  const handleSliderChange = (event: ChangeEvent<HTMLInputElement>) => {
-    // Update the state with the new value of the slider
-    setSliderValue(Math.round(Number(event.target.value)));
-  };
   function togglePlayPause() {
     const video = videoRef.current!;
 
@@ -26,25 +37,20 @@ export const VideoPlayer = () => {
     }
   }
 
-  function toggleFullScreenMode() {
-    const container = videoContainerRef.current!;
+  const handleSliderChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSliderValue(Number(event.target.value));
+  };
 
-    if (!document.fullscreenElement) {
-      container.requestFullscreen();
-    } else {
-      document.exitFullscreen();
-    }
-  }
-
-  function toggleMiniPlayerMode() {
-    const container = videoContainerRef.current!;
+  function toggleCaptions() {
     const videoElement = videoRef.current!;
+    const videoContainerElement = videoContainerRef.current!;
 
-    if (container.classList.contains("mini-player")) {
-      document.exitPictureInPicture();
-    } else {
-      videoElement?.requestPictureInPicture();
-    }
+    const captions = videoElement.textTracks[0];
+
+    const isHidden = captions.mode === "hidden";
+    captions.mode = isHidden ? "showing" : "hidden";
+
+    videoContainerElement.classList.toggle("captions", isHidden);
   }
 
   function toggleMute() {
@@ -53,15 +59,174 @@ export const VideoPlayer = () => {
     video.muted = !video.muted;
   }
 
+  function changePlaybackSpeed() {
+    const videoElement = videoRef.current!;
+    const speedBtnElement = speedBtnRef.current!;
+
+    let newPlaybackRate = videoElement.playbackRate + 0.25;
+    console.log(videoElement.playbackRate);
+    console.log(newPlaybackRate);
+    if (newPlaybackRate > 2) newPlaybackRate = 0.25;
+
+    videoElement.playbackRate = newPlaybackRate;
+    speedBtnElement.textContent = `${newPlaybackRate}x`;
+  }
+
   useEffect(() => {
-    if (videoRef.current && videoContainerRef.current) {
+    // Video player
+    const videoElement = videoRef.current!;
+    const videoContainerElement = videoContainerRef.current!;
+    // View mode
+    const fullscreenElement = fullScreenRef.current;
+    const miniPlayerElement = miniPlayerRef.current;
+    // Speed
+    const speedBtnElement = speedBtnRef.current!;
+    // Volume
+    const muteBtnElement = muteBtnRef.current!;
+    const volumeSliderElement = volumeSliderRef.current!;
+    // Time
+    const totalTimeElement = totalTimeRef.current!;
+    const currentTimeElement = currentTimeRef.current!;
+    // Captions
+    const captionsBtnElement = captionsBtnRef.current!;
+    // Timeline
+    const timelineContainerElement = timelineContainerRef.current!;
+    const thumbnailImgElement = thumbnailImgRef.current!;
+    const previewImgElement = previewImgRef.current!;
+
+    let isScrubbing = false;
+    let wasPaused = false;
+    function toggleScrubbling(e: MouseEvent) {
+      const rect = timelineContainerElement.getBoundingClientRect();
+      const percent =
+        Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+
+      isScrubbing = (e.buttons & 1) === 1;
+      videoContainerElement.classList.toggle("scrubbing", isScrubbing);
+
+      if (isScrubbing) {
+        wasPaused = videoElement.paused;
+        videoElement.pause();
+      } else {
+        videoElement.currentTime = percent * videoElement.duration;
+        if (!wasPaused) videoElement.play();
+      }
+
+      handleTimelineUpdate(e);
+    }
+
+    function handleTimelineUpdate(e: MouseEvent) {
+      const rect = timelineContainerElement.getBoundingClientRect();
+      const percent =
+        Math.min(Math.max(0, e.x - rect.x), rect.width) / rect.width;
+      // const previewImgNumber = Math.max(
+      //   1,
+      //   Math.floor((percent * videoElement.duration) / 10)
+      // );
+      // const previewImgSrc = `assets/previewImgs/preview${previewImgNumber}.jpg`;
+      const previewImgSrc = ``;
+
+      previewImgElement.src = previewImgSrc;
+      timelineContainerElement.style.setProperty(
+        "--preview-position",
+        String(percent)
+      );
+
+      if (isScrubbing) {
+        e.preventDefault();
+        thumbnailImgElement.src = previewImgSrc;
+        timelineContainerElement.style.setProperty(
+          "--progress-position",
+          String(percent)
+        );
+      }
+    }
+
+    function formatDuration(time: number) {
+      const seconds = Math.floor(time % 60);
+      const minutes = Math.floor(time / 60) % 60;
+      const hours = Math.floor(time / 3600);
+
+      if (hours === 0) {
+        return `${minutes}:${leadingZeroFormatter.format(seconds)}`;
+      } else {
+        return `${hours}${leadingZeroFormatter.format(
+          minutes
+        )}:${leadingZeroFormatter.format(seconds)}`;
+      }
+    }
+
+    const leadingZeroFormatter = new Intl.NumberFormat(undefined, {
+      minimumIntegerDigits: 2,
+    });
+
+    function toggleFullScreenMode() {
+      const container = videoContainerRef.current!;
+
+      if (!document.fullscreenElement) {
+        container.requestFullscreen();
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    function toggleMiniPlayerMode() {
+      const container = videoContainerRef.current!;
       const videoElement = videoRef.current!;
-      const videoContainerElement = videoContainerRef.current!;
 
-      //Volume
-      const muteBtnElement = muteBtn.current!;
-      const volumeSliderElement = volumeSlider.current!;
+      if (container.classList.contains("mini-player")) {
+        document.exitPictureInPicture();
+      } else {
+        videoElement?.requestPictureInPicture();
+      }
+    }
 
+    function skip(duration: number) {
+      const videoElement = videoRef.current!;
+
+      videoElement.currentTime += duration;
+    }
+
+    if (videoRef.current && videoContainerRef.current) {
+      // Timeline
+      timelineContainerElement.addEventListener(
+        "mousemove",
+        handleTimelineUpdate
+      );
+      timelineContainerElement.addEventListener("mousedown", toggleScrubbling);
+
+      document.addEventListener("mouseup", (e) => {
+        if (isScrubbing) toggleScrubbling(e);
+      });
+
+      document.addEventListener("mousemove", (e) => {
+        if (isScrubbing) handleTimelineUpdate(e);
+      });
+
+      // Playback Speed
+      speedBtnElement.addEventListener("click", changePlaybackSpeed);
+
+      // Captions
+      videoElement.textTracks[0].mode = "hidden";
+      captionsBtnElement.addEventListener("click", toggleCaptions);
+
+      // Duration
+      videoElement.addEventListener("loadeddata", () => {
+        totalTimeElement.textContent = formatDuration(videoElement.duration);
+      });
+
+      videoElement.addEventListener("timeupdate", () => {
+        currentTimeElement.textContent = formatDuration(
+          videoElement.currentTime
+        );
+        const percent = videoElement.currentTime / videoElement.duration;
+        timelineContainerElement.style.setProperty(
+          "--progress-position",
+          String(percent)
+        );
+      });
+
+      // Volume
       muteBtnElement.addEventListener("click", toggleMute);
       volumeSliderElement.addEventListener("input", (e) => {
         const inputElement = e.target as HTMLInputElement;
@@ -84,10 +249,8 @@ export const VideoPlayer = () => {
 
         videoContainerElement.dataset.volumeLevel = volumeLevel;
       });
-      //view Modes
-      const fullscreenElement = fullScreenRef.current;
-      const miniPlayerElement = miniPlayerRef.current;
 
+      // View Modes
       fullscreenElement?.addEventListener("click", toggleFullScreenMode);
       miniPlayerElement?.addEventListener("click", toggleMiniPlayerMode);
 
@@ -107,8 +270,7 @@ export const VideoPlayer = () => {
         videoContainerElement?.classList.remove("mini-player");
       });
 
-      //Video controls
-
+      // Video controls
       videoElement.addEventListener("play", () => {
         videoContainerElement.classList.remove("paused");
       });
@@ -117,8 +279,7 @@ export const VideoPlayer = () => {
         videoContainerElement.classList.add("paused");
       });
 
-      videoContainerElement.addEventListener("click", togglePlayPause);
-
+      // Keyboard shotcuts
       const handleKeyDown = (e: KeyboardEvent) => {
         const tagName = document.activeElement?.tagName.toLowerCase();
         if (tagName === "input") return;
@@ -139,6 +300,17 @@ export const VideoPlayer = () => {
           case "m":
             toggleMute();
             break;
+          case "arrowleft":
+          case "j":
+            skip(-5);
+            break;
+          case "arrowright":
+          case "l":
+            skip(5);
+            break;
+          case "c":
+            toggleCaptions();
+            break;
           default:
             break;
         }
@@ -158,8 +330,14 @@ export const VideoPlayer = () => {
       className="video-container paused"
       data-volume-level="high"
     >
+      <img className="thumbnail-img" ref={thumbnailImgRef} />
       <div className="video-controls-container">
-        <div className="timeline-container"></div>
+        <div className="timeline-container" ref={timelineContainerRef}>
+          <div className="timeline">
+            <img className="preview-img" ref={previewImgRef} />
+            <div className="thumb-indicator"></div>
+          </div>
+        </div>
         <div className="controls">
           <button className="play-pause-btn" onClick={togglePlayPause}>
             <svg
@@ -180,7 +358,7 @@ export const VideoPlayer = () => {
             </svg>
           </button>
           <div className="volume-container">
-            <button ref={muteBtn} className="mute-btn">
+            <button ref={muteBtnRef} className="mute-btn">
               <svg
                 width="30"
                 height="30"
@@ -217,7 +395,7 @@ export const VideoPlayer = () => {
             </button>
             <input
               className="volume-slider"
-              ref={volumeSlider}
+              ref={volumeSliderRef}
               type="range"
               min={0}
               max={1}
@@ -226,6 +404,23 @@ export const VideoPlayer = () => {
               onChange={handleSliderChange}
             />{" "}
           </div>
+          <div className="duration-container">
+            <div ref={currentTimeRef} className="current-time">
+              0:00
+            </div>
+            /<div ref={totalTimeRef} className="total-time"></div>
+          </div>
+          <button className="captions-btn" ref={captionsBtnRef}>
+            <svg width="30" height="30" viewBox="0 0 24 24">
+              <path
+                fill="currentColor"
+                d="M18,11H16.5V10.5H14.5V13.5H16.5V13H18V14A1,1 0 0,1 17,15H14A1,1 0 0,1 13,14V10A1,1 0 0,1 14,9H17A1,1 0 0,1 18,10M11,11H9.5V10.5H7.5V13.5H9.5V13H11V14A1,1 0 0,1 10,15H7A1,1 0 0,1 6,14V10A1,1 0 0,1 7,9H10A1,1 0 0,1 11,10M19,4H5C3.89,4 3,4.89 3,6V18A2,2 0 0,0 5,20H19A2,2 0 0,0 21,18V6C21,4.89 20.1,4 19,4Z"
+              />
+            </svg>
+          </button>
+          <button className="speed-btn wide-btn" ref={speedBtnRef}>
+            1x
+          </button>
           <button ref={miniPlayerRef} className="mini-player-btn">
             <svg width="30" height="30" viewBox="0 0 24 24">
               <path
@@ -250,7 +445,13 @@ export const VideoPlayer = () => {
           </button>
         </div>
       </div>
-      <video ref={videoRef} className="video-player" autoPlay>
+      <video
+        ref={videoRef}
+        className="video-player"
+        onClick={togglePlayPause}
+        autoPlay
+      >
+        <track kind={"captions"} srcLang="en" src="subtitles.vtt" />
         <source
           src="https://tecdn.b-cdn.net/img/video/Sail-Away.mp4"
           type="video/mp4"
