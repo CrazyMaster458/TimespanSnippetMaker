@@ -1,4 +1,4 @@
-import { CardView } from "@/components/Card";
+import { VideoCard } from "@/components/VideoCard";
 import { Navbar } from "@/components/Navbar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 function ListView() {
   return (
     <>
-      <Navbar></Navbar>
+      {/* <Navbar></Navbar> */}
 
       <div className="container mt-8">
         <Tabs
@@ -18,29 +18,29 @@ function ListView() {
               value="tate"
               className="transition duration-150 ease-in-out"
             >
-              Tate
+              Rollo
             </TabsTrigger>
-            <TabsTrigger value="tristan">Tristan</TabsTrigger>
+            <TabsTrigger value="tristan">Stirling</TabsTrigger>
             <TabsTrigger value="jwaller">JWaller</TabsTrigger>
             <TabsTrigger value="juel">Juel</TabsTrigger>
           </TabsList>
           <Separator className="my-2" />
-          <TabsContent value="jwaller" className="grid grid-cols-5 gap-5">
-            <CardView />
-            <CardView />
-            <CardView />
-            <CardView />
-            <CardView />
-            <CardView />
-            <CardView />
-            <CardView />
-            <CardView />
-            <CardView />
-            <CardView />
-            <CardView />
-            <CardView />
-            <CardView />
-            <CardView />
+          <TabsContent value="jwaller" className="grid grid-cols-4 gap-5">
+            <VideoCard />
+            <VideoCard />
+            <VideoCard />
+            <VideoCard />
+            <VideoCard />
+            <VideoCard />
+            <VideoCard />
+            <VideoCard />
+            <VideoCard />
+            <VideoCard />
+            <VideoCard />
+            <VideoCard />
+            <VideoCard />
+            <VideoCard />
+            <VideoCard />
           </TabsContent>
           <TabsContent value="password">Change your password here.</TabsContent>
         </Tabs>

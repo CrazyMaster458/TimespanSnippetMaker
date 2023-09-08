@@ -1,7 +1,7 @@
 import { Navbar } from "@/components/Navbar";
-import DataPage from "@/components/table/page2";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { VideoPlayer } from "./VideoPlayer";
+import { SnippetCard } from "@/components/SnippetCard";
 
 function Detail() {
   return (
@@ -13,9 +13,26 @@ function Detail() {
           <VideoPlayer />
         </div>
         <div className="">
-          <ScrollArea className="h-[684px] w-[full]">
-            <DataPage />
-            {/* <DemoPage /> */}
+          <ScrollArea className="h-[684px] w-[full] grid gap-4 grid-cols-1 pr-12">
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
+            <SnippetCard />
           </ScrollArea>
         </div>
       </div>

@@ -341,16 +341,16 @@ export const VideoPlayer = () => {
         <div className="controls">
           <button className="play-pause-btn" onClick={togglePlayPause}>
             <svg
-              width="30"
-              height="30"
+              width="35"
+              height="35"
               className="play-icon"
               viewBox="0 0 24 24"
             >
               <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
             </svg>
             <svg
-              width="30"
-              height="30"
+              width="35"
+              height="35"
               className="pause-icon"
               viewBox="0 0 24 24"
             >
@@ -360,8 +360,8 @@ export const VideoPlayer = () => {
           <div className="volume-container">
             <button ref={muteBtnRef} className="mute-btn">
               <svg
-                width="30"
-                height="30"
+                width="26"
+                height="26"
                 className="volume-high-icon"
                 viewBox="0 0 24 24"
               >
@@ -371,8 +371,8 @@ export const VideoPlayer = () => {
                 />
               </svg>
               <svg
-                width="30"
-                height="30"
+                width="26"
+                height="26"
                 className="volume-low-icon"
                 viewBox="0 0 24 24"
               >
@@ -382,8 +382,8 @@ export const VideoPlayer = () => {
                 />
               </svg>
               <svg
-                width="30"
-                height="30"
+                width="26"
+                height="26"
                 className="volume-muted-icon"
                 viewBox="0 0 24 24"
               >
@@ -422,7 +422,7 @@ export const VideoPlayer = () => {
             1x
           </button>
           <button ref={miniPlayerRef} className="mini-player-btn">
-            <svg width="30" height="30" viewBox="0 0 24 24">
+            <svg width="28" height="28" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
                 d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-10-7h9v6h-9z"
@@ -430,13 +430,13 @@ export const VideoPlayer = () => {
             </svg>
           </button>
           <button ref={fullScreenRef} className="full-screen-btn">
-            <svg className="open" width="30" height="30" viewBox="0 0 24 24">
+            <svg className="open" width="35" height="35" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
                 d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"
               />
             </svg>
-            <svg className="close" width="30" height="30" viewBox="0 0 24 24">
+            <svg className="close" width="35" height="35" viewBox="0 0 24 24">
               <path
                 fill="currentColor"
                 d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"

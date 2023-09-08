@@ -102,7 +102,7 @@
   z-index: 1;
   opacity: 0;
   transition: opacity 150ms ease-in-out;
-  height: 3.3rem;
+  height: 3.5rem;
 }
 
 .video-controls-container::before {
@@ -129,8 +129,8 @@
   align-items: center;
   padding-left: 1.3rem;
   padding-right: 1.3rem;
-  padding-top: 0.45rem;
-  padding-bottom: 0.45rem;
+  padding-top: 0.35rem;
+  padding-bottom: 0.5rem;
 }
 
 .video-controls-container .controls .button {
@@ -205,6 +205,11 @@
   transform: scaleX(1);
 }
 
+.speed-btn {
+  font-size: 1.9ch;
+  width: 35px;
+}
+
 input[type="range"] {
   -webkit-appearance: none;
   cursor: pointer;
@@ -228,6 +233,7 @@ input[type="range"]::-webkit-slider-runnable-track {
 }
 
 .duration-container {
+  font-size: 1.8ch;
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -236,6 +242,7 @@ input[type="range"]::-webkit-slider-runnable-track {
 
 .video-container.captions .captions-btn {
   border-bottom: 3px solid red;
+  transition: width 150ms ease-in-out;
 }
 
 .video-controls-container .controls .button.wide-btn {
@@ -338,4 +345,12 @@ input[type="range"]::-webkit-slider-runnable-track {
 .video-container.scrubbing .timeline,
 .timeline-container:hover .timeline {
   height: 100%;
+}
+
+input[type="time"]::-webkit-datetime-edit-ampm-field {
+  display: none;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
 }

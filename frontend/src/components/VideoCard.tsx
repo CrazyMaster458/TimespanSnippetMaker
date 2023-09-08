@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import { useNavigate } from "react-router-dom";
 
-export const CardView = () => {
+export const VideoCard = () => {
   const navigate = useNavigate();
 
   const HandleCardClick = () => {
