@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card } from "@/components/ui/card";
 import {
   Accordion,
@@ -7,7 +8,7 @@ import {
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Separator } from "./ui/separator";
-import React, { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 interface Option {
@@ -27,85 +28,157 @@ interface MultiSelectTagProps {
 }
 
 export const SnippetCard = () => {
-  const [snippetStart, setSnippetStart] = useState("00:00:00");
-  const [snippetEnd, setSnippetEnd] = useState("00:00:00");
+  const leadingZeroFormatter = new Intl.NumberFormat(undefined, {
+    minimumIntegerDigits: 2,
+  });
+  const [snippetStart, setSnippetStart] = useState({
+    hours: "00",
+    minutes: "00",
+    seconds: "00",
+  });
+
+  // State for snippetEnd
+  const [snippetEnd, setSnippetEnd] = useState({
+    hours: "00",
+    minutes: "00",
+    seconds: "00",
+  });
+
+  // SnippetStart Reffs
+  const inputRefHoursStart = useRef<HTMLInputElement>(null);
+  const inputRefMinutesStart = useRef<HTMLInputElement>(null);
+  const inputRefSecondsStart = useRef<HTMLInputElement>(null);
+  // SnippetEnd Reffs
+  const inputRefHoursEnd = useRef<HTMLInputElement>(null);
+  const inputRefMinutesEnd = useRef<HTMLInputElement>(null);
+  const inputRefSecondsEnd = useRef<HTMLInputElement>(null);
+
+  const snippetStartRef = useRef(snippetStart);
+  const snippetEndRef = useRef(snippetEnd);
+
+  useEffect(() => {
+    snippetStartRef.current = snippetStart;
+    snippetEndRef.current = snippetEnd;
+  }, [snippetStart, snippetEnd]);
+
+  const handleInputChangeStart = (e: {
+    target: { name: any; value: any };
+    currentTarget: HTMLInputElement | null;
+  }) => {
+    const { name, value } = e.target;
+
+    if (isValidTimeFormat(value) && name in snippetStart) {
+      // Check if the entered value is a two-digit number
+      if (value.length === 2) {
+        if (name === "hours") {
+          if (e.currentTarget === inputRefHoursStart.current) {
+            inputRefMinutesStart.current?.focus();
+          }
+        } else if (name === "minutes") {
+          if (e.currentTarget === inputRefMinutesStart.current) {
+            inputRefSecondsStart.current?.focus();
+          }
+        } else if (name === "seconds") {
+          if (e.currentTarget === inputRefSecondsStart.current) {
+            inputRefHoursEnd.current?.focus();
+            setSnippetEnd({
+              hours: snippetStart.hours,
+              minutes: snippetStart.minutes,
+              seconds: value,
+            });
+          }
+        }
+      }
+
+      setSnippetStart({
+        ...snippetStart,
+        [name]: value,
+      });
+      changeDuration();
+    }
+  };
+
+  const handleInputChangeEnd = (e: {
+    target: { name: any; value: any };
+    currentTarget: HTMLInputElement | null;
+  }) => {
+    const { name, value } = e.target;
+
+    if (isValidTimeFormat(value) && name in snippetEnd) {
+      // Check if the entered value is a two-digit number
+      if (value.length === 2) {
+        if (name === "hours") {
+          if (e.currentTarget === inputRefHoursEnd.current) {
+            inputRefMinutesEnd.current?.focus();
+          }
+        } else if (name === "minutes") {
+          if (e.currentTarget === inputRefMinutesEnd.current) {
+            inputRefSecondsEnd.current?.focus();
+          }
+        }
+      }
+
+      setSnippetEnd({
+        ...snippetEnd,
+        [name]: value,
+      });
+      changeDuration();
+    }
+  };
+
+  const isValidTimeFormat = (value: string) => {
+    const pattern = /^[0-5]?[0-9]$/;
+    return pattern.test(value);
+  };
+
   const [snippetDuration, setSnippetDuration] = useState("0:00");
   const [description, setDescription] = useState("");
 
-  function handleTimeChangeStart(event: { target: { value: string } }) {
-    const { value } = event.target;
-    setSnippetStart(value);
-    changeDuration();
-  }
-  function handleTimeChangeEnd(event: { target: { value: string } }) {
-    const { value } = event.target;
-    setSnippetEnd(value);
-    changeDuration();
-  }
   function handleDescriptionChange(event: { target: { value: string } }) {
     const { value } = event.target;
     setDescription(value);
   }
 
   function changeDuration() {
-    console.log(snippetStart);
-    console.log(snippetEnd);
-    const startSeconds = timeToSeconds(snippetStart);
-    const endSeconds = timeToSeconds(snippetEnd);
-    console.log(startSeconds);
-    console.log(endSeconds);
+    const startHours = parseInt(inputRefHoursStart.current?.value || "0", 10);
+    const startMinutes = parseInt(
+      inputRefMinutesStart.current?.value || "0",
+      10
+    );
+    const startSeconds = parseInt(
+      inputRefSecondsStart.current?.value || "0",
+      10
+    );
 
-    const durationSeconds = endSeconds - startSeconds;
-    console.log(durationSeconds);
-    console.log(secondsToTime(durationSeconds));
-    setSnippetDuration(secondsToTime(durationSeconds));
-  }
+    const endHours = parseInt(inputRefHoursEnd.current?.value || "0", 10);
+    const endMinutes = parseInt(inputRefMinutesEnd.current?.value || "0", 10);
+    const endSeconds = parseInt(inputRefSecondsEnd.current?.value || "0", 10);
 
-  function timeToSeconds(timeStr: string) {
-    const [hours, minutes, seconds] = timeStr.split(":").map(Number);
-    return hours * 3600 + minutes * 60 + seconds;
-  }
+    let minutes = endMinutes - startMinutes;
+    let seconds = endSeconds - startSeconds;
 
-  // Helper function to convert seconds to "HH:mm:ss"
-  function secondsToTime(seconds: number) {
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString()}:${remainingSeconds
-      .toString()
-      .padStart(2, "0")}`;
-  }
-
-  // Time
-
-  const [hour, setHour] = useState("00");
-  const [minute, setMinute] = useState("00");
-  const [second, setSecond] = useState("00");
-
-  const handleHourChange = (e: { target: { value: any } }) => {
-    const { value } = e.target;
-    if (/^\d{0,2}$/.test(value) && parseInt(value) <= 23) {
-      setHour(value.padStart(2, "0"));
+    if (seconds < 0) {
+      seconds += 60;
+      minutes--;
     }
-  };
 
-  const handleMinuteChange = (e: { target: { value: any } }) => {
-    const { value } = e.target;
-    if (/^\d{0,2}$/.test(value) && parseInt(value) <= 59) {
-      setMinute(value.padStart(2, "0"));
+    let hours = endHours - startHours;
+
+    if (minutes < 0) {
+      minutes += 60;
+      hours--;
     }
-  };
 
-  const handleSecondChange = (e: { target: { value: any } }) => {
-    const { value } = e.target;
-    if (/^\d{0,2}$/.test(value) && parseInt(value) <= 59) {
-      setSecond(value.padStart(2, "0"));
+    if (hours < 0) {
+      // Reset the duration to 0 if the end time is before the start time
+      minutes = 0;
+      seconds = 0;
     }
-  };
 
-  const formattedTime = `${hour}:${minute}:${second}`;
+    setSnippetDuration(`${minutes}:${leadingZeroFormatter.format(seconds)}`);
+  }
 
   return (
-    // <div className="w-[600px] m-16">
     <Card className="p-3 mb-2">
       <div className="place-self-center px-2">
         <Accordion type="single" collapsible>
@@ -121,25 +194,87 @@ export const SnippetCard = () => {
               <Separator className="mt-2" />
               <div className="pt-3 flex flex-row gap-4">
                 <div className="flex flex-row gap-1">
-                  <Input
-                    className="w-[85px]"
-                    type="time"
-                    name="appt-time"
-                    step="2"
-                    value={snippetStart}
-                    onChange={handleTimeChangeStart}
-                    placeholder="00:00:00"
-                  />
+                  <div className="timespaninput flex group items-center h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background">
+                    <input
+                      type="text"
+                      name="hours"
+                      value={snippetStart.hours}
+                      onChange={handleInputChangeStart}
+                      maxLength={2}
+                      style={{
+                        width: "20px",
+                        textAlign: "center",
+                      }}
+                      ref={inputRefHoursStart}
+                      onClick={() => inputRefHoursStart.current!.select()}
+                      onFocus={(e) => e.target.select()}
+                    />
+                    <span>:</span>
+                    <input
+                      type="text"
+                      name="minutes"
+                      value={snippetStart.minutes}
+                      onChange={handleInputChangeStart}
+                      maxLength={2}
+                      style={{ width: "20px", textAlign: "center" }}
+                      ref={inputRefMinutesStart} // Add this ref
+                      onClick={() => inputRefMinutesStart.current!.select()}
+                      onFocus={(e) => e.target.select()}
+                    />
+                    <span>:</span>
+                    <input
+                      type="text"
+                      name="seconds"
+                      value={snippetStart.seconds}
+                      onChange={handleInputChangeStart}
+                      maxLength={2}
+                      style={{ width: "20px", textAlign: "center" }}
+                      ref={inputRefSecondsStart} // Add this ref
+                      onClick={() => inputRefSecondsStart.current!.select()}
+                      onFocus={(e) => e.target.select()}
+                    />
+                  </div>
                   <div className="place-self-center">-</div>
-                  <Input
-                    className="w-[85px]"
-                    type="time"
-                    name="appt-time"
-                    step="2"
-                    value={snippetEnd}
-                    onChange={handleTimeChangeEnd}
-                    placeholder="00:00:00"
-                  />{" "}
+                  <div className="timespaninput flex items-center h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                    <input
+                      type="text"
+                      name="hours"
+                      value={snippetEnd.hours}
+                      onChange={handleInputChangeEnd}
+                      maxLength={2}
+                      style={{
+                        width: "20px",
+                        textAlign: "center",
+                      }}
+                      ref={inputRefHoursEnd}
+                      onClick={() => inputRefHoursEnd.current!.select()}
+                      onFocus={(e) => e.target.select()}
+                    />
+                    <span>:</span>
+                    <input
+                      type="text"
+                      name="minutes"
+                      value={snippetEnd.minutes}
+                      onChange={handleInputChangeEnd}
+                      maxLength={2}
+                      style={{ width: "20px", textAlign: "center" }}
+                      ref={inputRefMinutesEnd}
+                      onClick={() => inputRefMinutesEnd.current!.select()}
+                      onFocus={(e) => e.target.select()}
+                    />
+                    <span>:</span>
+                    <input
+                      type="text"
+                      name="seconds"
+                      value={snippetEnd.seconds}
+                      onChange={handleInputChangeEnd}
+                      maxLength={2}
+                      style={{ width: "20px", textAlign: "center" }}
+                      ref={inputRefSecondsEnd}
+                      onClick={() => inputRefSecondsEnd.current!.select()}
+                      onFocus={(e) => e.target.select()}
+                    />
+                  </div>
                 </div>
                 <div className="w-full">
                   <Input
@@ -161,39 +296,10 @@ export const SnippetCard = () => {
                     <option value="7">Angry</option>
                   </select>
                 </div> */}
-              <div className="pt-3">
-                <label htmlFor="dateInput"></label>
-              </div>
-              <input
-                type="text"
-                value={formattedTime}
-                onChange={(e) => {
-                  const { value } = e.target;
-                  // Allow only numeric digits and colons
-                  const cleanedValue = value.replace(/[^0-9:]/g, "");
-                  // Update the state variables accordingly
-                  const [hourPart, minutePart, secondPart] =
-                    cleanedValue.split(":");
-                  setHour(hourPart);
-                  setMinute(minutePart);
-                  setSecond(secondPart);
-                }}
-                onBlur={(e) => {
-                  // Ensure the state variables are in the desired format (padded with zeros)
-                  const formattedHour = hour.padStart(2, "0");
-                  const formattedMinute = minute.padStart(2, "0");
-                  const formattedSecond = second.padStart(2, "0");
-                  // Update the state with the formatted time
-                  setHour(formattedHour);
-                  setMinute(formattedMinute);
-                  setSecond(formattedSecond);
-                }}
-              />
             </AccordionContent>
           </AccordionItem>
         </Accordion>
       </div>
     </Card>
-    // </div>
   );
 };

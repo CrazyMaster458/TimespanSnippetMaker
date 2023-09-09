@@ -5,6 +5,7 @@ import Detail from "./pages/___tests___/Detail";
 import { VideoPlayer } from "./pages/___tests___/VideoPlayer";
 import { TestPage } from "./pages/___tests___/test";
 import { SnippetCard } from "./components/SnippetCard";
+import { Test } from "./components/test2";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/videoplayer" element={<VideoPlayer />} />
         <Route path="/testpage" element={<TestPage />} />
         <Route path="/snippetcard" element={<SnippetCard />} />
+        <Route path="/test" element={<Test />} />
       </Routes>
     </>
   );
