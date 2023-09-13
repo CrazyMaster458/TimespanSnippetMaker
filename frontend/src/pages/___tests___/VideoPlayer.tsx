@@ -327,7 +327,7 @@ export const VideoPlayer = () => {
   return (
     <div
       ref={videoContainerRef}
-      className="video-container paused"
+      className="video-container paused drop-shadow-lg"
       data-volume-level="high"
     >
       <img className="thumbnail-img" ref={thumbnailImgRef} />

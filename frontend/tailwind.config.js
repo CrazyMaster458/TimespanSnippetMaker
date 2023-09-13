@@ -7,6 +7,8 @@ export default {
     "./app/**/*.{ts,tsx}",
     "./src/**/*.{js,ts,jsx,tsx}",
     "./index.html",
+    "./src/**/*.{js,jsx,ts,tsx}",
+    "./node_modules/react-tailwindcss-select/dist/index.esm.js",
   ],
   theme: {
     container: {
