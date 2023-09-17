@@ -1,13 +1,10 @@
-import { Navbar } from "@/components/Navbar";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { VideoPlayer } from "./VideoPlayer";
+import { VideoPlayer } from "../components/VideoPlayer";
 import { SnippetCard } from "@/components/SnippetCard";
 
-function Detail() {
+export default function Detail() {
   return (
     <>
-      <Navbar></Navbar>
-
       <div className="grid grid-cols-2 gap-8 content-center pt-14">
         <div className="justify-self-center mt-12">
           <VideoPlayer />
@@ -39,5 +36,3 @@ function Detail() {
     </>
   );
 }
-
-export default Detail;

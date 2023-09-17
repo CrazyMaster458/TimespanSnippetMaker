@@ -379,3 +379,8 @@ input[type="number"]::-webkit-outer-spin-button {
   background-color: black;
   height: 100px;
 }
+
+#react-select-3-listbox {
+  overflow: visible;
+  z-index: 9999; /* Set a high z-index value */
+}

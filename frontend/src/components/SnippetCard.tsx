@@ -9,13 +9,14 @@ import {
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Separator } from "./ui/separator";
-import { KeyboardEvent, SetStateAction, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { KeyboardEvent, useRef, useState } from "react";
+import { ChevronDown, Download } from "lucide-react";
 import CreatableSelect from "react-select/creatable";
+import { Button } from "@/components/ui/button";
 
-type CustomOptionType = { value: string; label: string };
+type OptionType = { value: string; label: string };
 
-const options: CustomOptionType[] = [
+const options: OptionType[] = [
   { value: "fox", label: "🦊 Fox" },
   { value: "Butterfly", label: "🦋 Butterfly" },
   { value: "Honeybee", label: "🐝 Honeybee" },
@@ -211,25 +212,35 @@ export const SnippetCard = () => {
   }
 
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const [isOverflow, setIsOverflow] = useState("hidden");
 
-  const handleChange = (selectedValues: SetStateAction<never[]>) => {
-    setSelectedOptions(selectedValues);
-    console.log("Selected options:", selectedValues);
+  function OverflowVisibile() {
+    setIsOverflow("visible");
+  }
+
+  function OverflowHidden() {
+    setIsOverflow("hidden");
+  }
+
+  const handleChange = () => {
+    console.log(selectedOptions);
+    const options2 = { ...selectedOptions };
+    console.log(options2);
   };
 
   return (
-    <Card className="p-3 mb-2 drop-shadow-md">
+    <Card className="mb-2 drop-shadow-md">
       <div className="place-self-center px-2">
         <Accordion type="single" collapsible>
-          <AccordionItem value="item-1">
-            <AccordionTrigger className="flex justify-between">
+          <AccordionItem value="item-1" style={{ overflow: isOverflow }}>
+            <AccordionTrigger className="flex justify-between p-3">
               <div className="">{hook ? hook : "New Snippet"}</div>
               <div className="flex items-center">
                 <div className="">{snippetDuration}</div>
                 <ChevronDown className="ml-3 h-4 w-4 shrink-0 transition-transform duration-200" />
               </div>
             </AccordionTrigger>
-            <AccordionContent>
+            <AccordionContent className="mt-[-8px] px-3">
               <Separator className="mt-2" />
               <div className="pt-3 flex flex-row gap-4">
                 <div className="flex flex-row gap-1">
@@ -345,13 +356,38 @@ export const SnippetCard = () => {
                   />
                 </div>
               </div>
-              <div className="w-full pt-3">
+              <div className="w-full pt-3" onClick={OverflowVisibile}>
                 <CreatableSelect
                   isMulti
                   options={options}
                   value={selectedOptions}
-                  onChange={handleChange}
+                  onChange={(e) => setSelectedOptions(e)}
+                  isClearable={true}
+                  className="basic-single"
+                  classNamePrefix="select"
+                  defaultValue={"Hellow"}
+                  isDisabled={false}
+                  isLoading={false}
+                  isRtl={false}
+                  isSearchable={true}
+                  name="hashtags"
+                  onBlur={OverflowHidden}
+                  styles={{
+                    control: (provided) => ({
+                      ...provided,
+                      zIndex: 9999, // Set a high z-index value
+                    }),
+                  }}
                 />
+              </div>
+              {/* <button onClick={handleChange}>Show items</button> */}
+              <div className="w-full pt-5 flex justify-start place-items-center gap-3">
+                <Button className="px-5" variant="default">
+                  Save
+                </Button>
+                <Button variant="outline">
+                  <Download className="pr-2" /> Download
+                </Button>
               </div>
             </AccordionContent>
           </AccordionItem>
