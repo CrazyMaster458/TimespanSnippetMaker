@@ -8,6 +8,11 @@ import GuestLayout from "./components/layouts/GuestLayout";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import DefaultLayout from "./components/layouts/DefaultLayout";
+import VideoForm from "./pages/___tests___/videoform";
+import SnippetForm from "./pages/___tests___/snippetform";
+import TagForm from "./pages/___tests___/tagfrom";
+import InfluencerForm from "./pages/___tests___/influncerform";
+import VideoTypeForm from "./pages/___tests___/videotypeform";
 
 const router = createBrowserRouter([
   {
@@ -21,6 +26,26 @@ const router = createBrowserRouter([
       {
         path: "/detail",
         element: <Detail />,
+      },
+      {
+        path: "/videoform",
+        element: <VideoForm />,
+      },
+      {
+        path: "/snippetform",
+        element: <SnippetForm />,
+      },
+      {
+        path: "/tagform",
+        element: <TagForm />,
+      },
+      {
+        path: "/influencerform",
+        element: <InfluencerForm />,
+      },
+      {
+        path: "/videotypeform",
+        element: <VideoTypeForm />,
       },
     ],
   },

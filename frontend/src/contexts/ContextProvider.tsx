@@ -1,4 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   ReactNode,
   createContext,
@@ -9,38 +10,52 @@ import {
 } from "react";
 
 interface User {
-  name: string;
+  username: string;
   email: string;
 }
 
 interface ContextType {
   currentUser: User;
   userToken: string | null;
-  setcurrentUser: Dispatch<SetStateAction<User>>;
+  setCurrentUser: Dispatch<SetStateAction<User>>;
   setUserToken: Dispatch<SetStateAction<string | null>>;
 }
 
 const defaultContext: ContextType = {
   currentUser: {
-    name: "",
+    username: "",
     email: "",
   },
   userToken: null,
-  setcurrentUser: () => {},
+  setCurrentUser: () => {},
   setUserToken: () => {},
 };
 
 const StateContext = createContext(defaultContext);
 
 export const ContextProvider = ({ children }: { children: ReactNode }) => {
-  const [currentUser, setcurrentUser] = useState<User>({ name: "", email: "" });
-  const [userToken, setUserToken] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<User>({
+    username: "",
+    email: "",
+  });
+  const [userToken, _setUserToken] = useState<string | null>(
+    localStorage.getItem("TOKEN") || ""
+  );
+
+  const setUserToken = (token: any) => {
+    if (token) {
+      localStorage.setItem("TOKEN", token);
+    } else {
+      localStorage.removeItem("TOKEN");
+    }
+    _setUserToken(token);
+  };
 
   return (
     <StateContext.Provider
       value={{
         currentUser,
-        setcurrentUser,
+        setCurrentUser,
         userToken,
         setUserToken,
       }}

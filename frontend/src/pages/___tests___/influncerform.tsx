@@ -1,11 +1,11 @@
 import { useState } from "react";
-import axiosClient from "../axios.tsx";
-import { useStateContext } from "@/contexts/ContextProvider.tsx";
+import axiosClient from "../../axios.tsx";
+// import { useStateContext } from "@/contexts/ContextProvider.tsx";
 
-export default function Login() {
-  const { setCurrentUser, setUserToken } = useStateContext();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+export default function InfluencerForm() {
+  //   const { userToken, currentUser } = useStateContext();
+  const [name, setName] = useState("");
+  const [short, setShort] = useState("");
   const [error, setError] = useState({ __html: "" });
 
   const onSubmit = (e: { preventDefault: () => void }) => {
@@ -14,13 +14,13 @@ export default function Login() {
     type ErrorArray = string[];
 
     axiosClient
-      .post("/login", {
-        email: email,
-        password: password,
+      .post("/influencer", {
+        id: 1,
+        name: "Justing Waller",
+        short: "JW",
       })
       .then(({ data }) => {
-        setCurrentUser(data.user);
-        setUserToken(data.token);
+        console.log(data);
       })
       .catch((error) => {
         if (error.response) {
@@ -35,7 +35,7 @@ export default function Login() {
 
   return (
     <>
-      <h1>Login</h1>
+      <h1>Signup</h1>
 
       {error.__html && (
         <div
@@ -44,24 +44,25 @@ export default function Login() {
         ></div>
       )}
 
-      <form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit} className="pt-16">
         <input
-          type="email"
-          name="email"
-          placeholder="Email"
+          type="text"
+          name="title"
+          placeholder="Title"
           required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
         />
         <input
-          type="password"
-          name="password"
-          placeholder="Password"
+          type="text"
+          name="title"
+          placeholder="Title"
           required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={short}
+          onChange={(e) => setShort(e.target.value)}
         />
-        <button type="submit">Login</button>
+
+        <button type="submit">Sign up</button>
       </form>
     </>
   );
