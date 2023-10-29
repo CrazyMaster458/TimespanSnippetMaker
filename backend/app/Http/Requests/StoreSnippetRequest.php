@@ -14,6 +14,14 @@ class StoreSnippetRequest extends FormRequest
         return true;
     }
 
+    // public function prepareForValidation()
+    // {
+    //     $this->merge([
+    //         'video_id' => $this->route('video')->id,
+    //     ]);
+    // }
+
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -22,16 +30,15 @@ class StoreSnippetRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'hook' => 'required|string|max:255',
             'description' => 'required|string|max:1150',
             'starts_at' => 'nullable|date_format:H:i:s',
             'ends_at' => 'nullable|date_format:H:i:s',
             'file_path' => 'nullable|string|max:1150',
-            'snippet_code' => 'integer',
+            'downlaoded' => 'boolean',
+            'snippet_code' => 'string|max:8',
             'video_type_id' => 'exists:video_types,id',
             'video_id' => 'exists:videos,id',
-            'created_at' => 'date_format:Y-m-d H:i:s',
-            'updated_at' => 'date_format:Y-m-d H:i:s',
+            'user_id' => 'exists:users,id',
         ];
     }
 }

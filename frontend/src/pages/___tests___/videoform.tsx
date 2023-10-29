@@ -20,9 +20,7 @@ export default function VideoForm() {
     type ErrorArray = string[];
 
     axiosClient
-      .post("/video", {
-        id: 2,
-        user_id: userId,
+      .put("/video/1", {
         title: title,
         date_uploaded: dateUploaded,
         // file_path: filePath,
@@ -30,7 +28,7 @@ export default function VideoForm() {
         host_id: 1 /*host*/,
         // guests: guests,
         video_type_id: 1 /*videoType*/,
-        video_code: 123457,
+        video_code: "777456",
       })
       .then(({ data }) => {
         console.log(data);

@@ -20,14 +20,13 @@ export default function SnippetForm() {
 
     axiosClient
       .post("/snippet", {
-        hook: hook,
         description: description,
         starts_at: "00:01:00",
         ends_at: "00:02:00",
         // file_path: filePath,
         video_type_id: 1,
-        video_id: 2,
-        snippet_code: 123456,
+        video_id: 1,
+        snippet_code: "123456",
         // tags: tags,
       })
       .then(({ data }) => {

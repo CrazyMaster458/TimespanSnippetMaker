@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('statuses', function (Blueprint $table) {
             $table->id();
-            $table->timestamp('current_time');
-            $table->timestamp('max_time');
+            $table->time('current_time')->default("00:00:00");
+            $table->time('max_time')->default("00:00:00");
             $table->timestamps();
 
             // Foregin keys

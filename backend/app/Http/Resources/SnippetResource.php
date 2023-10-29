@@ -14,6 +14,7 @@ class SnippetResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        //TODO: FINISH THIS
         return [
             'id' => $this->id,
             'hook' => $this->hook,

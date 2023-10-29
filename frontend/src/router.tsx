@@ -11,8 +11,10 @@ import DefaultLayout from "./components/layouts/DefaultLayout";
 import VideoForm from "./pages/___tests___/videoform";
 import SnippetForm from "./pages/___tests___/snippetform";
 import TagForm from "./pages/___tests___/tagfrom";
-import InfluencerForm from "./pages/___tests___/influncerform";
+import InfluencerForm from "./pages/___tests___/influencerform";
 import VideoTypeForm from "./pages/___tests___/videotypeform";
+import StatusForm from "./pages/___tests___/statusform";
+import DetailForm from "./pages/___tests___/detailtext";
 
 const router = createBrowserRouter([
   {
@@ -46,6 +48,14 @@ const router = createBrowserRouter([
       {
         path: "/videotypeform",
         element: <VideoTypeForm />,
+      },
+      {
+        path: "/statusform",
+        element: <StatusForm />,
+      },
+      {
+        path: "/detailform/:id",
+        element: <DetailForm />,
       },
     ],
   },

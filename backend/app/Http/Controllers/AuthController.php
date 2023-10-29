@@ -2,34 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\SignupRequest;
-use App\Model\User;
+use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\StoreVideoRequest;
 
 class AuthController extends Controller
 {
-
-    public function signup(SignupRequest $request){
+    public function signup(SignupRequest $request)
+    {
         $data = $request->validated();
 
-        $user = \App\Models\User::create([
+        /** @var \App\Models\User $user */
+        $user = User::create([
             'username' => $data['username'],
             'email' => $data['email'],
-            'password' => bcrypt($data['password']),
+            'password' => bcrypt($data['password'])
         ]);
-
         $token = $user->createToken('main')->plainTextToken;
 
-        return response ([
+        return response([
             'user' => $user,
             'token' => $token
         ]);
     }
 
-    public function login(LoginRequest $request){
+    public function login(LoginRequest $request)
+    {
         $credentials = $request->validated();
         $remember = $credentials['remember'] ?? false;
         unset($credentials['remember']);
@@ -39,6 +39,7 @@ class AuthController extends Controller
                 'error' => 'The Provided credentials are not correct'
             ], 422);
         }
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $token = $user->createToken('main')->plainTextToken;
 
@@ -48,17 +49,22 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout(Request $request){
-        $user = Auth::user();
+    public function logout(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        // Revoke the token that was used to authenticate the current request...
+        // $user->tokens()->where('id', $user->currentAccessToken()->id)->delete();
+        $request->user()->currentAccessToken()->delete();
 
-        $user->currentAccessToken()->delete();
 
-        return response ([
+        return response([
             'success' => true
         ]);
     }
 
-    public function me(Request $request){
+    public function me(Request $request)
+    {
         return $request->user();
     }
 }

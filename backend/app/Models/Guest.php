@@ -9,7 +9,10 @@ class Guest extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['video_id', 'influencer_id'];
+    protected $fillable = [
+        'video_id',
+        'influencer_id',
+    ];
 
     public function video()
     {

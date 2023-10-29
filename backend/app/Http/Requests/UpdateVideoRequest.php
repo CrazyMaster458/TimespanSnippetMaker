@@ -32,9 +32,10 @@ class UpdateVideoRequest extends FormRequest
             'file_path' => 'nullable|string',
             'thumbnail_path' => 'nullable|string',
             'date_uploaded' => 'required|date',
+            'video_code' => 'string|max:6',
             'user_id' => 'exists:users,id',
-            'host_id' => 'nullable|exists:influencer,id',
-            'video_type_id' => 'exists:video_type,id',
+            'host_id' => 'nullable|exists:influencers,id',
+            'video_type_id' => 'exists:video_types,id',
         ];
     }
 }

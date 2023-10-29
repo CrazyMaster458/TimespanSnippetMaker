@@ -14,6 +14,7 @@ class VideoResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        //TODO: Finish this
         return [
             'id' => $this->id,
             'title' => $this->title,

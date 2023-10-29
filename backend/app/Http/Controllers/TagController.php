@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\UserResource;
-use App\Models\User;
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\TagResource;
+use App\Models\Tag;
+use App\Http\Requests\StoreTagRequest;
+use App\Http\Requests\UpdateTagRequest;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 
-class UserController extends Controller
+class TagController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -17,8 +18,8 @@ class UserController extends Controller
     {
         $user = $request->user();
 
-        return UserResource::collection(
-        User::orderBy('created_at', 'desc')
+        return TagResource::collection(
+        Tag::orderBy('created_at', 'desc')
             ->paginate(10)
         );
     }
@@ -26,49 +27,48 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreUserRequest $request)
+    public function store(StoreTagRequest $request)
     {
         $data = $request->validated();
 
-        $user = User::create($data);
+        $tag = Tag::create($data);
 
-        return new UserResource($user);
+        return new TagResource($tag);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show(Tag $tag)
     {
-        return new UserResource($user);
+        return new TagResource($tag);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateUserRequest $request, User $user)
+    public function update(UpdateTagRequest $request, Tag $tag)
     {
         $data = $request->validated();
 
-        $user->update($data);
+        $tag->update($data);
 
-        return new UserResource($user);
+        return new TagResource($tag);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user, Request $request)
+    public function destroy(Tag $tag, Request $request)
     {
         $user = $request->user();
-        // TODO: is it's the user and if admin has the permissions
+        // TODO: check permissions
         // if ($user->id != $snippet->user_id || $user->id != ($video->id == $snippet->video_id)) {
         //     return abort(403, 'Unauthorized action');
         // }
 
-        $user->delete();
+        $tag->delete();
 
         return response('', 204);
     }
-
 }

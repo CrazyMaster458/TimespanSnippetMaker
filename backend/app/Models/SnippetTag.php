@@ -11,7 +11,7 @@ class SnippetTag extends Model
 
     protected $fillable = [
         'snippet_id',
-        'tag_id'
+        'tag_id',
     ];
 
     public function snippet()

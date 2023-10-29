@@ -9,7 +9,12 @@ class Status extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['current_time', 'max_time', 'video_id', 'user_id'];
+    protected $fillable = [
+        'current_time',
+        'max_time',
+        'video_id',
+        'user_id',
+    ];
 
     public function user()
     {

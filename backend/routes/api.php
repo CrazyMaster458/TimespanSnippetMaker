@@ -1,9 +1,13 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\InfluencerController;
 use App\Http\Controllers\SnippetController;
+use App\Http\Controllers\StatusController;
+use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VideoController;
+use App\Http\Controllers\VideoTypeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,23 +25,16 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+
+    // CRUD routes
     Route::apiResource('video', VideoController::class);
+    Route::apiResource('snippet', SnippetController::class);
+    Route::apiResource('tag', TagController::class);
+    Route::apiResource('influencer', InfluencerController::class);
+    Route::apiResource('video_type', VideoTypeController::class);
+    Route::apiResource('status', StatusController::class);
 });
 
 // Authorization
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/login', [AuthController::class, 'login']);
-
-
-// Video
-Route::get('/video', [VideoController::class, 'index']);
-Route::post('/video', [VideoController::class, 'store']);
-
-// Snippet
-Route::get('/snippet', [SnippetController::class, 'index']);
-Route::post('/snippet', [SnippetController::class, 'store']);
-
-// Tag
-
-// VideoType
-

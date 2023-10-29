@@ -18,8 +18,8 @@ return new class extends Migration
         Schema::create('videos', function (Blueprint $table) {
             $table->id();
             $table->string('title', 255);
-            $table->string('file_path', 355)->nullable();
-            $table->string('thumbnail_path', 355)->nullable();
+            $table->string('file_path', 1150)->nullable();
+            $table->string('thumbnail_path', 1150)->nullable();
             $table->date('date_uploaded');
             $table->string('video_code', 6)->unique();
             $table->timestamps();

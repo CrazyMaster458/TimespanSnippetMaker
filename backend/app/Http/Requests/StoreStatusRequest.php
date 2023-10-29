@@ -2,23 +2,18 @@
 
 namespace App\Http\Requests;
 
-use App\Http\Controllers\AuthController;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Log;
 
-class StoreVideoRequest extends FormRequest
+class StoreStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
-     *
-     * @return bool
      */
     public function authorize(): bool
     {
         return true;
     }
 
-    // TODO
     protected function prepareForValidation()
     {
         $this->merge([
@@ -34,14 +29,10 @@ class StoreVideoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:1100',
-            'file_path' => 'nullable|string',
-            'thumbnail_path' => 'nullable|string',
-            'date_uploaded' => 'required|date',
-            'video_code' => 'string|max:6',
+            'current_time' => 'date_format:H:i:s',
+            'max_time' => 'date_format:H:i:s',
+            'video_id' => 'exists:videos,id',
             'user_id' => 'exists:users,id',
-            'host_id' => 'nullable|exists:influencers,id',
-            'video_type_id' => 'exists:video_types,id',
         ];
     }
 }

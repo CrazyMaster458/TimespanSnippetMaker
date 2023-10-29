@@ -9,7 +9,10 @@ class Influencer extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'short'];
+    protected $fillable = [
+        'name',
+        'short',
+    ];
 
     public function videos()
     {

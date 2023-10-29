@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('influencers', function (Blueprint $table) {
             $table->id();
             $table->string('name',255);
-            $table->string('short',10);
+            $table->string('short',10)->unique();
             $table->timestamps();
         });
     }

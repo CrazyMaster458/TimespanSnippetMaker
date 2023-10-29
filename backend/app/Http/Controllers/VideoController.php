@@ -7,6 +7,7 @@ use App\Models\Video;
 use App\Http\Requests\StoreVideoRequest;
 use App\Http\Requests\UpdateVideoRequest;
 use App\Http\Resources\VideoResource;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
@@ -47,6 +48,8 @@ class VideoController extends Controller
         //     $data['file_path'] = $relativePath;
         // }
 
+
+
         $video = Video::create($data);
 
         return new VideoResource($video);
@@ -59,7 +62,7 @@ class VideoController extends Controller
     public function show(Video $video, Request $request)
     {
         $user = $request->user();
-        if ($user->id == $video->user_id) {
+        if ($user->id !== $video->user_id) {
             return abort(403, 'Unauthorized action');
         }
 
@@ -73,18 +76,20 @@ class VideoController extends Controller
     {
         $data = $request->validated();
 
-        if(isset($data['thumbnail_path'])){
-            $relativePath = $this->saveFile($data['thumbnail_path']);
+        // if(isset($data['thumbnail_path'])){
+        //     $relativePath = $this->saveFile($data['thumbnail_path']);
 
-            $data['thumbnail_path'] = $relativePath;
+        //     $data['thumbnail_path'] = $relativePath;
 
-            if($video->thumbnail_path){
-                $absolutePath = public_path($video->thumbnail_path);
-                File::delete($absolutePath);
-            }
-        }
+        //     if($video->thumbnail_path){
+        //         $absolutePath = public_path($video->thumbnail_path);
+        //         File::delete($absolutePath);
+        //     }
+        // }
 
         $video->update($data);
+
+        return new VideoResource($video);
     }
 
     /**
@@ -93,7 +98,7 @@ class VideoController extends Controller
     public function destroy(Video $video, Request $request)
     {
         $user = $request->user();
-        if ($user->id == $video->user_id) {
+        if ($user->id !== $video->user_id) {
             return abort(403, 'Unauthorized action');
         }
 

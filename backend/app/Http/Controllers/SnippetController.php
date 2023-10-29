@@ -6,7 +6,9 @@ use App\Http\Resources\SnippetResource;
 use App\Models\Snippet;
 use App\Http\Requests\StoreSnippetRequest;
 use App\Http\Requests\UpdateSnippetRequest;
+use App\Models\Video;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Request;
 
 class SnippetController extends Controller
 {
@@ -15,7 +17,10 @@ class SnippetController extends Controller
      */
     public function index()
     {
-        //
+        return SnippetResource::collection(
+        Snippet::orderBy('created_at', 'desc')
+            ->paginate(10)
+        );
     }
 
     /**
@@ -45,7 +50,7 @@ class SnippetController extends Controller
      */
     public function show(Snippet $snippet)
     {
-        //
+        return new SnippetResource($snippet);
     }
 
     /**
@@ -53,8 +58,11 @@ class SnippetController extends Controller
      */
     public function update(UpdateSnippetRequest $request, Snippet $snippet)
     {
-        //
-        // $data = $request->validated();
+        $data = $request->validated();
+
+        $snippet->update($data);
+
+        return new SnippetResource($snippet);
 
 
         // $existingIds = $snippet->tags->pluck('id')->toArray();
@@ -80,8 +88,16 @@ class SnippetController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Snippet $snippet)
+    public function destroy(Snippet $snippet, Video $video, Request $request)
     {
-        //
+        $user = $request->user();
+        // TODO: idk what
+        // if ($user->id != $snippet->user_id || $user->id != ($video->id == $snippet->video_id)) {
+        //     return abort(403, 'Unauthorized action');
+        // }
+
+        $snippet->delete();
+
+        return response('', 204);
     }
 }

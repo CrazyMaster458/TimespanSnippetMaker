@@ -18,8 +18,6 @@ class Video extends Model
         'user_id',
         'host_id',
         'video_type_id',
-        'created_at',
-        'updated_at'
     ];
 
     public function video_type()

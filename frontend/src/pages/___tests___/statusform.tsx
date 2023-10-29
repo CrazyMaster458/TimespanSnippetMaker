@@ -2,7 +2,7 @@ import { useState } from "react";
 import axiosClient from "../../axios.tsx";
 // import { useStateContext } from "@/contexts/ContextProvider.tsx";
 
-export default function TagForm() {
+export default function StatusForm() {
   //   const { userToken, currentUser } = useStateContext();
   const [name, setName] = useState("");
   const [error, setError] = useState({ __html: "" });
@@ -13,8 +13,8 @@ export default function TagForm() {
     type ErrorArray = string[];
 
     axiosClient
-      .post("/tag", {
-        name: "funny",
+      .post("/status", {
+        video_id: 1,
       })
       .then(({ data }) => {
         console.log(data);
