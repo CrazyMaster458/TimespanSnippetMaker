@@ -15,8 +15,8 @@ export default function InfluencerForm() {
 
     axiosClient
       .post("/influencer", {
-        name: "Justing Waller",
-        short: "JW",
+        name: name,
+        short: short,
       })
       .then(({ data }) => {
         console.log(data);

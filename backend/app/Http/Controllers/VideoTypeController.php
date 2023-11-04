@@ -6,6 +6,7 @@ use App\Http\Resources\VideoTypeResource;
 use App\Models\VideoType;
 use App\Http\Requests\StoreVideoTypeRequest;
 use App\Http\Requests\UpdateVideoTypeRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 
 class VideoTypeController extends Controller
@@ -13,9 +14,9 @@ class VideoTypeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $user = $request->user();
+        $user = Auth::user();
 
         return VideoTypeResource::collection(
         VideoType::orderBy('created_at', 'desc')

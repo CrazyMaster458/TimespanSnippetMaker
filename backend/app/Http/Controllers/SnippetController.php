@@ -6,8 +6,10 @@ use App\Http\Resources\SnippetResource;
 use App\Models\Snippet;
 use App\Http\Requests\StoreSnippetRequest;
 use App\Http\Requests\UpdateSnippetRequest;
+use App\Models\SnippetTag;
 use App\Models\Video;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 
 class SnippetController extends Controller
@@ -19,6 +21,7 @@ class SnippetController extends Controller
     {
         return SnippetResource::collection(
         Snippet::orderBy('created_at', 'desc')
+            ->with('snippet_tags')
             ->paginate(10)
         );
     }
@@ -37,6 +40,15 @@ class SnippetController extends Controller
 
         $snippet = Snippet::create($data);
 
+        foreach ($data['snippet_tags'] as $snippetTag) {
+            $snippetTagData = [
+                'snippet_id' => $snippet->id,
+                'tag_id' => $snippetTag,
+            ];
+
+            SnippetTag::create($snippetTagData);
+        }
+
         // foreach ($data['tags'] as $tag) {
         //     $tag['snippet_id'] = $snippet->id;
         //     $this->storeTag($tag);
@@ -50,6 +62,10 @@ class SnippetController extends Controller
      */
     public function show(Snippet $snippet)
     {
+        $user = Auth::user();
+
+        $snippet->load('snippet_tags');
+
         return new SnippetResource($snippet);
     }
 
@@ -61,6 +77,17 @@ class SnippetController extends Controller
         $data = $request->validated();
 
         $snippet->update($data);
+
+        SnippetTag::where('snippet_id', $snippet->id)->delete();
+
+        foreach ($data['snippet_tags'] as $tag) {
+            $tagData = [
+                'snippet_id' => $snippet->id,
+                'tag_id' => $tag,
+            ];
+
+            SnippetTag::create($tagData);
+        }
 
         return new SnippetResource($snippet);
 
@@ -90,11 +117,13 @@ class SnippetController extends Controller
      */
     public function destroy(Snippet $snippet, Video $video, Request $request)
     {
-        $user = $request->user();
+        $user = Auth::user();
         // TODO: idk what
         // if ($user->id != $snippet->user_id || $user->id != ($video->id == $snippet->video_id)) {
         //     return abort(403, 'Unauthorized action');
         // }
+
+        SnippetTag::where('snippet_id', $snippet->id)->delete();
 
         $snippet->delete();
 

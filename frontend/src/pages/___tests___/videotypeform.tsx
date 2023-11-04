@@ -15,8 +15,8 @@ export default function VideoTypeForm() {
 
     axiosClient
       .post("/video_type", {
-        name: "Interview",
-        short: "I",
+        name: name,
+        short: short,
       })
       .then(({ data }) => {
         console.log(data);

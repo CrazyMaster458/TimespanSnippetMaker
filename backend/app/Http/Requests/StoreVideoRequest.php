@@ -42,6 +42,7 @@ class StoreVideoRequest extends FormRequest
             'user_id' => 'exists:users,id',
             'host_id' => 'nullable|exists:influencers,id',
             'video_type_id' => 'exists:video_types,id',
+            'guests' => 'array|exists:influencers,id',
         ];
     }
 }

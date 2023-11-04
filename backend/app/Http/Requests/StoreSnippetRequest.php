@@ -39,6 +39,7 @@ class StoreSnippetRequest extends FormRequest
             'video_type_id' => 'exists:video_types,id',
             'video_id' => 'exists:videos,id',
             'user_id' => 'exists:users,id',
+            'snippet_tags' => 'array|exists:tags,id',
         ];
     }
 }

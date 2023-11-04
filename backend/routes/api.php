@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\GuestController;
 use App\Http\Controllers\InfluencerController;
 use App\Http\Controllers\SnippetController;
 use App\Http\Controllers\StatusController;

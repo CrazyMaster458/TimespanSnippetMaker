@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Guest;
 use App\Models\Status;
 use App\Models\Video;
 use App\Http\Requests\StoreVideoRequest;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Auth;
 
 
 class VideoController extends Controller
@@ -18,12 +20,13 @@ class VideoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index()
     {
-        $user = $request->user();
+        $user = Auth::user();
 
         return VideoResource::collection(
             Video::where('user_id', $user->id)
+            ->with('guests')
             ->orderBy('created_at', 'desc')
             ->paginate(10)
         );
@@ -48,9 +51,16 @@ class VideoController extends Controller
         //     $data['file_path'] = $relativePath;
         // }
 
-
-
         $video = Video::create($data);
+
+        foreach ($data['guests'] as $guest) {
+            $guestData = [
+                'video_id' => $video->id,
+                'influencer_id' => $guest,
+            ];
+
+           Guest::create($guestData);
+        }
 
         return new VideoResource($video);
 
@@ -61,10 +71,12 @@ class VideoController extends Controller
      */
     public function show(Video $video, Request $request)
     {
-        $user = $request->user();
+        $user = Auth::user();
         if ($user->id !== $video->user_id) {
             return abort(403, 'Unauthorized action');
         }
+
+        $video->load('guests');
 
         return new VideoResource($video);
     }
@@ -89,6 +101,17 @@ class VideoController extends Controller
 
         $video->update($data);
 
+        Guest::where('video_id', $video->id)->delete();
+
+        foreach ($data['guests'] as $guest) {
+            $guestData = [
+                'video_id' => $video->id,
+                'influencer_id' => $guest,
+            ];
+
+            Guest::create($guestData);
+        }
+
         return new VideoResource($video);
     }
 
@@ -97,12 +120,15 @@ class VideoController extends Controller
      */
     public function destroy(Video $video, Request $request)
     {
-        $user = $request->user();
+        $user = Auth::user();
         if ($user->id !== $video->user_id) {
             return abort(403, 'Unauthorized action');
         }
 
+        Guest::where('video_id', $video->id)->delete();
+
         $video->delete();
+
 
         // if($video->thumbnail_path){
         //     $absolutePath = public_path($video->thumbnail_path);
@@ -153,3 +179,5 @@ class VideoController extends Controller
         return $relativePath;
     }
 }
+
+
