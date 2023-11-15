@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('username', 255);
             $table->string('email', 255)->unique();
             $table->string('password', 255);
+            $table->string('access_token', 1100)->nullable();
             $table->tinyInteger('admin')->default(0);
             $table->tinyInteger('master_admin')->default(0);
             $table->timestamps();

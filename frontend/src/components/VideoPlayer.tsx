@@ -453,7 +453,8 @@ export const VideoPlayer = () => {
       >
         <track kind={"captions"} srcLang="en" src="subtitles.vtt" />
         <source
-          src="https://tecdn.b-cdn.net/img/video/Sail-Away.mp4"
+          // src="https://tecdn.b-cdn.net/img/video/Sail-Away.mp4"
+          src="1STPUNCH_1694910290.mp4"
           type="video/mp4"
         />
       </video>

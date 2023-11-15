@@ -55,7 +55,6 @@ export default function VideoForm() {
         host_id: host,
         guests: guests,
         video_type_id: videoType,
-        video_code: "715515",
       })
       .then(({ data }) => {
         console.log(data);
@@ -110,6 +109,7 @@ export default function VideoForm() {
               placeholder="Video File"
               required
               value={filePath}
+              accept=".mp4,.mov,.mkv,.avi"
               onChange={(e) => setFilePath(e.target.value)}
             />
             <input
@@ -118,6 +118,7 @@ export default function VideoForm() {
               placeholder="Video File"
               required
               value={thumbnailPath}
+              accept=".jpeg,.png,.webp,"
               onChange={(e) => setThumbnailPath(e.target.value)}
             />
 

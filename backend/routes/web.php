@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GoogleDriveController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DataController;
 
@@ -26,3 +27,5 @@ Route::get('/dbconn', function () {
 Route::get('/project-data', [DataController::class, 'projectData']);
 
 
+Route::get('google/login',[GoogleDriveController::class,'googleLogin'])->name('google.login');
+Route::get('google-drive/file-upload',[GoogleDriveController::class,'googleDriveFileUpload'])->name('google.drive.file.upload');

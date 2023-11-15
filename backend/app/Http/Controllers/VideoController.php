@@ -39,17 +39,39 @@ class VideoController extends Controller
     {
         $data = $request->validated();
 
-        // if (isset($data['thumbnail_path']))
-        // {
-        //     $relativePath = $request->saveFile($data['thumbnail_path']);
-        //     $data['thumbnail_path'] = $relativePath;
-        // }
+        // if ($request->hasFile('thumbnail_path')) {
+        if (isset($data['thumbnail_path'])) {
+            $file = $request->file('thumbnail_path');
 
-        // if (isset($data['file_path']))
-        // {
-        //     $relativePath = $request->saveFile($data['file_path']);
-        //     $data['file_path'] = $relativePath;
-        // }
+            // Validate that the uploaded file is an image
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!in_array($file->getMimeType(), $allowedMimeTypes)) {
+                return response()->json(['error' => 'Invalid file type. Only image files (JPEG, PNG, WEBP) are allowed.'], 400);
+            }
+
+            // $relativePath = $this->saveFile($data['thumbnail_path']);
+            // $data['thumbnail_path'] = $relativePath;
+        }
+
+        // if ($request->hasFile('file_path')) {
+        if (isset($data['file_path'])) {
+            $file = $request->file('file_path');
+
+            $allowedExtensions = ['mp4', 'mov', 'avi', 'mkv',];
+            $fileExtension = strtolower($file->getClientOriginalExtension());
+            if (!in_array($fileExtension, $allowedExtensions)) {
+                return response()->json(['error' => 'Invalid file extension. Only video files are allowed.'], 400);
+            }
+
+            // $allowedMimeTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska',];
+            // $fileMimeType = $file->getMimeType();
+            // if (!in_array($fileMimeType, $allowedMimeTypes)) {
+            //     return response()->json(['error' => 'Invalid file type. Only video files are allowed.'], 400);
+            // }
+
+            // $relativePath = $this->saveFile($data['file_path']);
+            // $data['file_path'] = $relativePath;
+        }
 
         $video = Video::create($data);
 
@@ -143,41 +165,6 @@ class VideoController extends Controller
         return response('', 204);
     }
 
-    public function saveFile($file)
-    {
-        if(preg_match('/^data:image\/(\w+);base64,/', $file, $type)) //TODO
-        {
-            $file = substr($file, strpos($file, ',') + 1);
-            $type = strtolower($type[1]);
-
-            if(!in_array($type, ['jpg', 'jpeg', 'png', 'gif']))
-            {
-                throw new \Exception('Invalid file type');
-            }
-
-            $file = str_replace(' ', '+', $file);
-            $file = base64_decode($file);
-
-            if ($file === false){
-                throw new \Exception('base_decode failed');
-            }
-        }
-        else {
-            throw new \Exception('Did not match data URI with file data');
-        }
-
-        $dir = 'images/';
-        $file2 = Str::random(). '.'. $type;
-        $absolutePath = public_path($dir);
-        $relativePath = $dir. $file2;
-
-        if(!File::exists($absolutePath)){
-            File::makeDirectory($absolutePath, 0755, true);
-        }
-        file_put_contents($relativePath, $file);
-
-        return $relativePath;
-    }
 }
 
 

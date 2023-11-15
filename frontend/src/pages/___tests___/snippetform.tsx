@@ -47,7 +47,6 @@ export default function SnippetForm() {
         file_path: filePath,
         video_type_id: 1,
         video_id: 1,
-        snippet_code: "153456",
         snippet_tags: snippetTags,
       })
       .then(({ data }) => {
