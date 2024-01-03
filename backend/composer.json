@@ -14,10 +14,12 @@
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.3",
+        "laravel/socialite": "^5.10",
         "laravel/telescope": "^4.16",
         "laravel/tinker": "^2.8",
         "mll-lab/laravel-graphiql": "^3.1",
         "nuwave/lighthouse": "^6.16",
+        "pbmedia/laravel-ffmpeg": "^8.3",
         "rebing/graphql-laravel": "^9.1"
     },
     "require-dev": {

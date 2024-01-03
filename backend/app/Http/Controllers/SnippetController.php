@@ -11,6 +11,8 @@ use App\Models\Video;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
+use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
+use FFMpeg\Coordinate\TimeCode;
 
 class SnippetController extends Controller
 {
@@ -26,6 +28,16 @@ class SnippetController extends Controller
         );
     }
 
+    public function getVideoSnippets($video_id)
+    {
+        $snippets = Snippet::where('video_id', $video_id)
+        ->orderBy('created_at', 'asc')
+        ->with('snippet_tags')
+        ->get();
+
+        return SnippetResource::collection($snippets);
+    }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -39,14 +51,16 @@ class SnippetController extends Controller
         // }
 
         $snippet = Snippet::create($data);
-
-        foreach ($data['snippet_tags'] as $snippetTag) {
+        
+        if(isset($data['snippet_tags'])){
+            foreach ($data['snippet_tags'] as $snippetTag) {
             $snippetTagData = [
                 'snippet_id' => $snippet->id,
                 'tag_id' => $snippetTag,
             ];
 
             SnippetTag::create($snippetTagData);
+            }
         }
 
         // foreach ($data['tags'] as $tag) {
@@ -78,15 +92,17 @@ class SnippetController extends Controller
 
         $snippet->update($data);
 
-        SnippetTag::where('snippet_id', $snippet->id)->delete();
+        if(isset($data['snippet_tags'])){
+            SnippetTag::where('snippet_id', $snippet->id)->delete();
 
-        foreach ($data['snippet_tags'] as $tag) {
-            $tagData = [
-                'snippet_id' => $snippet->id,
-                'tag_id' => $tag,
-            ];
+            foreach ($data['snippet_tags'] as $snippetTag) {
+                $snippetTagData = [
+                    'snippet_id' => $snippet->id,
+                    'tag_id' => $snippetTag,
+                ];
 
-            SnippetTag::create($tagData);
+                SnippetTag::create($snippetTagData);
+            }
         }
 
         return new SnippetResource($snippet);
@@ -128,5 +144,33 @@ class SnippetController extends Controller
         $snippet->delete();
 
         return response('', 204);
+    }
+
+    public function cutVideo(Snippet $snippet) {
+        $user = Auth::user();
+        $video = Video::find($snippet->video_id);
+
+        $videoPathInfo = pathinfo($video->file_path);
+        $videoExtension = $videoPathInfo['extension'];
+
+        $videoFolderPath = "{$user->secret_name}/{$video->video_code}";
+
+        $snippetDestination = "{$videoFolderPath}/snippets/snippet{$snippet->snippet_code}.{$videoExtension}";
+        
+        $snippet->update([
+            'file_path' => "storage/" . $snippetDestination
+        ]);
+
+        FFMpeg::fromDisk('public')
+            ->open("{$videoFolderPath}/video.{$videoExtension}")
+            ->export()
+            ->toDisk('public')
+            ->inFormat(new \FFMpeg\Format\Video\X264)
+            ->addFilter([
+                '-ss', $snippet->starts_at,
+                '-to', $snippet->ends_at,
+            ])
+            ->save($snippetDestination);
+        return response()->json(["message" => "Success?"]);
     }
 }

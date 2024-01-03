@@ -7,6 +7,8 @@ use App\Http\Requests\SignupRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Mockery\Undefined;
+use App\Http\Controllers\StorageController;
 
 class AuthController extends Controller
 {
@@ -15,11 +17,42 @@ class AuthController extends Controller
         $data = $request->validated();
 
         /** @var \App\Models\User $user */
-        $user = User::create([
-            'username' => $data['username'],
-            'email' => $data['email'],
+        // $user = User::create([
+        //     'username' => $data['username'],
+        //     'email' => $data['email'],
+        //     'access_token' => $data['access_token'],
+        // ]);
+
+        $user = User::create($data);
+
+        $user->update([
             'password' => bcrypt($data['password'])
         ]);
+
+        app(StorageController::class)->createFolder($user->secret_name);
+
+        // $user = User::create([
+        //     'username' => $data['username'],
+        //     'email' => $data['email'],
+        //     'password' => bcrypt($data['password'])
+        // ]);
+
+        // if($data['password'] !== null && $data['password'] !== ""){
+        //     $user = User::create([
+        //         'username' => $data['username'],
+        //         'email' => $data['email'],
+        //         'password' => bcrypt($data['password'])
+        //     ]);
+        // }
+        // else if ($data['access_token'] !== null && $data['access_token'] !== "")
+        // {
+        //     $user = User::create([
+        //         'username' => $data['username'],
+        //         'email' => $data['email'],
+        //         'access_token' => $data['access_token'],
+        //     ]);
+        // }
+
         $token = $user->createToken('main')->plainTextToken;
 
         return response([

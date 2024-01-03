@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Requests;
-
+use Illuminate\Support\Str;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreUserRequest extends FormRequest
@@ -14,6 +15,25 @@ class StoreUserRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'secret_name' => $this->generateSecretName()
+        ]);
+    }
+
+    public function generateSecretName(){
+        $secretName = 'user' . Str::random(10);
+
+        $secretName = User::where('secret_name', $secretName)->first();
+
+        if($secretName){
+            return $this->generateVideoID();
+        }
+
+        return $secretName;
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -24,9 +44,12 @@ class StoreUserRequest extends FormRequest
         return [
             'username' => 'required|string|max:25',
             'email' => 'required|email|unique:users,email',
-            'password'  => 'required|string|min:8|confirmed',
+            'password'  => 'nullable|string|min:8',
+            'secret_name' => 'nullable|string|unique:users,secret_name',
+            'access_token'  => 'nullable|string|max:3500',
             'admin'  => 'boolean|integer',
             'master_admin' => 'boolean|integer',
         ];
+
     }
 }

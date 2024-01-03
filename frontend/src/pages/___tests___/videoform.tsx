@@ -7,7 +7,7 @@ export default function VideoForm() {
   //   const { userToken, currentUser } = useStateContext();
   const [title, setTitle] = useState("");
   const [dateUploaded, setDateUploaded] = useState("");
-  const [filePath, setFilePath] = useState("");
+  const [filePath, setFilePath] = useState('');
   const [thumbnailPath, setThumbnailPath] = useState("");
   const [host, setHost] = useState("1");
   const [videoType, setVideoType] = useState("1");
@@ -40,9 +40,21 @@ export default function VideoForm() {
       });
   }, []);
   
+  const handleVideoChange = (e: any) => {
+    setFilePath(e.target.files[0]);
+  }
+  const handleThumbnailChange = (e: any) => {
+    setThumbnailPath(e.target.files[0]);
+  }
   
   const onSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault();
+
+    // const fData = new FormData();
+
+    // fData.append('image', thumbnailPath);
+    // fData.append('video', filePath);
+
     setError({ __html: "" });
     type ErrorArray = string[];
 
@@ -50,15 +62,18 @@ export default function VideoForm() {
       .post("/video", {
         title: title,
         date_uploaded: dateUploaded,
-        file_path: filePath,
-        thumbnail_path: thumbnailPath,
+        video: filePath,
+        image: thumbnailPath,
         host_id: host,
         guests: guests,
         video_type_id: videoType,
-      })
+      }, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+    })
       .then(({ data }) => {
         console.log(data);
-        // console.log(guests); 
       })
       .catch((error) => {
         if (error.response) {
@@ -108,18 +123,16 @@ export default function VideoForm() {
               name="file_path"
               placeholder="Video File"
               required
-              value={filePath}
               accept=".mp4,.mov,.mkv,.avi"
-              onChange={(e) => setFilePath(e.target.value)}
+              onChange={handleVideoChange}
             />
             <input
               type="file"
               name="thumbnail_path"
               placeholder="Video File"
               required
-              value={thumbnailPath}
-              accept=".jpeg,.png,.webp,"
-              onChange={(e) => setThumbnailPath(e.target.value)}
+              accept=".jpeg,.png,.webp,.jpg"
+              onChange={handleThumbnailChange}
             />
 
             {influencers && (

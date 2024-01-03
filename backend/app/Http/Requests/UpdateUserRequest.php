@@ -24,7 +24,8 @@ class UpdateUserRequest extends FormRequest
         return [
             'username' => 'required|string|max:25',
             'email' => 'required|email|unique:users,email',
-            'password'  => 'required|string|min:8|confirmed',
+            // 'password'  => 'nullable|string|min:8',
+            'access_token'  => 'nullable|string|max:1100',
             'admin'  => 'boolean|integer',
             'master_admin' => 'boolean|integer',
         ];

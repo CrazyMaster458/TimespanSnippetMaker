@@ -11,6 +11,8 @@ use App\Http\Controllers\VideoController;
 use App\Http\Controllers\VideoTypeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GoogleDriveController;
+use App\Http\Controllers\StorageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,7 +25,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 
@@ -34,8 +36,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('influencer', InfluencerController::class);
     Route::apiResource('video_type', VideoTypeController::class);
     Route::apiResource('status', StatusController::class);
+
+    Route::get('/folder', [StorageController::class, 'createFolder']);
+    Route::get('/img', [StorageController::class, 'getImage']);
+    Route::post('/upload', [StorageController::class, 'uploadVideo']);
+
+    Route::get('/get-video-snippets/{video_id}', [SnippetController::class, 'getVideoSnippets']);
+    Route::post('/cut/{snippet}', [SnippetController::class, 'cutVideo']);
+
+
+
+    Route::get('/auth/google/redirect',[GoogleDriveController::class,'redirectToGoogle']);
 });
+
 
 // Authorization
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/login', [AuthController::class, 'login']);
+

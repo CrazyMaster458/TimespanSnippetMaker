@@ -19,7 +19,6 @@ class StoreSnippetRequest extends FormRequest
     public function prepareForValidation()
     {
         $this->merge([
-            // 'video_id' => $this->route('video')->id,
             'snippet_code' => $this->generateSnippetID(),
         ]);
     }
@@ -44,7 +43,7 @@ class StoreSnippetRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'description' => 'required|string|max:1150',
+            'description' => 'nullable|string|max:1150',
             'starts_at' => 'nullable|date_format:H:i:s',
             'ends_at' => 'nullable|date_format:H:i:s',
             'file_path' => 'nullable|string|max:1150',

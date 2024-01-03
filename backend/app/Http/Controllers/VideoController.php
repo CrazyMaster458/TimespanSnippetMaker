@@ -13,23 +13,38 @@ use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\StorageController;
+use App\Models\Snippet;
 
 class VideoController extends Controller
 {
+
+    private $storageController;
+
+    public function __construct(StorageController $storageController)
+    {
+        $this->storageController = $storageController;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
         $user = Auth::user();
-
-        return VideoResource::collection(
-            Video::where('user_id', $user->id)
+    
+        $videos = Video::where('user_id', $user->id)
             ->with('guests')
             ->orderBy('created_at', 'desc')
-            ->paginate(10)
-        );
+            ->get();
+        $videos = $videos->map(function ($video) {
+            $video->video_url = $this->storageController->getFileUrl($video->file_path);
+            $video->image_url = $this->storageController->getFileUrl($video->thumbnail_path);
+    
+            return new VideoResource($video);
+        });
+    
+        return $videos;
     }
 
     /**
@@ -39,53 +54,36 @@ class VideoController extends Controller
     {
         $data = $request->validated();
 
-        // if ($request->hasFile('thumbnail_path')) {
-        if (isset($data['thumbnail_path'])) {
-            $file = $request->file('thumbnail_path');
-
-            // Validate that the uploaded file is an image
-            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
-            if (!in_array($file->getMimeType(), $allowedMimeTypes)) {
-                return response()->json(['error' => 'Invalid file type. Only image files (JPEG, PNG, WEBP) are allowed.'], 400);
-            }
-
-            // $relativePath = $this->saveFile($data['thumbnail_path']);
-            // $data['thumbnail_path'] = $relativePath;
-        }
-
-        // if ($request->hasFile('file_path')) {
-        if (isset($data['file_path'])) {
-            $file = $request->file('file_path');
-
-            $allowedExtensions = ['mp4', 'mov', 'avi', 'mkv',];
-            $fileExtension = strtolower($file->getClientOriginalExtension());
-            if (!in_array($fileExtension, $allowedExtensions)) {
-                return response()->json(['error' => 'Invalid file extension. Only video files are allowed.'], 400);
-            }
-
-            // $allowedMimeTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska',];
-            // $fileMimeType = $file->getMimeType();
-            // if (!in_array($fileMimeType, $allowedMimeTypes)) {
-            //     return response()->json(['error' => 'Invalid file type. Only video files are allowed.'], 400);
-            // }
-
-            // $relativePath = $this->saveFile($data['file_path']);
-            // $data['file_path'] = $relativePath;
-        }
-
         $video = Video::create($data);
 
-        foreach ($data['guests'] as $guest) {
-            $guestData = [
-                'video_id' => $video->id,
-                'influencer_id' => $guest,
-            ];
+        // if(!Auth::user()->access_token) {
+        //     // app(GoogleDriveController::class)->redirectToGoogle();
+        //     return redirect()->route('google.login');
+        // } else {
+        // }
 
-           Guest::create($guestData);
+        // app(GoogleDriveController::class)->googleLogin();
+
+        $this->storageController->createFolder($video->video_code);
+        $this->storageController->createFolder($video->video_code . "/snippets");
+        $thumbnailPath = $this->storageController->uploadFile($request, $video->video_code, 'image');
+        $videoPath = $this->storageController->uploadFile($request, $video->video_code, 'video');
+
+        $video->update([
+            'thumbnail_path' => $thumbnailPath,
+            'file_path' => $videoPath,
+        ]);
+
+        if(isset($data['guests'])){
+            foreach ($data['guests'] as $guest) {
+                $guestData = [
+                    'video_id' => $video->id,
+                    'influencer_id' => $guest,
+                ];
+               Guest::create($guestData);
+            }
         }
-
         return new VideoResource($video);
-
     }
 
     /**
@@ -100,6 +98,12 @@ class VideoController extends Controller
 
         $video->load('guests');
 
+        $video->video_url = $this->storageController->getFileUrl($video->file_path);
+        // $video->image_url = $this->storageController->getFileUrl($video->thumbnail_path);
+
+        $snippets = Snippet::where('video_id', $video->id)->with('snippet_tags')->get();
+        $video->snippets = $snippets;
+
         return new VideoResource($video);
     }
 
@@ -109,17 +113,6 @@ class VideoController extends Controller
     public function update(UpdateVideoRequest $request, Video $video)
     {
         $data = $request->validated();
-
-        // if(isset($data['thumbnail_path'])){
-        //     $relativePath = $this->saveFile($data['thumbnail_path']);
-
-        //     $data['thumbnail_path'] = $relativePath;
-
-        //     if($video->thumbnail_path){
-        //         $absolutePath = public_path($video->thumbnail_path);
-        //         File::delete($absolutePath);
-        //     }
-        // }
 
         $video->update($data);
 
@@ -150,17 +143,6 @@ class VideoController extends Controller
         Guest::where('video_id', $video->id)->delete();
 
         $video->delete();
-
-
-        // if($video->thumbnail_path){
-        //     $absolutePath = public_path($video->thumbnail_path);
-        //     File::delete($absolutePath);
-        // }
-
-        // if($video->file_path){
-        //     $absolutePath = public_path($video->file_path);
-        //     File::delete($absolutePath);
-        // }
 
         return response('', 204);
     }

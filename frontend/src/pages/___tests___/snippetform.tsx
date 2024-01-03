@@ -46,7 +46,7 @@ export default function SnippetForm() {
         ends_at: "00:02:00",
         file_path: filePath,
         video_type_id: 1,
-        video_id: 1,
+        video_id: 34,
         snippet_tags: snippetTags,
       })
       .then(({ data }) => {

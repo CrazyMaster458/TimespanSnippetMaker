@@ -15,6 +15,7 @@ import InfluencerForm from "./pages/___tests___/influencerform";
 import VideoTypeForm from "./pages/___tests___/videotypeform";
 import StatusForm from "./pages/___tests___/statusform";
 import DetailForm from "./pages/___tests___/detailtext";
+import UploadImg from "./pages/___tests___/upload";
 
 const router = createBrowserRouter([
   {
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
       {
         path: "/detailform/:id",
         element: <DetailForm />,
+      },
+      {
+        path: "/upload",
+        element: <UploadImg />,
       },
     ],
   },

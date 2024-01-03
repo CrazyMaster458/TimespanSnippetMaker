@@ -13,9 +13,10 @@ export default function TagForm() {
     type ErrorArray = string[];
 
     axiosClient
-      .post("/tag", {
-        name: "funny",
-      })
+      // .post("/tag", {
+      //   name: "funny",
+      // })
+      .get("/folder")
       .then(({ data }) => {
         console.log(data);
       })
