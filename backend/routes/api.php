@@ -44,7 +44,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/get-video-snippets/{video_id}', [SnippetController::class, 'getVideoSnippets']);
     Route::post('/cut/{snippet}', [SnippetController::class, 'cutVideo']);
 
-
+    Route::get('video_parameters', [VideoController::class, 'retriveVideoParameters']);
 
     Route::get('/auth/google/redirect',[GoogleDriveController::class,'redirectToGoogle']);
 });

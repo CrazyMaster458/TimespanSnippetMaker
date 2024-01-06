@@ -3,7 +3,7 @@
 /* eslint-disable no-fallthrough */
 import React, { ChangeEvent, useEffect, useState } from "react";
 
-export const VideoPlayer = () => {
+export const VideoPlayer = ({videoUrl} : {videoUrl: string}) => {
   // Video player
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
   const videoContainerRef = React.useRef<HTMLDivElement | null>(null);
@@ -449,12 +449,11 @@ export const VideoPlayer = () => {
         ref={videoRef}
         className="video-player"
         onClick={togglePlayPause}
-        autoPlay
       >
         <track kind={"captions"} srcLang="en" src="subtitles.vtt" />
         <source
           // src="https://tecdn.b-cdn.net/img/video/Sail-Away.mp4"
-          src="1STPUNCH_1694910290.mp4"
+          src={videoUrl}
           type="video/mp4"
         />
       </video>

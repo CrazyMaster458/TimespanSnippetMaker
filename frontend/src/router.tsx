@@ -16,6 +16,7 @@ import VideoTypeForm from "./pages/___tests___/videotypeform";
 import StatusForm from "./pages/___tests___/statusform";
 import DetailForm from "./pages/___tests___/detailtext";
 import UploadImg from "./pages/___tests___/upload";
+import { CardWithForm } from "./components/VideoUploadCard";
 
 const router = createBrowserRouter([
   {
@@ -61,6 +62,10 @@ const router = createBrowserRouter([
       {
         path: "/upload",
         element: <UploadImg />,
+      },
+      {
+        path: "/cardform",
+        element: <CardWithForm />,
       },
     ],
   },

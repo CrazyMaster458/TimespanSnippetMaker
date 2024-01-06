@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import axiosClient from "@/axios";
 
 export const VideoCard = ({videoData, videoId}: {videoData: object, videoId: string}) => {
   const navigate = useNavigate();
@@ -9,6 +10,17 @@ export const VideoCard = ({videoData, videoId}: {videoData: object, videoId: str
   const HandleRedirect = () => {
     navigate(`/detailform/${videoId}`);
   };
+
+  function handleDelete(){
+    axiosClient
+    .delete(`/video/` + videoId)
+    .then(({ data }) => {
+      console.log(data.data);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  }
 
   return (
     <Card
@@ -22,6 +34,7 @@ export const VideoCard = ({videoData, videoId}: {videoData: object, videoId: str
         </p>
         <div className="card-actions justify-end">
           <Badge className="badge badge-primary">{videoData.host_id.name}</Badge>
+          <button onClick={handleDelete}>DELETE</button>
         </div>
 
       </CardContent>

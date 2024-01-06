@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import axiosClient from "../../axios.tsx";
 import { useParams } from "react-router-dom";
 import { Snippet } from "@/components/___tests___/snippet.tsx";
+import { VideoPlayer } from "@/components/VideoPlayer.tsx";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
+import { SnippetCard } from "@/components/SnippetCard.tsx";
 // import { useStateContext } from "@/contexts/ContextProvider.tsx";
 
 export default function DetailForm() {
@@ -28,8 +31,10 @@ export default function DetailForm() {
     if (snippetData) {
       setSnippetData(snippetData);
 
+
       setSnippets(snippetData.map((snippet) => (
-        <Snippet key={snippet.id} videoId={id} snippetData={snippet} snippetId={snippet.id}/>
+        <SnippetCard key={snippet.id} videoId={id} snippetData={snippet} snippetId={snippet.id}/>
+        // <Snippet key={snippet.id} videoId={id} snippetData={snippet} snippetId={snippet.id}/>
       )));
     }
   }, [snippetData, id]);
@@ -51,32 +56,29 @@ export default function DetailForm() {
       });
   }
 
-  function handleShowSnippet() {
-    // Add a new snippet to the array each time the button is clicked
-    createSnippet();
-    // setSnippets([...snippets, <Snippet key={snippets.length} videoId={id}/>]);
-  }
-
   return (
-    <>
-      <h1 className="pt-16">Signup</h1>
-
-      <p>{id}</p>
-      
-      <div className="flex flex-row justify-between">
-        <div>
+    <>      
+      <div className="grid grid-cols-7 gap-2 content-center pt-20">
+        <div className="col-span-4">
           {videoDetailData && videoDetailData.video_url ?
             <>
-              <video controls>
-                  <source src={videoDetailData.video_url} type="video/mp4"/>
-              </video>
+              <VideoPlayer videoUrl={videoDetailData.video_url}/>
+              <h3 className="pl-10 font-bold font-sans text-left text-xl pt-2">{videoDetailData.title}</h3>
             </>
-            : <p>Loading...</p>} 
+            : <p>Loading...</p>
+          } 
         </div>
-        <div>
-          {snippets.length > 0 ? snippets : <p>Loading...</p>}
+        <div className="col-span-3">
+          {snippets.length > 0 ?
+          
+          <ScrollArea className="h-[684px] w-[full] flex flex-col pr-12">
+            {snippets}
+            <button onClick={createSnippet}>Create Snippet</button>
+          </ScrollArea>
 
-          <button onClick={handleShowSnippet}>Create Snippet</button>
+            : <p>Loading...</p>
+          }
+
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import axiosClient from "../../axios.tsx";
+import { DatePickerDemo } from "@/components/DatePicker.tsx";
 // import { useStateContext } from "@/contexts/ContextProvider.tsx";
 
 export default function VideoForm() {
@@ -15,28 +16,23 @@ export default function VideoForm() {
   const [error, setError] = useState({ __html: "" });
 
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState([]);
   const [influencers, setInfluencers] = useState([]);
+  const [videoTypes, setVideoTypes] = useState([]);
 
 
   useEffect(() => {
     setLoading(true);
     axiosClient
-      .get(`/video_type`)
+      .get(`/video_parameters`)
       .then((res) => {
-        console.log(res.data.data);
-        setData(res.data.data);
-        return axiosClient.get('/influencer');
-      })
-      .then((res2) => {
         setLoading(false);
-        setInfluencers(res2.data.data);
-        return res2;
+        console.log(res.data.influencers);
+        setInfluencers(res.data.influencers);
+        setVideoTypes(res.data.videoTypes)
       })
       .catch((error) => {
         setLoading(false);
         console.log("error");
-        return error;
       });
   }, []);
   
@@ -88,9 +84,13 @@ export default function VideoForm() {
 
   return (
     <>
-      <h1>Signup</h1>
+      <h1 className="pt-16">Signup</h1>
 
       {loading && <div className="flex justify-center">Loading...</div>}
+
+      <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+
+      <DatePickerDemo/>
 
       {!loading && (
         <>
@@ -159,7 +159,7 @@ export default function VideoForm() {
               </>
             )}
 
-            {data && (
+            {videoTypes && (
               <>
                 <select
                   name="video_type"
@@ -167,7 +167,7 @@ export default function VideoForm() {
                   value={videoType}
                   onChange={(e) => setVideoType(e.target.value)}
                 >
-                  {data.map((item : any) => (
+                  {videoTypes.map((item : any) => (
                     <option key={item.id} value={item.id}>
                       {item.name}
                     </option>

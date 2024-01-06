@@ -15,6 +15,12 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\StorageController;
 use App\Models\Snippet;
+use App\Http\Controllers\SnippetController;
+use App\Http\Resources\InfluencerResource;
+use App\Http\Resources\VideoTypeResource;
+use App\Models\Influencer;
+use App\Models\VideoType;
+
 
 class VideoController extends Controller
 {
@@ -38,13 +44,24 @@ class VideoController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
         $videos = $videos->map(function ($video) {
-            $video->video_url = $this->storageController->getFileUrl($video->file_path);
+            // $video->video_url = $this->storageController->getFileUrl($video->file_path);
             $video->image_url = $this->storageController->getFileUrl($video->thumbnail_path);
     
             return new VideoResource($video);
         });
     
         return $videos;
+    }
+
+    public function retriveVideoParameters()
+    {
+        $influencers = InfluencerResource::collection(Influencer::all());
+        $videoTypes = VideoTypeResource::collection(VideoType::all());
+
+        return [
+            'influencers' => $influencers,
+            'videoTypes' => $videoTypes,
+        ];
     }
 
     /**
@@ -101,7 +118,7 @@ class VideoController extends Controller
         $video->video_url = $this->storageController->getFileUrl($video->file_path);
         // $video->image_url = $this->storageController->getFileUrl($video->thumbnail_path);
 
-        $snippets = Snippet::where('video_id', $video->id)->with('snippet_tags')->get();
+        $snippets = app(SnippetController::class)->getVideoSnippets($video->id);
         $video->snippets = $snippets;
 
         return new VideoResource($video);
@@ -133,7 +150,7 @@ class VideoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Video $video, Request $request)
+    public function destroy(Video $video, Request $request, StorageController $storageController)
     {
         $user = Auth::user();
         if ($user->id !== $video->user_id) {
@@ -141,6 +158,9 @@ class VideoController extends Controller
         }
 
         Guest::where('video_id', $video->id)->delete();
+
+        $videoFolder = "public/{$user->secret_name}/{$video->video_code}";
+        $storageController->deleteFolder($videoFolder);
 
         $video->delete();
 

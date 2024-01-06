@@ -31,7 +31,7 @@ class SnippetController extends Controller
     public function getVideoSnippets($video_id)
     {
         $snippets = Snippet::where('video_id', $video_id)
-        ->orderBy('created_at', 'asc')
+        ->orderBy('starts_at', 'asc')
         ->with('snippet_tags')
         ->get();
 
@@ -131,13 +131,17 @@ class SnippetController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Snippet $snippet, Video $video, Request $request)
+    public function destroy(Snippet $snippet, Video $video, Request $request, StorageController $storageController)
     {
         $user = Auth::user();
         // TODO: idk what
         // if ($user->id != $snippet->user_id || $user->id != ($video->id == $snippet->video_id)) {
         //     return abort(403, 'Unauthorized action');
         // }
+
+        if (!empty($snippet->file_path)) {
+            $storageController->deleteFile($snippet->file_path);
+        }
 
         SnippetTag::where('snippet_id', $snippet->id)->delete();
 
@@ -156,10 +160,6 @@ class SnippetController extends Controller
         $videoFolderPath = "{$user->secret_name}/{$video->video_code}";
 
         $snippetDestination = "{$videoFolderPath}/snippets/snippet{$snippet->snippet_code}.{$videoExtension}";
-        
-        $snippet->update([
-            'file_path' => "storage/" . $snippetDestination
-        ]);
 
         FFMpeg::fromDisk('public')
             ->open("{$videoFolderPath}/video.{$videoExtension}")
@@ -171,6 +171,11 @@ class SnippetController extends Controller
                 '-to', $snippet->ends_at,
             ])
             ->save($snippetDestination);
+    
+        $snippet->update([
+            'file_path' => $snippetDestination
+        ]);
+
         return response()->json(["message" => "Success?"]);
     }
 }

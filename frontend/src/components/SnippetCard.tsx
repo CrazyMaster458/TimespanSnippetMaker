@@ -9,10 +9,11 @@ import {
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Separator } from "./ui/separator";
-import { KeyboardEvent, useRef, useState } from "react";
+import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { ChevronDown, Download } from "lucide-react";
 import CreatableSelect from "react-select/creatable";
 import { Button } from "@/components/ui/button";
+import axiosClient from "@/axios";
 
 type OptionType = { value: string; label: string };
 
@@ -22,7 +23,19 @@ const options: OptionType[] = [
   { value: "Honeybee", label: "🐝 Honeybee" },
 ];
 
-export const SnippetCard = () => {
+export const SnippetCard = ({videoId, snippetData, snippetId}: {videoId: string, snippetData: object, snippetId: string}) => {
+  const parseTime = (timeString) => {
+    const [hours, minutes, seconds] = timeString.split(':');
+    
+    return {
+      hours: hours.padStart(2, '0'),
+      minutes: minutes.padStart(2, '0'),
+      seconds: seconds.padStart(2, '0'),
+    };
+  };
+
+  const [initialLoad, setInitialLoad] = useState(true);
+  
   const [snippetStart, setSnippetStart] = useState({
     hours: "00",
     minutes: "00",
@@ -96,7 +109,7 @@ export const SnippetCard = () => {
         });
       }
 
-      changeDuration();
+      // changeDuration();
     }
   };
 
@@ -132,7 +145,7 @@ export const SnippetCard = () => {
         ),
       });
 
-      changeDuration();
+      // changeDuration();
     }
   };
 
@@ -143,49 +156,50 @@ export const SnippetCard = () => {
       setIsArrowKey(false);
     }
   };
+  
 
   // function handleDescriptionChange(event: { target: { value: string } }) {
   //   const { value } = event.target;
   //   setDescription(value);
   // }
 
-  function changeDuration() {
-    const startHours = parseInt(inputRefHoursStart.current?.value || "0", 10);
-    const startMinutes = parseInt(
-      inputRefMinutesStart.current?.value || "0",
-      10
-    );
-    const startSeconds = parseInt(
-      inputRefSecondsStart.current?.value || "0",
-      10
-    );
+  // const changeDuration = () => {
+  //   const startHours = parseInt(inputRefHoursStart.current?.value || "0", 10);
+  //   const startMinutes = parseInt(
+  //     inputRefMinutesStart.current?.value || "0",
+  //     10
+  //   );
+  //   const startSeconds = parseInt(
+  //     inputRefSecondsStart.current?.value || "0",
+  //     10
+  //   );
 
-    const endHours = parseInt(inputRefHoursEnd.current?.value || "0", 10);
-    const endMinutes = parseInt(inputRefMinutesEnd.current?.value || "0", 10);
-    const endSeconds = parseInt(inputRefSecondsEnd.current?.value || "0", 10);
+  //   const endHours = parseInt(inputRefHoursEnd.current?.value || "0", 10);
+  //   const endMinutes = parseInt(inputRefMinutesEnd.current?.value || "0", 10);
+  //   const endSeconds = parseInt(inputRefSecondsEnd.current?.value || "0", 10);
 
-    let minutes = endMinutes - startMinutes;
-    let seconds = endSeconds - startSeconds;
+  //   let minutes = endMinutes - startMinutes;
+  //   let seconds = endSeconds - startSeconds;
 
-    if (seconds < 0) {
-      seconds += 60;
-      minutes--;
-    }
+  //   if (seconds < 0) {
+  //     seconds += 60;
+  //     minutes--;
+  //   }
 
-    let hours = endHours - startHours;
+  //   let hours = endHours - startHours;
 
-    if (minutes < 0) {
-      minutes += 60;
-      hours--;
-    }
+  //   if (minutes < 0) {
+  //     minutes += 60;
+  //     hours--;
+  //   }
 
-    if (hours < 0) {
-      minutes = 0;
-      seconds = 0;
-    }
+  //   if (hours < 0) {
+  //     minutes = 0;
+  //     seconds = 0;
+  //   }
 
-    setSnippetDuration(`${minutes}:${leadingZeroFormatter.format(seconds)}`);
-  }
+  //   setSnippetDuration(`${minutes}:${leadingZeroFormatter.format(seconds)}`);
+  // }
 
   const timeToSeconds = (time: {
     hours: string;
@@ -227,6 +241,83 @@ export const SnippetCard = () => {
     const options2 = { ...selectedOptions };
     console.log(options2);
   };
+
+  useEffect(() => {
+    if(snippetEnd && snippetStart){
+      let minutes = parseInt(snippetEnd.minutes) - parseInt(snippetStart.minutes);
+      let seconds = parseInt(snippetEnd.seconds) - parseInt(snippetStart.seconds);
+  
+      if (seconds < 0) {
+        seconds += 60;
+        minutes--;
+      }
+  
+      let hours = parseInt(snippetEnd.hours) - parseInt(snippetStart.hours);
+  
+      if (minutes < 0) {
+        minutes += 60;
+        hours--;
+      }
+  
+      if (hours < 0) {
+        minutes = 0;
+        seconds = 0;
+      }
+  
+      setSnippetDuration(`${minutes}:${leadingZeroFormatter.format(seconds)}`);
+    }
+  }, [leadingZeroFormatter, snippetEnd, snippetStart])
+
+  useEffect(() => {
+    if (snippetData && initialLoad) {
+      setDescription(snippetData.description || "New Snippet // <-- to split the hook from description");
+      setSnippetStart(parseTime(snippetData.starts_at || "00:00:00"));
+      setSnippetEnd(parseTime(snippetData.ends_at || "00:00:00"));
+
+      handleDescriptionChange({ target: { value: snippetData.description || "New Snippet" } });
+
+      setInitialLoad(false);
+    }
+  }, [initialLoad, leadingZeroFormatter, snippetData, snippetEnd, snippetStart]);
+
+  function updateData(){    
+    axiosClient
+      .put("/snippet/" + snippetId, {
+        description: description,
+        starts_at: Object.values(snippetStart).join(":"),
+        ends_at: Object.values(snippetEnd).join(":"),
+        video_type_id: 1,
+        video_id: videoId,
+      })
+      .then(({ data }) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
+  function deleteSnippet(){    
+    axiosClient
+      .delete(`/snippet/` + snippetId)
+      .then(({ data }) => {
+        console.log(data.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
+  function cutVideo(){
+    axiosClient
+    .post(`/cut/` + snippetId)
+    .then(({ data }) => {
+      console.log(data.data);
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  }
 
   return (
     <Card className="mb-2 drop-shadow-md">
@@ -356,7 +447,7 @@ export const SnippetCard = () => {
                   />
                 </div>
               </div>
-              <div className="w-full pt-3" onClick={OverflowVisibile}>
+              {/* <div className="w-full pt-3" onClick={OverflowVisibile}>
                 <CreatableSelect
                   isMulti
                   options={options}
@@ -379,14 +470,17 @@ export const SnippetCard = () => {
                     }),
                   }}
                 />
-              </div>
+              </div> */}
               {/* <button onClick={handleChange}>Show items</button> */}
               <div className="w-full pt-5 flex justify-start place-items-center gap-3">
-                <Button className="px-5" variant="default">
+                <Button className="px-5" variant="default" onClick={updateData}>
                   Save
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={cutVideo}>
                   <Download className="pr-2" /> Download
+                </Button>
+                <Button variant="outline" onClick={deleteSnippet} className="bg-red-500 justify-self-end">
+                  DELETE
                 </Button>
               </div>
             </AccordionContent>

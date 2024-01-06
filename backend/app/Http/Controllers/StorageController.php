@@ -19,7 +19,9 @@ class StorageController extends Controller
 
     public function getFileUrl($filePath)
     {
-        return asset($filePath);
+        $fullPath = "storage/" . $filePath;
+
+        return asset($fullPath);
     }
 
     public function uploadFile(Request $request, string $videoFolder, string $fileType)
@@ -42,7 +44,7 @@ class StorageController extends Controller
             $filePath = "public/{$this->user->secret_name}/{$videoFolder}/{$finalName}";
             $request->file($fileKey)->storeAs($filePath);
 
-            return "storage/{$this->user->secret_name}/{$videoFolder}/{$finalName}";
+            return "{$this->user->secret_name}/{$videoFolder}/{$finalName}";
         } else {
             return response()->json(["message" => "You must select a {$fileType}"]);
         }
@@ -50,9 +52,11 @@ class StorageController extends Controller
 
     // DELETE FILE
     public function deleteFile($filePath)
-    {
-        if (Storage::exists($filePath)) {
-            Storage::delete($filePath);
+    {     
+        $fullPath = "public/" . $filePath;
+
+        if (Storage::exists($fullPath)) {
+            Storage::delete($fullPath);
 
             return response()->json(["message" => "File deleted successfully"]);
         } else {
