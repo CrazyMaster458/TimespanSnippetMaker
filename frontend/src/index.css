@@ -384,3 +384,102 @@ input[type="number"]::-webkit-outer-spin-button {
   overflow: visible;
   z-index: 9999; /* Set a high z-index value */
 }
+
+/* .step > p {
+  color: blue;
+  position: absolute;
+  transform: translateY(-40px);
+} */
+
+/* .steps {
+  font-size: small;
+  font-weight: 650;
+}
+
+.step #text {
+  position: absolute;
+  top: -50px;
+
+}
+
+.steps .step::after {
+  height: 1.7rem;
+  width: 1.7rem;
+}
+
+.steps button::hover {
+  font-size: 20px;
+} */
+
+.steps {
+  font-size: small;
+  font-weight: 500;
+}
+
+.steps .step::after {
+  height: 1.7rem;
+  width: 1.7rem;
+}
+
+.steps .step::before {
+  height: 0.25rem;
+}
+
+
+.error {
+  font-size: small;
+  color: red;
+}
+
+.redirect-link {
+  font-size: small;
+}
+
+/* .text-white{
+  color: red;
+}
+
+.stepper{
+  background-color: black;
+}
+
+.cursor-pointer{
+} */
+
+#form-file-upload {
+  height: 16rem;
+  width: 28rem;
+  max-width: 100%;
+  text-align: center;
+  position: relative;
+}
+
+#input-file-upload {
+  display: none;
+}
+
+#label-file-upload {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-width: 2px;
+  border-radius: 1rem;
+  border-style: dashed;
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+  width: 80vh;
+}
+
+.upload-button {
+  cursor: pointer;
+  padding: 0.25rem;
+  font-size: 1rem;
+  border: none;
+  font-family: 'Oswald', sans-serif;
+  background-color: transparent;
+}
+
+.upload-button:hover {
+  text-decoration-line: underline;
+}

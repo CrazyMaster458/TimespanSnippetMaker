@@ -17,6 +17,11 @@ import StatusForm from "./pages/___tests___/statusform";
 import DetailForm from "./pages/___tests___/detailtext";
 import UploadImg from "./pages/___tests___/upload";
 import { CardWithForm } from "./components/VideoUploadCard";
+import { SignupCard } from "./components/SignupCard";
+import { LoginCard } from "./components/LoginCard";
+import { Drawer } from "./components/Drawer";
+import Stepper, { YourComponent2 } from "./components/Stepper3";
+import { YourComponent } from "./components/Stepper2";
 
 const router = createBrowserRouter([
   {
@@ -67,6 +72,14 @@ const router = createBrowserRouter([
         path: "/cardform",
         element: <CardWithForm />,
       },
+      {
+        path: "/drawer",
+        element: <Drawer />,
+      },
+      {
+        path: "/stepper",
+        element: <YourComponent/>,
+      },
     ],
   },
   {
@@ -80,6 +93,14 @@ const router = createBrowserRouter([
       {
         path: "/signup",
         element: <Signup />,
+      },
+      {
+        path: "/signupcard",
+        element: <SignupCard />,
+      },
+      {
+        path: "/logincard",
+        element: <LoginCard />,
       },
     ],
   },

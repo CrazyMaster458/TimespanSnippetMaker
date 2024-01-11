@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
 import axiosClient from "@/axios";
+import { Link } from "react-router-dom";
 
 export default function ListView() {
   const [loading, setLoading] = useState(true);
@@ -37,9 +38,27 @@ export default function ListView() {
   }, [videoData]);
 
   return (
-    <div className="container pt-24">
+    <div className="container">   
 
-      <Tabs
+    <div className="grid grid-cols-4 gap-4">
+    {videos.length > 0 ? videos : <p>Loading...</p>}
+    </div>
+
+
+    <Link to={"/cardform"}>Create Video</Link>
+
+    {/* <div role="tablist" className="tabs tabs-bordered">
+      <input type="radio" name="my_tabs_1" role="tab" className="tab" aria-label="Tab 1" />
+      <div role="tabpanel" className="tab-content p-10">Tab content 1</div>
+
+      <input type="radio" name="my_tabs_1" role="tab" className="tab" aria-label="Tab 2" checked />
+      <div role="tabpanel" className="tab-content p-10">Tab content 2</div>
+
+      <input type="radio" name="my_tabs_1" role="tab" className="tab" aria-label="Tab 3" />
+      <div role="tabpanel" className="tab-content p-10">Tab content 3</div>
+    </div> */}
+
+      {/* <Tabs
         defaultValue="account"
         className="flex flex-col justify-center content-center"
       >
@@ -56,10 +75,9 @@ export default function ListView() {
         </TabsList>
         <Separator className="my-2" />
         <TabsContent value="jwaller" className="grid grid-cols-4 gap-4">
-          {videos.length > 0 ? videos : <p>Loading...</p>}
         </TabsContent>
         <TabsContent value="password">Change your password here.</TabsContent>
-      </Tabs>
+      </Tabs> */}
 
     </div>
   );
