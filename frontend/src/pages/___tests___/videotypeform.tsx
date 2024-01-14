@@ -15,34 +15,20 @@ export default function VideoTypeForm() {
     type ErrorArray = string[];
 
     axiosClient
-      // .post("/video_type", {
-      //   name: name,
-      //   short: short,
-      // })
-      // .then(({ data }) => {
-      //   console.log(data);
-      // })
-      // .catch((error) => {
-      //   if (error.response) {
-      //     const finalErrors = (
-      //       Object.values(error.response.data.errors) as ErrorArray
-      //     ).reduce<string[]>((accum, next) => [...accum, ...next], []);
-      //     setError({ __html: finalErrors.join("<br />") });
-      //   }
-      //   console.log(error);
-      // });
-
-      .get("/auth/google/redirect")
+      .post("/video_type", {
+        name: name,
+        short: short,
+      })
       .then(({ data }) => {
-        // console.log(data);
+        console.log(data);
       })
       .catch((error) => {
-        // if (error.response) {
-        //   const finalErrors = (
-        //     Object.values(error.response.data.errors) as ErrorArray
-        //   ).reduce<string[]>((accum, next) => [...accum, ...next], []);
-        //   setError({ __html: finalErrors.join("<br />") });
-        // }
+        if (error.response) {
+          const finalErrors = (
+            Object.values(error.response.data.errors) as ErrorArray
+          ).reduce<string[]>((accum, next) => [...accum, ...next], []);
+          setError({ __html: finalErrors.join("<br />") });
+        }
         console.log(error);
       });
   };

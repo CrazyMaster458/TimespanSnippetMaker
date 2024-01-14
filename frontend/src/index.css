@@ -470,7 +470,7 @@ input[type="number"]::-webkit-outer-spin-button {
   background-color: #f8fafc;
   width: 80vh;
 }
-
+/* 
 .upload-button {
   cursor: pointer;
   padding: 0.25rem;
@@ -482,4 +482,28 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .upload-button:hover {
   text-decoration-line: underline;
+} */
+
+.createSelect {
+  font-size: 11pt;
+}
+
+/* Add this CSS to your styles or use a CSS module */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Adjust as needed */
+}
+
+/* Add some styles to center your modal content within the card */
+.modal-overlay > .card {
+  /* Add your centering styles here */
 }

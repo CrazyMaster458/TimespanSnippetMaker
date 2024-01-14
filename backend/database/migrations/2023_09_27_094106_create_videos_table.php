@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('title', 255);
             $table->string('file_path', 1150)->nullable();
             $table->string('thumbnail_path', 1150)->nullable();
-            $table->date('date_uploaded');
             $table->string('video_code', 8)->unique();
             $table->timestamps();
 

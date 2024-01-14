@@ -55,7 +55,6 @@ class StoreVideoRequest extends FormRequest
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'file_path' => 'nullable|string',
             'thumbnail_path' => 'nullable|string',
-            'date_uploaded' => 'required|date',
             'video_code' => 'nullable|string|max:8',
             'user_id' => 'exists:users,id',
             'host_id' => 'nullable|exists:influencers,id',

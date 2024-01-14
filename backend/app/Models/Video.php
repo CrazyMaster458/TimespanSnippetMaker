@@ -13,7 +13,6 @@ class Video extends Model
         'title',
         'file_path',
         'thumbnail_path',
-        'date_uploaded',
         'video_code',
         'user_id',
         'host_id',

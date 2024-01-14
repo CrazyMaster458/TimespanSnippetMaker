@@ -9,25 +9,35 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { DatePickerDemo } from "./DatePicker"
-import { ComboboxDemo } from "./Combobox"
 import axiosClient from "@/axios"
 import { useEffect, useState } from "react"
+import { SelectComponent }from "./MultiSelect"
+
+const steps = [
+  {
+    title: "Upload Video",
+    description: "Upload a viddeo file and fill in details.",
+  },
+  {
+    title: "Details",
+    description: "Upload a viddeo file and fill in details.",
+  },
+  {
+    title: "Host & Guests",
+    description: "Upload a viddeo file and fill in details.",
+  },
+  {
+    title: "Visibility",
+    description: "Upload a viddeo file and fill in details.",
+  },
+]
 
 export function CardWithForm() {
   const [title, setTitle] = useState("");
-  const [dateUploaded, setDateUploaded] = useState("");
   const [filePath, setFilePath] = useState('');
   const [thumbnailPath, setThumbnailPath] = useState("");
-  const [host, setHost] = useState("1");
-  const [videoType, setVideoType] = useState("1");
+  const [host, setHost] = useState(null);
+  const [videoType, setVideoType] = useState(null);
   const [guests, setGuests] = useState<string[]>([]);
   const [error, setError] = useState({ __html: "" });
 
@@ -41,7 +51,7 @@ export function CardWithForm() {
       .get(`/video_parameters`)
       .then((res) => {
         setLoading(false);
-        console.log(res.data.influencers);
+        console.log(res.data.videoTypes);
         setInfluencers(res.data.influencers);
         setVideoTypes(res.data.videoTypes)
       })
@@ -64,30 +74,49 @@ export function CardWithForm() {
       setStep(step - 1);
     }
   };
+    
+  const handleVideoChange = (e: any) => {
+    setFilePath(e.target.files[0]);
+  }
+  const handleThumbnailChange = (e: any) => {
+    setThumbnailPath(e.target.files[0]);
+  }
 
-  const steps = [
-    {
-      title: "Upload Video",
-      description: "Upload a viddeo file and fill in details.",
-    },
-    {
-      title: "Details",
-      description: "Upload a viddeo file and fill in details.",
-    },
-    {
-      title: "Host & Guests",
-      description: "Upload a viddeo file and fill in details.",
-    },
-    {
-      title: "Visibility",
-      description: "Upload a viddeo file and fill in details.",
-    },
-  ]
+  const createVideo = () => {
+    setError({ __html: "" });
+    type ErrorArray = string[];
+
+    axiosClient
+      .post("/video", {
+        title: title,
+        video: filePath,
+        image: thumbnailPath,
+        host_id: host,
+        guests: guests,
+        video_type_id: videoType,
+      }, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+    })
+      .then(({ data }) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        if (error.response) {
+          const finalErrors = (
+            Object.values(error.response.data.errors) as ErrorArray
+          ).reduce<string[]>((accum, next) => [...accum, ...next], []);
+          setError({ __html: finalErrors.join("<br />") });
+        }
+        console.log(error);
+      });
+  };
 
   return (
-    <div className="absolute inset-0 flex justify-center h-full w-full items-center">
-        <Card className="w-[60vw] h-[78vh] grid grid-col">
-        <CardHeader>
+    <div className="overflow-hidden absolute inset-0 flex justify-center h-full w-full items-center">
+        <Card className="w-[60vw] h-[78vh] flex flex-col">
+        <CardHeader className="px-12">
         <ul className="steps pb-4 pt-4">
           <li className={`step ${step > 0 ? 'step-primary' : ''}`}>{steps[0].title}</li>
           <li className={`step ${step > 1 ? 'step-primary' : ''}`}>{steps[1].title}</li>
@@ -97,16 +126,22 @@ export function CardWithForm() {
           <CardTitle>{steps[step-1].title}</CardTitle>
           <CardDescription>{steps[step-1].description}</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="grow px-12">
             <form className="grid">
               {step === 1 ? <>
-
-
-                <div className="upload border-dashed border-2">
+                <div className="upload">
                 <div className="col-span-4 grid w-full gap-4">
                     <div className="flex flex-col space-y-1.5">
                       <Label htmlFor="video">Upload Video</Label>
-                      <Input id="video" type="file" />
+                        <Input 
+                          id="video" 
+                          type="file"
+                          name="file_path"
+                          placeholder="Video File"
+                          required
+                          accept=".mp4,.mov,.mkv,.avi"
+                          onChange={handleVideoChange}
+                        />
                     </div>
                 </div>
               </div>
@@ -114,80 +149,65 @@ export function CardWithForm() {
               </> : null}
               
               {step === 2 ? <>
-                <div className="details">
-                <Label htmlFor="title">Title</Label>
-                  <Input 
-                    id="title" 
-                    placeholder="Title of your project"
-                    type="text" 
-                    required
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)} 
-                  />
+                <div className="details grid grid-cols-7 gap-8">
+                  <div className="col-span-4">
+                    <div className="border-2 rounded pt-2 px-3 pb-4">
+                      <Label htmlFor="title" className="text-gray-500	text-xs font-medium">Title (required)</Label>
+                      <input
+                        className="w-full"                         
+                        id="title" 
+                        placeholder="Title of your project"
+                        type="text" 
+                        required
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)} 
+                        />
+                    </div>
 
-                  <Label htmlFor="date">Upload Date</Label>
-                  <DatePickerDemo></DatePickerDemo>
 
-                  <Label htmlFor="thumbnail">Upload Thumbnail</Label>
-                      <Input id="thumbnail" type="file" />
 
-                  <ComboboxDemo/>
-
-                  <Label htmlFor="video_type">Video Type</Label>
-                  <Select>
-                      <SelectTrigger id="framework">
-                      <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent position="popper">
-                      <SelectItem value="next">Next.js</SelectItem>
-                      <SelectItem value="sveltekit">SvelteKit</SelectItem>
-                      <SelectItem value="astro">Astro</SelectItem>
-                      <SelectItem value="nuxt">Nuxt.js</SelectItem>
-                      </SelectContent>
-                  </Select>
-              </div>
+                    <Label htmlFor="video_type">Video Type</Label>
+                    <SelectComponent data={videoTypes} onSelect={(value) => setVideoType(value[0])}/>
+                  </div>
+                  <div className="col-span-3">
+                    <Label htmlFor="thumbnail">Upload Thumbnail</Label>
+                    <Input 
+                      id="thumbnail" 
+                      type="file"
+                      name="thumbnail_path"
+                      placeholder="Video File"
+                      required
+                      accept=".jpeg,.png,.webp,.jpg"
+                      onChange={handleThumbnailChange} 
+                    />
+                  </div>
+                </div>
               </> : null}
 
               {step === 3 ? <>
                 <div className="guests">
                 <Label htmlFor="host">Host</Label>
-                  <Select>
-                      <SelectTrigger id="framework">
-                      <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent position="popper">
-                      <SelectItem value="next">Next.js</SelectItem>
-                      <SelectItem value="sveltekit">SvelteKit</SelectItem>
-                      <SelectItem value="astro">Astro</SelectItem>
-                      <SelectItem value="nuxt">Nuxt.js</SelectItem>
-                      </SelectContent>
-                  </Select>
+                <SelectComponent data={influencers} onSelect={(value) => setHost(value[0])}/>
 
-                  <Label htmlFor="guests">Guests</Label>
-                  <Select>
-                      <SelectTrigger id="framework">
-                      <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent position="popper">
-                      <SelectItem value="next">Next.js</SelectItem>
-                      <SelectItem value="sveltekit">SvelteKit</SelectItem>
-                      <SelectItem value="astro">Astro</SelectItem>
-                      <SelectItem value="nuxt">Nuxt.js</SelectItem>
-                      </SelectContent>
-                  </Select>
+
+                <Label htmlFor="guests">Guests</Label> 
+                <SelectComponent data={influencers} onSelect={(value) => setGuests(value)} multi={true}/>
+
               </div>
               </> : null}
 
               {step === 4 ? <>
-              
+                {error.__html && (
+                    <div
+                    className="bg-red-500 text-sm rounded mb-2 p-2 px-3 text-white"
+                    dangerouslySetInnerHTML={error}
+                ></div>)}
               </> : null}
-
-
             </form>
         </CardContent>
-        <CardFooter className="self-end flex justify-between">
-            <Button onClick={handleBack} variant="outline">Back</Button>
-            <Button onClick={handleNext}>Next</Button>
+        <CardFooter className="flex justify-between">
+        {step !== 1 ? <Button onClick={handleBack} variant="outline">Back</Button> : <p></p>}
+        {step !== 4 ? <Button onClick={handleNext}>Next</Button> : <Button onClick={createVideo}>Create</Button>}
         </CardFooter>
     </Card>
     </div>
