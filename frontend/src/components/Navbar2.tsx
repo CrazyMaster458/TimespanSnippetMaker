@@ -2,6 +2,7 @@
 import { useStateContext } from "@/contexts/ContextProvider";
 import axiosClient from "@/axios";
 import { Link, Navigate } from "react-router-dom";
+import { Button } from "./ui/button";
 
 export const Navbar2 = () => {
   const { setCurrentUser, setUserToken } = useStateContext();
@@ -68,9 +69,9 @@ export const Navbar2 = () => {
           <label htmlFor="my-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
           <ul className="menu flex flex-col p-4 w-65 min-h-full bg-base-100 text-base-content">
             {/* Sidebar content here */}
-            <li><Link to={"/listview"}>ListView</Link></li>
-            <li><a>Sidebar Item 2</a></li>
-                <ul className="menu bg-base-200 w-56 rounded-box">
+            <li className="w-56"><Link to={"/listview"}>ListView</Link></li>
+            <li className="w-56"><a>Sidebar Item 2</a></li>
+                {/* <ul className="menu bg-base-200 w-56 rounded-box">
                 <li>
                     <a>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
@@ -89,8 +90,8 @@ export const Navbar2 = () => {
                     Item 3
                     </a>
                 </li>
-                </ul>
-                <ul className="menu bg-base-200 w-56 rounded-box">
+                </ul> */}
+                {/* <ul className="menu bg-base-200 w-56 rounded-box">
                 <li><a>Item 1</a></li>
                 <li>
                     <details open>
@@ -111,8 +112,8 @@ export const Navbar2 = () => {
                     </details>
                 </li>
                 <li><a>Item 3</a></li>
-                </ul>
-                <button className="" onClick={logout}>Logout</button>
+                </ul> */}
+                <Button variant="outline" className="bg-red-500 justify-self-end" onClick={logout}>Logout</Button>
           </ul>
         </div>
         </div>

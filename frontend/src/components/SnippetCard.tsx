@@ -23,7 +23,7 @@ const options: OptionType[] = [
   { value: "Honeybee", label: "🐝 Honeybee" },
 ];
 
-export const SnippetCard = ({videoId, snippetData, snippetId}: {videoId: string, snippetData: object, snippetId: string}) => {
+export const SnippetCard = ({videoId, snippetData, snippetId, onDeleteSnippet}: {videoId: string, snippetData: object, snippetId: string}) => {
   const parseTime = (timeString) => {
     const [hours, minutes, seconds] = timeString.split(':');
     
@@ -302,7 +302,8 @@ export const SnippetCard = ({videoId, snippetData, snippetId}: {videoId: string,
       .delete(`/snippet/` + snippetId)
       .then(({ data }) => {
         console.log(data.data);
-      })
+        onDeleteSnippet(snippetId);
+        })
       .catch((error) => {
         console.log(error);
       });

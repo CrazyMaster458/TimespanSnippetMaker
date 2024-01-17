@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import axiosClient from "../../axios.tsx";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Snippet } from "@/components/___tests___/snippet.tsx";
 import { VideoPlayer } from "@/components/VideoPlayer.tsx";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { SnippetCard } from "@/components/SnippetCard.tsx";
+import { isNullOrUndefined } from "util";
+import { Button } from "@/components/ui/button.tsx";
 // import { useStateContext } from "@/contexts/ContextProvider.tsx";
 
 export default function DetailForm() {
@@ -13,6 +15,13 @@ export default function DetailForm() {
   const [snippetData, setSnippetData] = useState(null);
   const [snippets, setSnippets] = useState<JSX.Element[]>([]); // State to track an array of snippets
   const { id } = useParams();
+  const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
+
+  const HandleRedirect = () => {
+    navigate(`/listview`);
+  };
 
   useEffect(() => {
     axiosClient
@@ -21,21 +30,39 @@ export default function DetailForm() {
         console.log(data.data);
         setVideoDetailData(data.data);
         setSnippetData(data.data.snippets)
+        setLoading(true);
       })
       .catch((error) => {
         console.log(error);
       });
   }, [id]);
 
+  function handleDelete(){
+    axiosClient
+    .delete(`/video/` + id)
+    .then(({ data }) => {
+      console.log(data.data);
+      HandleRedirect();
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+  }
+
+
+  function updateSnippetsAfterDelete(deletedSnippetId) {
+    setSnippets(prevSnippets => prevSnippets.filter(snippet => snippet.props.snippetId !== deletedSnippetId));
+  }
+
   useEffect(() => {
     if (snippetData) {
       setSnippetData(snippetData);
 
-
       setSnippets(snippetData.map((snippet) => (
-        <SnippetCard key={snippet.id} videoId={id} snippetData={snippet} snippetId={snippet.id}/>
+        <SnippetCard key={snippet.id} videoId={id} snippetData={snippet} snippetId={snippet.id} onDeleteSnippet={updateSnippetsAfterDelete}/>
         // <Snippet key={snippet.id} videoId={id} snippetData={snippet} snippetId={snippet.id}/>
       )));
+      setLoading(false);
     }
   }, [snippetData, id]);
 
@@ -58,26 +85,30 @@ export default function DetailForm() {
 
   return (
     <>      
-      <div className="grid grid-cols-7 gap-2 content-center pt-20">
+      <div className="grid grid-cols-7 gap-2 content-center">
         <div className="col-span-4">
           {videoDetailData && videoDetailData.video_url ?
             <>
               <VideoPlayer videoUrl={videoDetailData.video_url}/>
-              <h3 className="pl-10 font-bold font-sans text-left text-xl pt-2">{videoDetailData.title}</h3>
+              <div className="pl-10 pt-2">
+                <h3 className="font-bold font-sans text-left text-xl">{videoDetailData.title}</h3>
+                <Button variant="outline" className="bg-red-500" onClick={handleDelete}>DELETE</Button>
+              </div>
+
             </>
             : <p>Loading...</p>
           } 
         </div>
         <div className="col-span-3">
-          {snippets.length > 0 ?
-          
-          <ScrollArea className="h-[684px] w-[full] flex flex-col pr-12">
-            {snippets}
-            <button onClick={createSnippet}>Create Snippet</button>
-          </ScrollArea>
-
+        <ScrollArea className="h-[530px] w-[full] flex flex-col pr-12 overflow-scroll">
+          {!loading ? snippets !== null ?
+            snippets.length > 0 ? snippets : <p>No data found...</p>
+            
+            : <p>No data found.</p>
             : <p>Loading...</p>
           }
+            <Button variant="outline" onClick={createSnippet}>Create Snippet</Button>
+        </ScrollArea>
 
         </div>
       </div>

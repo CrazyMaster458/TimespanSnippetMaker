@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label"
 import axiosClient from "@/axios"
 import { useEffect, useState } from "react"
 import { SelectComponent }from "./MultiSelect"
+import { Navigate, useNavigate } from "react-router-dom"
 
 const steps = [
   {
@@ -101,6 +102,7 @@ export function CardWithForm() {
     })
       .then(({ data }) => {
         console.log(data);
+        navigate("/listview");
       })
       .catch((error) => {
         if (error.response) {
@@ -112,6 +114,8 @@ export function CardWithForm() {
         console.log(error);
       });
   };
+
+  const navigate = useNavigate();
 
   return (
     <div className="overflow-hidden absolute inset-0 flex justify-center h-full w-full items-center">

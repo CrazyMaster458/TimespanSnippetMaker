@@ -3,7 +3,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
 import axiosClient from "@/axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 export default function ListView() {
   const [loading, setLoading] = useState(true);
@@ -23,6 +24,12 @@ export default function ListView() {
         console.log("error");
       });
   }, []);
+
+  const navigate = useNavigate();
+
+  const HandleRedirect = () => {
+    navigate(`/cardform`);
+  };
 
   useEffect(() => {
     // This useEffect will run whenever snippetData is updated
@@ -45,7 +52,7 @@ export default function ListView() {
     </div>
 
 
-    <Link to={"/cardform"}>Create Video</Link>
+    <Button className="mt-5" onClick={HandleRedirect}>Create Video</Button>
 
     {/* <div role="tablist" className="tabs tabs-bordered">
       <input type="radio" name="my_tabs_1" role="tab" className="tab" aria-label="Tab 1" />
