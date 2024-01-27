@@ -1,6 +1,6 @@
 import CreatableSelect from 'react-select/creatable';
 
-export const SelectComponent = ({ data, onSelect, multi }: { data: object[]; onSelect: (value: string[]) => void; multi?: boolean }) => {
+export const SelectComponent = ({data, onSelect, multi}: {data: object[]; onSelect: (value: string[]) => void; multi?: boolean }) => {
   const transformData = data.map(item => ({
     value: item.id,
     label: item.name
