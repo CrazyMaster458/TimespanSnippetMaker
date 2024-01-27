@@ -47,6 +47,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('video_parameters', [VideoController::class, 'retriveVideoParameters']);
 
     Route::get('/auth/google/redirect',[GoogleDriveController::class,'redirectToGoogle']);
+    Route::post('/upload-video/{video}',[VideoController::class,'uploadVideo']);
+    Route::post('/upload-image/{video}',[VideoController::class,'uploadImage']);
 });
 
 

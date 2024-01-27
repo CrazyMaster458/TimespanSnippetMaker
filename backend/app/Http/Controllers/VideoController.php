@@ -7,6 +7,8 @@ use App\Models\Status;
 use App\Models\Video;
 use App\Http\Requests\StoreVideoRequest;
 use App\Http\Requests\UpdateVideoRequest;
+use App\Http\Requests\UploadVideoRequest;
+use App\Http\Requests\UploadImageRequest;
 use App\Http\Resources\VideoResource;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
@@ -83,11 +85,11 @@ class VideoController extends Controller
 
         $this->storageController->createFolder($video->video_code);
         $this->storageController->createFolder($video->video_code . "/snippets");
-        $thumbnailPath = $this->storageController->uploadFile($request, $video->video_code, 'image');
+        // $thumbnailPath = $this->storageController->uploadFile($request, $video->video_code, 'image');
         $videoPath = $this->storageController->uploadFile($request, $video->video_code, 'video');
 
         $video->update([
-            'thumbnail_path' => $thumbnailPath,
+            // 'thumbnail_path' => $thumbnailPath,
             'file_path' => $videoPath,
         ]);
 
@@ -124,6 +126,44 @@ class VideoController extends Controller
         return new VideoResource($video);
     }
 
+    public function uploadVideo(UploadVideoRequest $request, Video $video) 
+    {
+        $data = $request->validated();
+
+        $this->storageController->createFolder($video->video_code);
+        $this->storageController->createFolder($video->video_code . "/snippets");
+    
+        if ($request->hasFile('video')) {
+            $videoPath = $this->storageController->uploadFile($request, $video->video_code, 'video');
+    
+            $video->update([
+                'file_path' => $videoPath,
+            ]);
+    
+            return new VideoResource($video);
+        }
+    
+        return response()->json(['message' => 'Video file not provided.'], 400);
+    }
+
+    public function uploadImage(UploadImageRequest $request, Video $video) 
+    {
+        $data = $request->validated();
+
+    
+        if ($request->hasFile('image')) {
+            $thumbnailPath = $this->storageController->uploadFile($request, $video->video_code, 'image');
+    
+            $video->update([
+                'thumbnail_path' => $thumbnailPath,
+            ]);
+
+            return new VideoResource($video);
+        }
+    
+        return response()->json(['message' => 'Video file not provided.'], 400);
+    }
+
     /**
      * Update the specified resource in storage.
      */
@@ -132,16 +172,18 @@ class VideoController extends Controller
         $data = $request->validated();
 
         $video->update($data);
-
+        
         Guest::where('video_id', $video->id)->delete();
 
-        foreach ($data['guests'] as $guest) {
-            $guestData = [
-                'video_id' => $video->id,
-                'influencer_id' => $guest,
-            ];
+        if(isset($data['guests'])){
+            foreach ($data['guests'] as $guest) {
+                $guestData = [
+                    'video_id' => $video->id,
+                    'influencer_id' => $guest,
+                ];
 
-            Guest::create($guestData);
+                Guest::create($guestData);
+            }
         }
 
         return new VideoResource($video);

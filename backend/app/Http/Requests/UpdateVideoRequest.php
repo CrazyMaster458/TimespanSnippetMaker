@@ -29,14 +29,9 @@ class UpdateVideoRequest extends FormRequest
     {
         return [
             'title' => 'required|string|max:1100',
-            'video' => 'nullable|mimetypes:video/mp4,video/mpeg,video/quicktime',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
-            'file_path' => 'nullable|string',
-            'thumbnail_path' => 'nullable|string',
-            'video_code' => 'string|max:6',
             'user_id' => 'exists:users,id',
-            'host_id' => 'nullable|exists:influencers,id',
-            'video_type_id' => 'exists:video_types,id',
+            'host_id' => 'required|exists:influencers,id',
+            'video_type_id' => 'required|exists:video_types,id',
             'guests' => 'array|exists:influencers,id',
         ];
     }

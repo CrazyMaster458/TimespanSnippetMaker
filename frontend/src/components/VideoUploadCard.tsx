@@ -42,6 +42,10 @@ export function CardWithForm() {
   const [guests, setGuests] = useState<string[]>([]);
   const [error, setError] = useState({ __html: "" });
 
+  const [uploadProgress, setUploadProgress] = useState("");
+  const [videoId, setVideoId] = useState();
+
+
   const [loading, setLoading] = useState(true);
   const [influencers, setInfluencers] = useState([]);
   const [videoTypes, setVideoTypes] = useState([]);
@@ -62,6 +66,12 @@ export function CardWithForm() {
       });
   }, []);
 
+  useEffect(() => {
+    if (uploadProgress){
+      console.log(uploadProgress);
+    }
+  }, [uploadProgress]);
+
   const [step, setStep] = useState(1);
 
   const handleNext = () => {
@@ -75,31 +85,45 @@ export function CardWithForm() {
       setStep(step - 1);
     }
   };
+
+  useEffect(() => {
+    if (videoId){
+      console.log(videoId);
+    }
+  }, [videoId]);
     
-  const handleVideoChange = (e: any) => {
+  const handleVideoChange = async (e: any) => {
     setFilePath(e.target.files[0]);
-  }
-  const handleThumbnailChange = (e: any) => {
+  
+    try {
+      let videoId = await createVideo();
+      await uploadVideo(e.target.files[0], videoId);
+    } catch (error) {
+      console.error("Error handling video change:", error);
+    }
+};
+
+
+  const handleThumbnailChange = async (e: any) => {
     setThumbnailPath(e.target.files[0]);
+    try {
+      await uploadImage(e.target.files[0]);
+    } catch (error) {
+      console.error("Error handling video change:", error);
+    }
   }
 
-  const createVideo = () => {
+  const updateVideo = () => {
     setError({ __html: "" });
     type ErrorArray = string[];
 
     axiosClient
-      .post("/video", {
+      .put(`/video/${videoId}`, {
         title: title,
-        video: filePath,
-        image: thumbnailPath,
         host_id: host,
         guests: guests,
         video_type_id: videoType,
-      }, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-    })
+      })
       .then(({ data }) => {
         console.log(data);
         navigate("/listview");
@@ -113,6 +137,82 @@ export function CardWithForm() {
         }
         console.log(error);
       });
+  };
+
+  const uploadVideo = async (file : any, videoId: number) => {
+    setError({ __html: "" });
+    type ErrorArray = string[];
+  
+    try {
+      const formData = new FormData();
+      formData.append('video', file);
+      const response = await axiosClient.post(`/upload-video/${videoId}`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setUploadProgress(`${percentCompleted}%`);
+            console.log(`Upload Progress: ${percentCompleted}%`);
+        },
+    });
+      console.log(response.data);
+    } catch (error) {
+      if (error.response) {
+        const finalErrors = (
+          Object.values(error.response.data.errors) as ErrorArray
+        ).reduce<string[]>((accum, next) => [...accum, ...next], []);
+        setError({ __html: finalErrors.join("<br />") });
+      }
+      console.error(error);
+    }
+  };
+
+
+  const uploadImage = async (file : any) => {
+    setError({ __html: "" });
+    type ErrorArray = string[];
+  
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const response = await axiosClient.post(`/upload-image/${videoId}`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+      console.log(response.data);
+    } catch (error) {
+      if (error.response) {
+        const finalErrors = (
+          Object.values(error.response.data.errors) as ErrorArray
+        ).reduce<string[]>((accum, next) => [...accum, ...next], []);
+        setError({ __html: finalErrors.join("<br />") });
+      }
+      console.error(error);
+    }
+  };
+
+  const createVideo = async () => {
+    setError({ __html: "" });
+    type ErrorArray = string[];
+
+    try {
+      // Start the asynchronous operation
+      const response = await axiosClient.post("/video");
+      setVideoId(response.data.data.id);
+      return response.data.data.id;
+    } catch (error) {
+      if (error.response) {
+        const finalErrors = (
+          Object.values(error.response.data.errors) as ErrorArray
+        ).reduce<string[]>((accum, next) => [...accum, ...next], []);
+        setError({ __html: finalErrors.join("<br />") });
+      }
+      console.error(error);
+    }
   };
 
   const navigate = useNavigate();
@@ -211,7 +311,8 @@ export function CardWithForm() {
         </CardContent>
         <CardFooter className="flex justify-between">
         {step !== 1 ? <Button onClick={handleBack} variant="outline">Back</Button> : <p></p>}
-        {step !== 4 ? <Button onClick={handleNext}>Next</Button> : <Button onClick={createVideo}>Create</Button>}
+        {uploadProgress} 
+        {step !== 4 ? <Button onClick={handleNext}>Next</Button> : <Button onClick={updateVideo}>Create</Button>}
         </CardFooter>
     </Card>
     </div>
