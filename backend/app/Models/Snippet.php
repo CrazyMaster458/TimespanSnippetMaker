@@ -20,6 +20,7 @@ class Snippet extends Model
         'user_id',
         'video_type_id',
         'snippet_code',
+        'transcript',
     ];
 
     public function video()

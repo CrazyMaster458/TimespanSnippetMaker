@@ -20,6 +20,7 @@ return new class extends Migration
             $table->time('starts_at')->default("00:00:00");
             $table->time('ends_at')->default("00:00:00");
             $table->string('file_path', 1150)->nullable();
+            $table->text('transcript')->nullable();
             $table->string('snippet_code', 11)->unique();
             $table->boolean('downloaded')->default(false);
             $table->timestamps();

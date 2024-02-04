@@ -13,6 +13,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GoogleDriveController;
 use App\Http\Controllers\StorageController;
+use App\Http\Controllers\SseController;
+use App\Http\Controllers\TranscriptionController;
+use App\Http\Controllers\SearchController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +52,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/auth/google/redirect',[GoogleDriveController::class,'redirectToGoogle']);
     Route::post('/upload-video/{video}',[VideoController::class,'uploadVideo']);
     Route::post('/upload-image/{video}',[VideoController::class,'uploadImage']);
+
+    Route::get('/sse/{snippetId}', [SseController::class, 'handleSse']);
+    Route::get('/snippet/{snippetId}/sendProgressUpdate', [SnippetController::class, 'sendProgressUpdate']);
+
+    Route::get('/transcribe', [TranscriptionController::class, 'transcribe']);
+    Route::get('/search', [SearchController::class, 'search']);
+
 });
 
 

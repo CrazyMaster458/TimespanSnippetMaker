@@ -14,6 +14,8 @@ import { ChevronDown, Download } from "lucide-react";
 import CreatableSelect from "react-select/creatable";
 import { Button } from "@/components/ui/button";
 import axiosClient from "@/axios";
+import Echo from 'laravel-echo';
+
 
 type OptionType = { value: string; label: string };
 
@@ -319,6 +321,88 @@ export const SnippetCard = ({videoId, snippetData, snippetId, onDeleteSnippet}: 
       console.log(error);
     });
   }
+
+  // const [cuttingProgress, setCuttingProgress] = useState(0);
+
+  //   const getCuttingProgress = () => {
+  //       axiosClient
+  //           .get(`/cut/progress/${snippetId}`)
+  //           .then(({ data }) => {
+  //               setCuttingProgress(data.progress);
+  //           })
+  //           .catch((error) => {
+  //               console.log(error);
+  //           });
+  //   };
+
+  //   const [cuttingProgress, setCuttingProgress] = useState(0);
+
+  //   useEffect(() => {
+  //       const channel = `snippet.${snippetId}`;
+  //       echo.channel(channel).listen('SnippetCutProgressEvent', (event) => {
+  //           setCuttingProgress(event.progress);
+  //       });
+
+  //       return () => {
+  //           echo.leave(channel);
+  //       };
+  //   }, [snippetId]);
+
+  //   useEffect(() => {
+  //   console.log(cuttingProgress);
+  // }, [cuttingProgress]);
+
+  //   useEffect(() => {
+  //     const interval = setInterval(() => {
+  //         getCuttingProgress();
+  //     }, 1000);
+
+  //     return () => clearInterval(interval);
+  // }, [snippetId]);
+
+  // useEffect(() => {
+  //   const eventSource = new EventSource(`/sse/${snippetId}`);
+
+  //   eventSource.addEventListener('snippetCutProgress', (event) => {
+  //     const data = JSON.parse(event.data);
+  //     const progress = data.progress;
+
+  //     // Update your UI with the cutting progress
+  //     console.log(`Snippet ${snippetId} cutting progress: ${progress}%`);
+  //   });
+
+  //   return () => {
+  //     // Close the EventSource connection when the component unmounts
+  //     eventSource.close();
+  //   };
+  // }, [snippetId]);
+
+  // const [progress, setProgress] = useState();
+  // const userId = 1;
+
+  // useEffect(() => {
+  //   const echo = new Echo({
+  //     broadcaster: 'pusher',
+  //     key: process.env.MIX_PUSHER_APP_KEY,
+  //     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
+  //     encrypted: true,
+  //   });
+
+  //   const privateChannel = `private-user.${userId}`;
+
+  //   echo.private(privateChannel).listen('SnippetCutProgressEvent', (event: any) => {
+  //     if (event.snippetId === snippetId) {
+  //       setProgress(event.percentage);
+  //     }
+  //   });
+
+  //   // Cleanup on unmount
+  //   return () => {
+  //     echo.leave(privateChannel);
+  //   };
+  // }, [userId, snippetId]);
+
+
 
   return (
     <Card className="mb-2 drop-shadow-md">

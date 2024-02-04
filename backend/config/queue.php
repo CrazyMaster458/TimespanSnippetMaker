@@ -34,6 +34,13 @@ return [
             'driver' => 'sync',
         ],
 
+        'transcription' => [
+            'driver' => 'redis',
+            'connection' => 'default',
+            'queue' => 'transcription',
+            'retry_after' => 90,
+        ],
+
         'database' => [
             'driver' => 'database',
             'table' => 'jobs',

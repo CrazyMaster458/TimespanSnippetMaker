@@ -3,6 +3,7 @@ import { useStateContext } from "@/contexts/ContextProvider";
 import axiosClient from "@/axios";
 import { Link, Navigate } from "react-router-dom";
 import { Button } from "./ui/button";
+import { SearchBar } from "./SearchBar";
 
 export const Navbar2 = () => {
   const { setCurrentUser, setUserToken } = useStateContext();
@@ -42,7 +43,7 @@ export const Navbar2 = () => {
             </div>
         </div>
         <div className="navbar-center">
-          <a className="btn btn-ghost text-lg">TSM</a>
+          <SearchBar/>
         </div>
         <div className="navbar-end">
           <button className="btn btn-ghost btn-circle">

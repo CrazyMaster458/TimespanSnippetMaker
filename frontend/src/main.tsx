@@ -7,7 +7,6 @@ import router from "./router.tsx";
 import { ContextProvider } from "./contexts/ContextProvider.tsx";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
-
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <GoogleOAuthProvider clientId="665242793026-cmskapaiveadved5rqgfab5f8rk4p52d.apps.googleusercontent.com">

@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use FFMpeg\Coordinate\TimeCode;
+use Illuminate\Support\Facades\Broadcast;
+use App\Events\SnippetCutProgressEvent;
+use Illuminate\Support\Facades\Log;
+
 
 class SnippetController extends Controller
 {
@@ -54,12 +58,12 @@ class SnippetController extends Controller
         
         if(isset($data['snippet_tags'])){
             foreach ($data['snippet_tags'] as $snippetTag) {
-            $snippetTagData = [
-                'snippet_id' => $snippet->id,
-                'tag_id' => $snippetTag,
-            ];
+                $snippetTagData = [
+                    'snippet_id' => $snippet->id,
+                    'tag_id' => $snippetTag,
+                ];
 
-            SnippetTag::create($snippetTagData);
+                SnippetTag::create($snippetTagData);
             }
         }
 
@@ -149,6 +153,13 @@ class SnippetController extends Controller
 
         return response('', 204);
     }
+    // public function sendProgressUpdate($progress)
+    // {
+    //     // Implement the logic to send progress update to frontend
+    //     // This can be done using an API endpoint that your frontend polls
+    //     // For simplicity, you can log the progress to the Laravel log for now
+    //     Log::info("Progress: {$progress}%");
+    // }
 
     public function cutVideo(Snippet $snippet) {
         $user = Auth::user();
@@ -161,20 +172,32 @@ class SnippetController extends Controller
 
         $snippetDestination = "{$videoFolderPath}/snippets/snippet{$snippet->snippet_code}.{$videoExtension}";
 
-        FFMpeg::fromDisk('public')
+        $ffmpeg = FFMpeg::fromDisk('public')
             ->open("{$videoFolderPath}/video.{$videoExtension}")
             ->export()
             ->toDisk('public')
             ->inFormat(new \FFMpeg\Format\Video\X264)
             ->addFilter([
+                '-c:v', 'copy',
                 '-ss', $snippet->starts_at,
                 '-to', $snippet->ends_at,
             ])
+            // ->onProgress(function ($percentage) use ($user, $snippet) {
+            //     // $totalDuration = $ffmpeg->getDuration();
+
+            // // $progress = round($percentage * $totalDuration / 100);
+            //     $progress = $percentage;
+            //     $this->sendProgressUpdate($progress);
+            //     // event(new SnippetCutProgressEvent($user->id, $snippet->id, $progress));
+            // })
             ->save($snippetDestination);
+
     
         $snippet->update([
             'file_path' => $snippetDestination
         ]);
+
+        app(TranscriptionController::class)->transcribe($snippetDestination, $snippet->id);
 
         return response()->json(["message" => "Success?"]);
     }

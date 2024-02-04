@@ -22,6 +22,9 @@ import { LoginCard } from "./components/LoginCard";
 import { Drawer } from "./components/Drawer";
 import Stepper, { YourComponent2 } from "./components/Stepper3";
 import { YourComponent } from "./components/Stepper2";
+import Whisper from "./components/whisper";
+import Test from "./test";
+import { SearchBar } from "./components/SearchBar";
 
 const router = createBrowserRouter([
   {
@@ -79,6 +82,18 @@ const router = createBrowserRouter([
       {
         path: "/stepper",
         element: <YourComponent/>,
+      },
+      {
+        path: "/whisper",
+        element: <Whisper/>,
+      },
+      {
+        path: "/test",
+        element: <Test/>,
+      },
+      {
+        path: "/search",
+        element: <SearchBar/>,
       },
     ],
   },

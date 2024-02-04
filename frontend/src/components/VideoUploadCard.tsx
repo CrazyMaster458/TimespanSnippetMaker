@@ -41,14 +41,9 @@ export function CardWithForm() {
   const [host, setHost] = useState<number | null>(null);
   const [videoType, setVideoType] = useState<number | null>(null);
   const [guests, setGuests] = useState<string[]>([]);
-
   const [error, setError] = useState<string[]>([]);
-
   const [uploadProgress, setUploadProgress] = useState<string>("");
-
-
   const [videoId, setVideoId] = useState<number | null>(null);
-
   const [influencers, setInfluencers] = useState<any[]>([]);
   const [videoTypes, setVideoTypes] = useState<any[]>([]);
   const [stepNum, setStepNum] = useState(1);
