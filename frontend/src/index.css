@@ -507,3 +507,44 @@ input[type="number"]::-webkit-outer-spin-button {
 .modal-overlay > .card {
   /* Add your centering styles here */
 }
+
+.upload-input{
+  display: none;
+}
+.upload-label{
+  border-radius: 6px;
+  border: 1px dashed #999;
+  display: inline-block;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: #c0392c;
+  text-align: center;
+  padding: 15px 40px;
+  font-size: 18px;
+  letter-spacing: 1.5px;
+  user-select: none;
+  cursor: pointer;
+  box-shadow: 5px 15px 25px rgba(0,0,0,0.35);
+  border-radius: 3px;
+
+}
+.upload-label:hover{
+  color: #de0611;
+  border: 1px dashed #de0611
+}
+
+.create__menu .css-1nmdiq5-menu {
+  background: black;
+}
+
+[id^="react-select-"][id$="-listbox"] {
+  padding: 8px;
+}
+
+[id^="react-select-"][id$="-listbox"] > * > * {
+  border-radius: 6px;
+}
+
+.video-card {
+  border: #e5e7eb 1px solid;
+}

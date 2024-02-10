@@ -20,11 +20,16 @@ import { CardWithForm } from "./components/VideoUploadCard";
 import { SignupCard } from "./components/SignupCard";
 import { LoginCard } from "./components/LoginCard";
 import { Drawer } from "./components/Drawer";
-import Stepper, { YourComponent2 } from "./components/Stepper3";
 import { YourComponent } from "./components/Stepper2";
 import Whisper from "./components/whisper";
 import Test from "./test";
-import { SearchBar } from "./components/SearchBar";
+import ListPage from "./pages/ListPage";
+import VideoList from "./pages/VideoList";
+import SnippetList from "./pages/SnippetList";
+import InfluencerList from "./pages/InfluencerList";
+import ChannelList from "./pages/ChannelList";
+import TagList from "./pages/TagList";
+import Settings from "./pages/Settings";
 
 const router = createBrowserRouter([
   {
@@ -92,8 +97,32 @@ const router = createBrowserRouter([
         element: <Test/>,
       },
       {
-        path: "/search",
-        element: <SearchBar/>,
+        path: "/listpage",
+        element: <ListPage/>,
+      },
+      {
+        path: "/videos",
+        element: <VideoList/>,
+      },
+      {
+        path: "/snippets",
+        element: <SnippetList/>,
+      },
+      {
+        path: "/influencers",
+        element: <InfluencerList/>,
+      },
+      {
+        path: "/channels",
+        element: <ChannelList/>,
+      },
+      {
+        path: "/tags",
+        element: <TagList/>,
+      },
+      {
+        path: "/settings",
+        element: <Settings/>,
       },
     ],
   },

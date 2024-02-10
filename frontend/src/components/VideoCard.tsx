@@ -10,9 +10,11 @@ export const VideoCard = ({videoData, videoId}: {videoData: object, videoId: str
     navigate(`/detailform/${videoId}`);
   };
 
+  console.log(videoData);
+
   return (
     <Card
-      className="flex flex-col overflow-hidden pb-4 w-full h-full hover:bg-slate-100 hover:scale-105 cursor-pointer transition duration-150 ease-in-out drop-shadow-md active:scale-95"
+      className="video-card flex flex-col overflow-hidden pb-4 w-full h-full cursor-pointer drop-shadow-md"
       onClick={HandleRedirect}
     >
       <img src={videoData.image_url} alt="" className="aspect-video w-full" />
@@ -23,7 +25,7 @@ export const VideoCard = ({videoData, videoId}: {videoData: object, videoId: str
       </CardContent>
       <CardFooter className="flex justify-between py-0">
         <p></p>
-      <Badge className="badge badge-primary">{videoData.host_id.name}</Badge>
+      <Badge className="badge badge-primary">{videoData.video_type.name}</Badge>
 
       </CardFooter>
     </Card>

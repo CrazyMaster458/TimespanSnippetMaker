@@ -1,42 +1,63 @@
 import { useEffect, useState } from "react";
 import { Search } from 'lucide-react';
 import axios from "axios";
+import axiosClient from "@/axios";
 
 
-export const SearchBar = () => {
+export const SearchBar = ({onSearch}) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState([]);
 
     const handleSearch = () => {
       // Implement your search logic here
       console.log("Searching for:", searchTerm);
+
+      onSearch(searchTerm);
+
+      // axiosClient
+      // .get("/search", {
+      //   params: {
+      //     query: searchTerm
+      //   }      
+      // })
+      // .then(({ data }) => {
+      //   console.log(data);
+      // })
+      // .catch((error) => {
+
+      //   console.log(error);
+      // });
     };
 
-    useEffect(() => {
-        const fetchData = async () => {
-          try {
-            const response = await axios.get("/search", {
-                params: { searchTerm },
-            });
-    
-            const data = response.data;
-            setSearchResults(data);
-          } catch (error) {
-            console.error("Error fetching data:", error);
-          }
-        };
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //       try {
+    //         const response = await axiosClient.get(`/search`, {
+    //           params: { query: searchTerm },
+    //         });
+    //         setSearchResults(response.data);
+    //       } catch (error) {
+    //         console.error("Error fetching data:", error);
+    //       }
+    //     };
 
-        if (searchTerm.trim() !== "") {
-            fetchData();
-          } else {
-            // Handle case when the search term is empty (e.g., clear the results)
-            setSearchResults([]);
-          }
-    }, [searchTerm])
+    //     if (searchTerm.trim() !== "") {
+    //         fetchData();
+    //       } else {
+    //         // Handle case when the search term is empty (e.g., clear the results)
+    //         setSearchResults([]);
+    //       }
+    // }, [searchTerm])
+
+    const handleKeyPress = (e) => {
+      if (e.key === "Enter") {
+        handleSearch();
+      }
+    };
 
   return (
     <>
-        <div className="relative mt-1 w-[30rem]">
+        <div className="relative w-[30rem]">
             <input 
                 type="search" 
                 id="password" 
@@ -44,6 +65,7 @@ export const SearchBar = () => {
                 placeholder="Search..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyPress={handleKeyPress} // Add this line
             >
             </input>
             <button 
@@ -53,9 +75,9 @@ export const SearchBar = () => {
         </div>
 
         {/* Display search results */}
-        {searchResults.map((result) => (
-            <div key={result.id}>{/* Render your search result item here */}</div>
-        ))}
+        {/* {searchResults.map((result) => (
+            <div key={result.id}>{result.title}</div>
+        ))} */}
     </>
   )
 }

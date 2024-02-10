@@ -4,6 +4,8 @@ import axiosClient from "@/axios";
 import { Link, Navigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { SearchBar } from "./SearchBar";
+import { Video } from 'lucide-react';
+
 
 export const Navbar2 = () => {
   const { setCurrentUser, setUserToken } = useStateContext();
@@ -24,7 +26,7 @@ export const Navbar2 = () => {
   };
 
   return (
-    <div style={{ position: "relative", zIndex: 2 }} className="pb-4">
+    <div style={{ position: "relative", zIndex: 2 }}>
       <div className="navbar p-0 px-2 h-1rem bg-base-100 border-b-4">
         <div className="navbar-start">
           <div className="dropdown">
@@ -34,16 +36,15 @@ export const Navbar2 = () => {
               </svg>
             </button>
           </div>
-          <div className="text-sm breadcrumbs">
+          {/* <div className="text-sm breadcrumbs">
               <ul>
                 <li><a>Home</a></li> 
                 <li><a>Documents</a></li> 
                 <li>Add Document</li>
               </ul>
-            </div>
+            </div> */}
         </div>
         <div className="navbar-center">
-          <SearchBar/>
         </div>
         <div className="navbar-end">
           <button className="btn btn-ghost btn-circle">
@@ -70,7 +71,7 @@ export const Navbar2 = () => {
           <label htmlFor="my-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
           <ul className="menu flex flex-col p-4 w-65 min-h-full bg-base-100 text-base-content">
             {/* Sidebar content here */}
-            <li className="w-56"><Link to={"/listview"}>ListView</Link></li>
+            <li className="w-56"><Link to={"/listview"}><Video />ListView</Link></li>
             <li className="w-56"><a>Sidebar Item 2</a></li>
                 {/* <ul className="menu bg-base-200 w-56 rounded-box">
                 <li>

@@ -16,18 +16,15 @@ class SearchController extends Controller
         // ]);
 
         // Perform the search in multiple models and combine the results
-        $searchTerm = $request->input('searchTerm');
+        $query = $request->input('query');
         
-        $videoResults = Video::where('title', 'like', "%$searchTerm%")
-                            ->orWhere('description', 'like', "%$searchTerm%")
+        $videoResults = Video::where('title', 'like', "%$query%")
                             ->get();
 
-        $snippetResults = Snippet::where('title', 'like', "%$searchTerm%")
-                                ->orWhere('description', 'like', "%$searchTerm%")
+        $snippetResults = Snippet::where('description', 'like', "%$query%")
                                 ->get();
 
-        $influencerResults = Influencer::where('name', 'like', "%$searchTerm%")
-                                     ->orWhere('description', 'like', "%$searchTerm%")
+        $influencerResults = Influencer::where('name', 'like', "%$query%")
                                      ->get();
 
         // Combine and return the search results as JSON
@@ -36,7 +33,11 @@ class SearchController extends Controller
             'snippets' => $snippetResults,
             'influencers' => $influencerResults,
         ];
-
         return response()->json($combinedResults);
+
+        // $results = Video::where('title', 'like', "%$query%")->get();
+
+        return response()->json($results);
+
     }
 }
