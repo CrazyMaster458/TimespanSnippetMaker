@@ -11,7 +11,6 @@ class Influencer extends Model
 
     protected $fillable = [
         'name',
-        'short',
     ];
 
     public function videos()

@@ -23,7 +23,6 @@ class StoreVideoTypeRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'short' => 'required|string|max:25',
         ];
     }
 }

@@ -191,7 +191,7 @@ export function CardWithForm() {
                   </div>
 
                   <Label htmlFor="video_type">Video Type</Label>
-                  <SelectComponent data={videoTypes} onSelect={handleVideoSelect} />
+                  <SelectComponent data={videoTypes} onSelect={handleVideoSelect} endpoint="video_type"/>
                 </div>
                 <div className="col-span-3">
                   <Label htmlFor="thumbnail">Upload Thumbnail</Label>
@@ -211,10 +211,10 @@ export function CardWithForm() {
             {stepNum === 3 && (
               <div className="guests">
                 <Label htmlFor="host">Host</Label>
-                <SelectComponent data={influencers} onSelect={handleHostSelect}/>
+                <SelectComponent data={influencers} onSelect={handleHostSelect} endpoint="influencer"/>
 
                 <Label htmlFor="guests">Guests</Label>
-                <SelectComponent data={influencers} onSelect={handleGuestsSelect} multi={true} />
+                <SelectComponent data={influencers} onSelect={handleGuestsSelect} multi={true} endpoint="influencer"/>
               </div>
             )}
 
