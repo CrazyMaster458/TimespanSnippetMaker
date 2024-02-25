@@ -30,6 +30,7 @@ import InfluencerList from "./pages/InfluencerList";
 import ChannelList from "./pages/ChannelList";
 import TagList from "./pages/TagList";
 import Settings from "./pages/Settings";
+import { Accordion2 } from "./pages/AccorditionTest";
 
 const router = createBrowserRouter([
   {
@@ -123,6 +124,10 @@ const router = createBrowserRouter([
       {
         path: "/settings",
         element: <Settings/>,
+      },
+      {
+        path: "/accordion2",
+        element: <Accordion2/>,
       },
     ],
   },

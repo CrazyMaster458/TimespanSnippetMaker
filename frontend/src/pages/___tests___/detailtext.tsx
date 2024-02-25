@@ -7,6 +7,7 @@ import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { SnippetCard } from "@/components/SnippetCard.tsx";
 import { isNullOrUndefined } from "util";
 import { Button } from "@/components/ui/button.tsx";
+import { Accordion2 } from "../AccorditionTest.tsx";
 // import { useStateContext } from "@/contexts/ContextProvider.tsx";
 
 export default function DetailForm() {
@@ -101,6 +102,7 @@ export default function DetailForm() {
         </div>
         <div className="col-span-3">
         <ScrollArea className="h-[530px] w-[full] flex flex-col pr-12 overflow-scroll">
+
           {!loading ? snippets !== null ?
             snippets.length > 0 ? snippets : <p>No data found...</p>
             

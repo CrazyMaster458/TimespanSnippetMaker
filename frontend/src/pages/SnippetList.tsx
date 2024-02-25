@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import Button from "@material-tailwind/react/components/Button";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { SearchBar } from "@/components/SearchBar";
+import { Accordion2 } from "./AccorditionTest";
 
 export default function SnippetList() {
     const [loading, setLoading] = useState(true);
@@ -112,10 +113,17 @@ export default function SnippetList() {
 
                   <div className="flex flex-col w-full">
                       {/* {videos.length > 0 ? videos : <p>Loading...</p>} */}
-                      {filteredSnippets.length > 0 ? filteredSnippets : <p>Loading...</p>}
+                      {/* {filteredSnippets.length > 0 ? filteredSnippets : <p>Loading...</p>} */}
                   </div>
                     {/* <Button variant="outline" onClick={createSnippet}>Create Snippet</Button> */}
                 {/* </ScrollArea> */}
+
+                <Accordion2/>
+                <Accordion2/>
+                <Accordion2/>
+                <Accordion2/>
+                <Accordion2/>
+                <Accordion2/>
 
               </div>
 
