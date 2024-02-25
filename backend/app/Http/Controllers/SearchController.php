@@ -37,7 +37,5 @@ class SearchController extends Controller
 
         // $results = Video::where('title', 'like', "%$query%")->get();
 
-        return response()->json($results);
-
     }
 }

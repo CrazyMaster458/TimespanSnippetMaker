@@ -59,6 +59,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/transcribe', [TranscriptionController::class, 'transcribe']);
     Route::get('/search', [SearchController::class, 'search']);
 
+    Route::get('/snippet-list', [SnippetController::class, 'getSnippetList']);
+
+
 });
 
 

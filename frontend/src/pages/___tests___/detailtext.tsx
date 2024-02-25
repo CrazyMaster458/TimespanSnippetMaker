@@ -90,7 +90,7 @@ export default function DetailForm() {
           {videoDetailData && videoDetailData.video_url ?
             <>
               <VideoPlayer videoUrl={videoDetailData.video_url}/>
-              <div className="pl-10 pt-2">
+              <div className="pt-2">
                 <h3 className="font-bold font-sans text-left text-xl">{videoDetailData.title}</h3>
                 <Button variant="outline" className="bg-red-500" onClick={handleDelete}>DELETE</Button>
               </div>

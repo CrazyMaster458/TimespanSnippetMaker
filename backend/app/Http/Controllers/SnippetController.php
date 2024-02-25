@@ -16,20 +16,71 @@ use FFMpeg\Coordinate\TimeCode;
 use Illuminate\Support\Facades\Broadcast;
 use App\Events\SnippetCutProgressEvent;
 use Illuminate\Support\Facades\Log;
-
+use App\Http\Controllers\StorageController;
+use App\Http\Controllers\TagController; // Import the TagController
+use App\Http\Resources\TagResource; // Import the TagResource
+use App\Models\Tag;
 
 class SnippetController extends Controller
 {
+    
+    private $storageController;
+    private $tagController;
+
+    public function __construct(StorageController $storageController, TagController $tagController)
+    {
+        $this->storageController = $storageController;
+        $this->tagController = $tagController;
+    }
+    
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return SnippetResource::collection(
-        Snippet::orderBy('created_at', 'desc')
-            ->with('snippet_tags')
-            ->paginate(10)
-        );
+        // $snippets = SnippetResource::collection(
+        // Snippet::orderBy('created_at', 'desc')
+        //     ->with('snippet_tags')
+        //     ->paginate(10)
+        // );
+
+        $snippets = Snippet::orderBy('created_at', 'desc')
+        ->with('snippet_tags')
+        ->get();
+
+        $snippets = $snippets->map(function ($snippet) {
+            // $video->video_url = $this->storageController->getFileUrl($video->file_path);
+            $snippet->video_url = $this->storageController->getFileUrl($snippet->file_path);
+    
+            return new SnippetResource($snippet);
+        });
+
+        return SnippetResource::collection($snippets);
+    }
+
+    public function getSnippetList(){
+        $snippets = Snippet::orderBy('created_at', 'desc')
+        ->with('snippet_tags')
+        ->get();
+
+        $tags = TagResource::collection(Tag::all()); // Utilize TagController
+
+
+        // $tags = $this->tagController->index()->json()->getData()->data;
+
+        $snippets = $snippets->map(function ($snippet) {
+            // $video->video_url = $this->storageController->getFileUrl($video->file_path);
+            $snippet->video_url = $this->storageController->getFileUrl($snippet->file_path);
+    
+            return new SnippetResource($snippet);
+        });
+
+        // return SnippetResource::collection($snippets);
+
+        return [
+            'tags' => $tags,
+            'snippets' => SnippetResource::collection($snippets),
+        ];
     }
 
     public function getVideoSnippets($video_id)

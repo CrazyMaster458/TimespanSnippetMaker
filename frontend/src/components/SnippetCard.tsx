@@ -15,17 +15,12 @@ import CreatableSelect from "react-select/creatable";
 import { Button } from "@/components/ui/button";
 import axiosClient from "@/axios";
 import Echo from 'laravel-echo';
+import { SelectComponent } from "./MultiSelect";
+import { Textarea } from "@/components/ui/textarea"
 
 
-type OptionType = { value: string; label: string };
 
-const options: OptionType[] = [
-  { value: "fox", label: "🦊 Fox" },
-  { value: "Butterfly", label: "🦋 Butterfly" },
-  { value: "Honeybee", label: "🐝 Honeybee" },
-];
-
-export const SnippetCard = ({videoId, snippetData, snippetId, onDeleteSnippet}: {videoId: string, snippetData: object, snippetId: string}) => {
+export const SnippetCard = ({videoId, snippetData, snippetId, isOpen, onDeleteSnippet, tagData, onClick }: {videoId: string, snippetData: object, isOpen: boolean, snippetId: string, tagData: Array<object>, onClick: () => void }) => {
   const parseTime = (timeString) => {
     const [hours, minutes, seconds] = timeString.split(':');
     
@@ -34,6 +29,12 @@ export const SnippetCard = ({videoId, snippetData, snippetId, onDeleteSnippet}: 
       minutes: minutes.padStart(2, '0'),
       seconds: seconds.padStart(2, '0'),
     };
+  };
+
+  const handleCardClick = () => {
+    // Call the provided onClick function when the card is clicked
+    onClick();
+    // You can add other logic specific to SnippetCard here
   };
 
   const [initialLoad, setInitialLoad] = useState(true);
@@ -401,15 +402,34 @@ export const SnippetCard = ({videoId, snippetData, snippetId, onDeleteSnippet}: 
   //     echo.leave(privateChannel);
   //   };
   // }, [userId, snippetId]);
+  const [tags, setTags] = useState<any[]>([]);
+  const [tag, setTag] = useState<any[]>([]);
 
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await axiosClient.get('/tag');
+  //       console.log(response.data.data);
+  //       setTags(response.data.data);
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   };
+  
+  //   fetchData();
+  // }, []);
+
+  const handleTagSelect = (value: any) => {
+    setTag(value.length > 0 ? value[0] : null);
+  };
 
 
   return (
-    <Card className="mb-2 drop-shadow-md">
+    <Card onClick={handleCardClick} className="mb-2 drop-shadow-md">
       <div className="place-self-center px-2">
         <Accordion type="single" collapsible>
-          <AccordionItem value="item-1" style={{ overflow: isOverflow }}>
-            <AccordionTrigger className="flex justify-between p-3">
+          <AccordionItem value="item-1" /*style={{ overflow: isOverflow }}*/>
+            <AccordionTrigger className="flex justify-between p-3" onClick={handleCardClick}>
               <div className="">{hook ? hook : "New Snippet"}</div>
               <div className="flex items-center">
                 <div className="">{snippetDuration}</div>
@@ -532,30 +552,15 @@ export const SnippetCard = ({videoId, snippetData, snippetId, onDeleteSnippet}: 
                   />
                 </div>
               </div>
-              {/* <div className="w-full pt-3" onClick={OverflowVisibile}>
-                <CreatableSelect
-                  isMulti
-                  options={options}
-                  value={selectedOptions}
-                  onChange={(e) => setSelectedOptions(e)}
-                  isClearable={true}
-                  className="basic-single"
-                  classNamePrefix="select"
-                  defaultValue={"Hellow"}
-                  isDisabled={false}
-                  isLoading={false}
-                  isRtl={false}
-                  isSearchable={true}
-                  name="hashtags"
-                  onBlur={OverflowHidden}
-                  styles={{
-                    control: (provided) => ({
-                      ...provided,
-                      zIndex: 9999, // Set a high z-index value
-                    }),
-                  }}
-                />
-              </div> */}
+              
+              <div className="pt-3">
+                <SelectComponent data={tagData} onSelect={handleTagSelect} endpoint="tag" multi={true}/>
+              </div>
+              
+              <div className="pt-3">
+                <Textarea value={snippetData.transcript} placeholder="Transcript not avalible" />
+              </div>
+            
               {/* <button onClick={handleChange}>Show items</button> */}
               <div className="w-full pt-5 flex justify-start place-items-center gap-3">
                 <Button className="px-5" variant="default" onClick={updateData}>

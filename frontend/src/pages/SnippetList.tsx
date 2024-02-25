@@ -1,128 +1,148 @@
-import { VideoCard } from "@/components/VideoCard";
 import { useEffect, useState } from "react";
 import axiosClient from "@/axios";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { SnippetCard } from "@/components/SnippetCard";
+import { SelectComponent2 } from "@/components/MultiSelect copy";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import Button from "@material-tailwind/react/components/Button";
+import { VideoPlayer } from "@/components/VideoPlayer";
 import { SearchBar } from "@/components/SearchBar";
-import { SelectComponent } from "@/components/MultiSelect";
-import * as api from "../components/api.tsx";
-import { List } from 'lucide-react';
-import { Image } from 'lucide-react';
-import { LayoutGrid } from 'lucide-react';
-import { LayoutList } from 'lucide-react';
-import { SelectComponent2 } from "@/components/MultiSelect copy.tsx";
 
 export default function SnippetList() {
     const [loading, setLoading] = useState(true);
-    const [videoData, setVideoData] = useState(null);
-    const [videos, setVideos] = useState<JSX.Element[]>([]);
+    const [snippetData, setSnippetData] = useState([]);
+    const [filteredSnippets, setFilteredSnippets] = useState<JSX.Element[]>([]);
+
+    const [isOpen, setIsOpen] = useState(false);
+    const [openSnippetId, setOpenSnippetId] = useState<string | null>(null);
+    const [selectedSnippet, setSelectedSnippet] = useState(null);
+    const [tagsData, setTagsData] = useState(null);
 
 
-    const [influencers, setInfluencers] = useState<any[]>([]);
-    const [videoTypes, setVideoTypes] = useState<any[]>([]);
+    const handleSnippetCardClick = (videoUrl) => {
+        setIsOpen(true);
+        setSelectedSnippet(videoUrl);
+      };
 
-    const [videoType, setVideoType] = useState<number | null>(null);
-
-  
-    useEffect(() => {
-      setLoading(true);
-      axiosClient
-        .get(`/video`)
-        .then(({data}) => {
-          console.log(data);
-          setVideoData(data);
-        })
-        .catch((error) => {
-          setLoading(false);
-          console.log("error");
-        });
-    }, []);
-
-    useEffect(() => {
-        api.fetchVideoParameters()
-          .then((res) => {
-            setInfluencers(res.influencers || []);
-            setVideoTypes(res.videoTypes || []);
-          })
-          .catch((error) => {
-            console.error("Error fetching video parameters:", error);
-          });
-      }, []);
-  
-    const navigate = useNavigate();
-
-    
-    const handleVideoSelect = (value: any) => {
-        setVideoType(value.length > 0 ? value[0] : null);
+    const handleHideClick = () => {
+      setIsOpen(false);
     };
-  
-    const HandleRedirect = () => {
-      navigate(`/cardform`);
-    };
-  
-    useEffect(() => {
-      // This useEffect will run whenever snippetData is updated
-      if (videoData) {
-        // Update snippetData state
-        setVideoData(videoData);
-  
-        // Map over the new snippetData and update the snippets state
-        setVideos(videoData.map((video) => (
-          <VideoCard key={video.id} videoData={video} videoId={video.id}/>
-        )));
-      }
-    }, [videoData]);
 
-    const [filteredVideos, setFilteredVideos] = useState<JSX.Element[]>([]);
-
-    useEffect(() => {
-      if (videoData) {
-        setFilteredVideos(
-          videoData.map((video) => <VideoCard key={video.id} videoData={video} videoId={video.id} />)
-        );
-      }
-    }, [videoData]);
-  
-    // Callback function to handle search term changes
     const handleSearch = (searchTerm: string) => {
-      // If the search term is empty, show all videos
+      // If the search term is empty, show all snippets
       if (searchTerm.trim() === "") {
-        setFilteredVideos(
-          videoData.map((video) => <VideoCard key={video.id} videoData={video} videoId={video.id} />)
+        setFilteredSnippets(
+          snippetData.map((snippet) => (
+            <SnippetCard key={snippet.id} snippetData={snippet} snippetId={snippet.id} onClick={() => handleSnippetCardClick(snippet.video_url)} />
+          ))
         );
       } else {
-        // Otherwise, filter videos based on the search term
-        const filtered = videoData.filter((video) =>
-          video.title.toLowerCase().includes(searchTerm.toLowerCase())
+        // Otherwise, filter snippets based on the search term
+        const filtered = snippetData.filter((snippet) =>
+          snippet.description.toLowerCase().includes(searchTerm.toLowerCase())
         );
   
-        setFilteredVideos(
-          filtered.map((video) => <VideoCard key={video.id} videoData={video} videoId={video.id} />)
+        setFilteredSnippets(
+          filtered.map((snippet) => (
+            <SnippetCard key={snippet.id} snippetData={snippet} snippetId={snippet.id} onClick={() => handleSnippetCardClick(snippet.video_url)} />
+          ))
         );
       }
     };
+
+    useEffect(() => {
+      const fetchData = async () => {
+        setLoading(true);
+        try {
+          const response = await axiosClient.get('/snippet-list');
+          console.log(response.data);
+          setSnippetData(response.data.snippets);
+          setTagsData(response.data.tags);
+        } catch (error) {
+          setLoading(false);
+          console.error(error);
+        }
+      };
+    
+      fetchData();  // Call the async function
+    }, []);
+
+
+    useEffect(() => {
+      console.log(selectedSnippet);
+    }, [selectedSnippet]);
+
+    useEffect(() => {
+        if (snippetData && tagsData) {
+            setFilteredSnippets(
+            snippetData.map((snippet) => <SnippetCard key={snippet.id} snippetData={snippet} snippetId={snippet.id} tagData={tagsData} onClick={() => handleSnippetCardClick(snippet.video_url)}/>)
+          );
+        }
+      }, [snippetData, tagsData]);
 
     return (
         <div>
+            <div className="flex flex-row justify-stretch">
+            <div className={`max-w-[50vw] min-w-[50vw] grow sticky ${isOpen ? "fixed top-0" : "hidden"}`}>
+                {selectedSnippet ?
+                  <div className="">
+                    <VideoPlayer key={selectedSnippet} videoUrl={selectedSnippet}/>
+                    <div className="pt-2">
+                      <h3 className="font-bold font-sans text-left text-xl">{snippetData[0]?.description}</h3>
+                      {/* <Button variant="outline" className="bg-red-500" onClick={handleDelete}>DELETE</Button> */}
+
+                      <Button onClick={handleHideClick}>Hide</Button>
+                    </div>
+
+                  </div>
+                  : <p>Loading...</p>
+                } 
+              </div>
+
+              <div className="grow ">
+                {/* <ScrollArea className="h-[88.5vh] w-[full] flex flex-col overflow-scroll"> */}
+                <div className="flex flex-row justify-between pb-8 content-center items-center place-content-center place-items-center">
+                  <div></div>
+
+                  <div>
+                    <SearchBar onSearch={handleSearch}/>
+                  </div>
+                </div>
+
+         
+
+                  <div className="flex flex-col w-full">
+                      {/* {videos.length > 0 ? videos : <p>Loading...</p>} */}
+                      {filteredSnippets.length > 0 ? filteredSnippets : <p>Loading...</p>}
+                  </div>
+                    {/* <Button variant="outline" onClick={createSnippet}>Create Snippet</Button> */}
+                {/* </ScrollArea> */}
+
+              </div>
+
+            </div>
+        
+
+          {/* <div className="flex flex-row justify-between pb-8 content-center items-center place-content-center place-items-center">
+
             <div>
             <div className="flex flex-row justify-between pb-8 content-center items-center place-content-center place-items-center">
                 <div>
                     <SelectComponent2 data={videoTypes} onSelect={handleVideoSelect} multi={false} />
                 </div>
                 <div><SearchBar onSearch={handleSearch}/></div>
-                {/* <div className="flex flex-row gap-3">
+                <div className="flex flex-row gap-3">
                     <button><Image /></button>
                     <button><LayoutList /></button>
                     <button><LayoutGrid /></button>
-                </div> */}
+                </div>
+                <div className="flex flex-col w-full">
+                    {videos.length > 0 ? videos : <p>Loading...</p>}
+                    {filteredSnippets.length > 0 ? filteredSnippets : <p>Loading...</p>}
+                 </div>
             </div>
-
-            <div className="grid grid-cols-4 gap-4">
-                {/* {videos.length > 0 ? videos : <p>Loading...</p>} */}
-                {filteredVideos.length > 0 ? filteredVideos : <p>Loading...</p>}
-            </div>
-            <Button className="mt-5" onClick={HandleRedirect}>Create Video</Button>
-            </div>
+          </div>
+          </div> */}
+          
         </div>
     );
 }

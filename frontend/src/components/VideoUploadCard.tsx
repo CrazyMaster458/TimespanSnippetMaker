@@ -232,7 +232,7 @@ export function CardWithForm() {
           </form>
         </CardContent>
         <CardFooter className="flex justify-between">
-          {stepNum !== 1 && <Button onClick={handleBack} variant="outline">Back</Button>}
+          {stepNum !== 1 ? <Button onClick={handleBack} variant="outline">Back</Button> : <p></p>}
           {uploadProgress}
           {stepNum !== 4 ? <Button onClick={handleNext}>Next</Button> : <Button onClick={updateVideo}>Create</Button>}
         </CardFooter>

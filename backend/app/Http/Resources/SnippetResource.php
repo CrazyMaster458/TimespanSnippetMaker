@@ -19,9 +19,11 @@ class SnippetResource extends JsonResource
             'id' => $this->id,
             'hook' => $this->hook,
             'description' => $this->description,
+            'video_url' => $this->video_url,
             'starts_at' => $this->starts_at,
             'ends_at' => $this->ends_at,
             'video_type' => $this->video_type,
+            'transcript' => $this->transcript,
         ];
     }
 }

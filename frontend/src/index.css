@@ -78,7 +78,6 @@
   position: relative;
   display: flex;
   justify-content: center;
-  margin-inline: auto;
   border-radius: 1rem;
   overflow: hidden;
 }
@@ -537,12 +536,15 @@ input[type="number"]::-webkit-outer-spin-button {
   background: black;
 }
 
+
 [id^="react-select-"][id$="-listbox"] {
   padding: 8px;
+  z-index: 0;
 }
 
 [id^="react-select-"][id$="-listbox"] > * > * {
   border-radius: 6px;
+  z-index: 0;
 }
 
 .video-card {

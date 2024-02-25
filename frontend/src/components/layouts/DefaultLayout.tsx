@@ -19,7 +19,7 @@ export default function DefaultLayout() {
           <MenuBar />
         </div>
         <ScrollArea className="grow overflow-hidden h-[90.8vh]">
-          <div className="ml-8 mr-12 pl-0 mt-4">
+          <div className="ml-9 mr-12 pl-0 mt-4">
             <Outlet />
           </div>
         </ScrollArea>

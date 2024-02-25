@@ -71,7 +71,7 @@ export const SelectComponent = ({ data, onSelect, multi, endpoint }: { data: obj
   };
 
   return (
-    <div className="w-80">
+    <div className="w-[full]">
       <CreatableSelect
         isMulti={multi}
         options={options}

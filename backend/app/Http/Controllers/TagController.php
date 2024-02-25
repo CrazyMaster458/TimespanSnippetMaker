@@ -21,7 +21,7 @@ class TagController extends Controller
 
         return TagResource::collection(
         Tag::orderBy('created_at', 'desc')
-            ->paginate(10)
+            ->get()
         );
     }
 
