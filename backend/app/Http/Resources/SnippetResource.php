@@ -24,6 +24,8 @@ class SnippetResource extends JsonResource
             'ends_at' => $this->ends_at,
             'video_type' => $this->video_type,
             'transcript' => $this->transcript,
+            'video_id' => $this->video_id,
+            'snippet_tags' => $this->snippet_tags,
         ];
     }
 }

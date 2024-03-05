@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import axiosClient from "@/axios";
-import { SnippetCard } from "@/components/SnippetCard";
 import { SelectComponent2 } from "@/components/MultiSelect copy";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import Button from "@material-tailwind/react/components/Button";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { SearchBar } from "@/components/SearchBar";
-import { Accordion2 } from "./AccorditionTest";
+import { SnippetCard } from "./SnippetCard";
 
 export default function SnippetList() {
     const [loading, setLoading] = useState(true);
@@ -15,40 +14,35 @@ export default function SnippetList() {
 
     const [isOpen, setIsOpen] = useState(false);
     const [openSnippetId, setOpenSnippetId] = useState<string | null>(null);
-    const [selectedSnippet, setSelectedSnippet] = useState(null);
+    const [selectedSnippet, setSelectedSnippet] = useState("");
     const [tagsData, setTagsData] = useState(null);
 
 
-    const handleSnippetCardClick = (videoUrl) => {
-        setIsOpen(true);
-        setSelectedSnippet(videoUrl);
-      };
+    const handleSnippetCardClick = (videoUrl: string) => {
+      setIsOpen(true);
+      setSelectedSnippet(videoUrl);
+    };
 
     const handleHideClick = () => {
       setIsOpen(false);
     };
 
-    const handleSearch = (searchTerm: string) => {
+    const handleSearch = (searchTerm) => {
       // If the search term is empty, show all snippets
       if (searchTerm.trim() === "") {
-        setFilteredSnippets(
-          snippetData.map((snippet) => (
-            <SnippetCard key={snippet.id} snippetData={snippet} snippetId={snippet.id} onClick={() => handleSnippetCardClick(snippet.video_url)} />
-          ))
-        );
+        setFilteredSnippets([...snippetData]);
       } else {
         // Otherwise, filter snippets based on the search term
         const filtered = snippetData.filter((snippet) =>
           snippet.description.toLowerCase().includes(searchTerm.toLowerCase())
         );
-  
-        setFilteredSnippets(
-          filtered.map((snippet) => (
-            <SnippetCard key={snippet.id} snippetData={snippet} snippetId={snippet.id} onClick={() => handleSnippetCardClick(snippet.video_url)} />
-          ))
-        );
+        setFilteredSnippets(filtered);
       }
     };
+  
+    useEffect(() => {
+      setFilteredSnippets([...snippetData]);
+    }, [snippetData]);
 
     useEffect(() => {
       const fetchData = async () => {
@@ -74,8 +68,10 @@ export default function SnippetList() {
 
     useEffect(() => {
         if (snippetData && tagsData) {
-            setFilteredSnippets(
-            snippetData.map((snippet) => <SnippetCard key={snippet.id} snippetData={snippet} snippetId={snippet.id} tagData={tagsData} onClick={() => handleSnippetCardClick(snippet.video_url)}/>)
+
+          setFilteredSnippets(
+              snippetData.map((snippet) => <SnippetCard key={snippet.id} snippetData={snippet} tagsData={tagsData} setTagsData={setTagsData} onClick={() => handleSnippetCardClick(snippet.video_url)}/>)
+              // snippetData.map((snippet) => <SnippetCard key={snippet.id} snippetData={snippet} snippetId={snippet.id} tagData={tagsData} onClick={() => handleSnippetCardClick(snippet.video_url)}/>)
           );
         }
       }, [snippetData, tagsData]);
@@ -101,29 +97,24 @@ export default function SnippetList() {
 
               <div className="grow ">
                 {/* <ScrollArea className="h-[88.5vh] w-[full] flex flex-col overflow-scroll"> */}
-                <div className="flex flex-row justify-between pb-8 content-center items-center place-content-center place-items-center">
+                <div className="flex flex-row justify-between content-center items-center place-content-center place-items-center">
                   <div></div>
 
-                  <div>
+                  {/* <div>
                     <SearchBar onSearch={handleSearch}/>
-                  </div>
+                  </div> */}
                 </div>
 
-         
+                <ScrollArea className="h-[88.5vh] w-[full] flex flex-col overflow-hidden pr-5">
+                <div className="flex flex-col w-full">
+                    {/* {videos.length > 0 ? videos : <p>Loading...</p>} */}
+                    {filteredSnippets.length > 0 ? filteredSnippets : <p>Loading...</p>}
+                </div>
+                </ScrollArea>
 
-                  <div className="flex flex-col w-full">
-                      {/* {videos.length > 0 ? videos : <p>Loading...</p>} */}
-                      {/* {filteredSnippets.length > 0 ? filteredSnippets : <p>Loading...</p>} */}
-                  </div>
+
                     {/* <Button variant="outline" onClick={createSnippet}>Create Snippet</Button> */}
                 {/* </ScrollArea> */}
-
-                <Accordion2/>
-                <Accordion2/>
-                <Accordion2/>
-                <Accordion2/>
-                <Accordion2/>
-                <Accordion2/>
 
               </div>
 

@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import { SnippetCard } from "./components/SnippetCard";
+import { SnippetCard } from "./components/SnippetCardOld";
 import { VideoPlayer } from "./components/VideoPlayer";
 import Detail from "./pages/Detail";
 import ListView from "./pages/ListView";
@@ -30,7 +30,6 @@ import InfluencerList from "./pages/InfluencerList";
 import ChannelList from "./pages/ChannelList";
 import TagList from "./pages/TagList";
 import Settings from "./pages/Settings";
-import { Accordion2 } from "./pages/AccorditionTest";
 
 const router = createBrowserRouter([
   {
@@ -125,10 +124,6 @@ const router = createBrowserRouter([
         path: "/settings",
         element: <Settings/>,
       },
-      {
-        path: "/accordion2",
-        element: <Accordion2/>,
-      },
     ],
   },
   {
@@ -156,10 +151,6 @@ const router = createBrowserRouter([
   {
     path: "/videoplayer",
     element: <VideoPlayer />,
-  },
-  {
-    path: "/snippetcard",
-    element: <SnippetCard />,
   },
   {
     path: "*",

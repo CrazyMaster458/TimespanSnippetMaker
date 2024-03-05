@@ -324,6 +324,10 @@ export const VideoPlayer = ({videoUrl} : {videoUrl: string}) => {
     }
   }, []);
 
+  useEffect(() => {
+    console.log(videoUrl);
+  }, [videoUrl]);
+
   return (
     <div
       ref={videoContainerRef}
@@ -445,18 +449,21 @@ export const VideoPlayer = ({videoUrl} : {videoUrl: string}) => {
           </button>
         </div>
       </div>
-      <video
-        ref={videoRef}
-        className="video-player"
-        onClick={togglePlayPause}
-      >
-        <track kind={"captions"} srcLang="en" src="subtitles.vtt" />
-        <source
-          // src="https://tecdn.b-cdn.net/img/video/Sail-Away.mp4"
-          src={videoUrl}
-          type="video/mp4"
-        />
-      </video>
+      {videoUrl && (
+        <video
+          ref={videoRef}
+          className="video-player"
+          onClick={togglePlayPause}
+        >
+          <track kind={"captions"} srcLang="en" src="subtitles.vtt" />
+          <source
+            // src="https://tecdn.b-cdn.net/img/video/Sail-Away.mp4"
+            // src="https://hugh.cdn.rumble.cloud/video/s8/2/K/F/p/a/KFpaq.caa.mp4?u=3&b=0"
+            src={videoUrl}
+            type="video/mp4"
+          />
+        </video>
+      )}
     </div>
   );
 };

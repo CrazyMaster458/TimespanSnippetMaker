@@ -1,6 +1,6 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { VideoPlayer } from "../components/VideoPlayer";
-import { SnippetCard } from "@/components/SnippetCard";
+// import { SnippetCard } from "@/components/SnippetCardOld";
 
 export default function Detail() {
   return (
@@ -11,6 +11,7 @@ export default function Detail() {
         </div>
         <div className="">
           <ScrollArea className="h-[684px] w-[full] grid gap-4 grid-cols-1 pr-12">
+            {/* <SnippetCard />
             <SnippetCard />
             <SnippetCard />
             <SnippetCard />
@@ -28,8 +29,7 @@ export default function Detail() {
             <SnippetCard />
             <SnippetCard />
             <SnippetCard />
-            <SnippetCard />
-            <SnippetCard />
+            <SnippetCard /> */}
           </ScrollArea>
         </div>
       </div>

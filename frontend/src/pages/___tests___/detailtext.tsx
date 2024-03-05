@@ -4,10 +4,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Snippet } from "@/components/___tests___/snippet.tsx";
 import { VideoPlayer } from "@/components/VideoPlayer.tsx";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
-import { SnippetCard } from "@/components/SnippetCard.tsx";
+import { SnippetCardOld } from "@/components/SnippetCardOld.tsx";
 import { isNullOrUndefined } from "util";
 import { Button } from "@/components/ui/button.tsx";
-import { Accordion2 } from "../AccorditionTest.tsx";
+import { Accordion2, SnippetCard } from "../SnippetCard.tsx";
 // import { useStateContext } from "@/contexts/ContextProvider.tsx";
 
 export default function DetailForm() {
@@ -60,7 +60,7 @@ export default function DetailForm() {
       setSnippetData(snippetData);
 
       setSnippets(snippetData.map((snippet) => (
-        <SnippetCard key={snippet.id} videoId={id} snippetData={snippet} snippetId={snippet.id} onDeleteSnippet={updateSnippetsAfterDelete}/>
+        <SnippetCard key={snippet.id} snippetData={snippet} tagsData={[]}/>
         // <Snippet key={snippet.id} videoId={id} snippetData={snippet} snippetId={snippet.id}/>
       )));
       setLoading(false);
@@ -101,7 +101,7 @@ export default function DetailForm() {
           } 
         </div>
         <div className="col-span-3">
-        <ScrollArea className="h-[530px] w-[full] flex flex-col pr-12 overflow-scroll">
+        <ScrollArea className="h-[88.5vh] w-[full] flex flex-col overflow-scroll">
 
           {!loading ? snippets !== null ?
             snippets.length > 0 ? snippets : <p>No data found...</p>

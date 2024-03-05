@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea"
 
 
 
-export const SnippetCard = ({videoId, snippetData, snippetId, isOpen, onDeleteSnippet, tagData, onClick }: {videoId: string, snippetData: object, isOpen: boolean, snippetId: string, tagData: Array<object>, onClick: () => void }) => {
+export const SnippetCardOld = ({videoId, snippetData, snippetId, isOpen, onDeleteSnippet, tagData, onClick }: {videoId: string, snippetData: object, isOpen: boolean, snippetId: string, tagData: Array<object>, onClick: () => void }) => {
   const parseTime = (timeString) => {
     const [hours, minutes, seconds] = timeString.split(':');
     
