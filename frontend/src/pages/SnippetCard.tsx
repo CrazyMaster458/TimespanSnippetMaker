@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosClient from "@/axios";
-import { SelectComponent } from "@/components/MultiSelect";
-import { SelectComponent2 } from "@/components/MultiSelect copy 2";
+import { MultiSelect } from "@/components/MultiSelect";
+import { MultiSelect2 } from "@/components/SingleSelect";
 import { TimespanInput } from "@/components/TimespanInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -190,7 +190,7 @@ export const SnippetCard : React.FC<SnippetCardProps> = ({snippetData, tagsData,
 
                     <div className="pt-3">
                         {/* <SelectComponent data={tagsData} endpoint="tag" multi={true} value={tags} setValue={setTags}/> */}
-                        <SelectComponent2 data={tagsData} endpoint="tag" value={tags} setValue={setTags} setTagsData={setTagsData}/>
+                        <MultiSelect data={tagsData} endpoint="tag" value={tags} setValue={setTags} setData={setTagsData}/>
                     </div>
                     
                     <div className="pt-3">

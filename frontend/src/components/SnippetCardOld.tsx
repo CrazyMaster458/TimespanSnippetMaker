@@ -15,7 +15,7 @@ import CreatableSelect from "react-select/creatable";
 import { Button } from "@/components/ui/button";
 import axiosClient from "@/axios";
 import Echo from 'laravel-echo';
-import { SelectComponent } from "./MultiSelect";
+import { SelectComponent } from "./SingleSelect";
 import { Textarea } from "@/components/ui/textarea"
 
 

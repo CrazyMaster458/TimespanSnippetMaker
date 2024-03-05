@@ -4,7 +4,7 @@ import axiosClient from "@/axios";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/SearchBar";
-import { SelectComponent } from "@/components/MultiSelect";
+import { SelectComponent } from "@/components/SingleSelect.tsx";
 import * as api from "../components/api.tsx";
 import { List } from 'lucide-react';
 import { Image } from 'lucide-react';

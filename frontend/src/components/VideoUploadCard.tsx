@@ -13,9 +13,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SelectComponent } from "./MultiSelect";
 
 import * as api from "./api";
+import { MultiSelect } from "./MultiSelect";
+import { SingleSelect } from "./SingleSelect";
 
 const steps = [
   {
@@ -40,7 +41,7 @@ export function CardWithForm() {
   const [title, setTitle] = useState("");
   const [host, setHost] = useState<number | null>(null);
   const [videoType, setVideoType] = useState<number | null>(null);
-  const [guests, setGuests] = useState<string[]>([]);
+  const [guests, setGuests] = useState<number[]>([]);
   const [error, setError] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState<string>("");
   const [videoId, setVideoId] = useState<number | null>(null);
@@ -191,7 +192,7 @@ export function CardWithForm() {
                   </div>
 
                   <Label htmlFor="video_type">Video Type</Label>
-                  <SelectComponent data={videoTypes} onSelect={handleVideoSelect} endpoint="video_type"/>
+                  <SingleSelect data={videoTypes} endpoint="video_type" value={videoType} setValue={setVideoType} setData={setVideoTypes}/>
                 </div>
                 <div className="col-span-3">
                   <Label htmlFor="thumbnail">Upload Thumbnail</Label>
@@ -211,10 +212,11 @@ export function CardWithForm() {
             {stepNum === 3 && (
               <div className="guests">
                 <Label htmlFor="host">Host</Label>
-                <SelectComponent data={influencers} onSelect={handleHostSelect} endpoint="influencer"/>
+                <SingleSelect data={influencers} endpoint="influencer" value={host} setValue={setHost} setData={setInfluencers}/>
 
                 <Label htmlFor="guests">Guests</Label>
-                <SelectComponent data={influencers} onSelect={handleGuestsSelect} multi={true} endpoint="influencer"/>
+                {/* <SelectComponent data={influencers} onSelect={handleGuestsSelect} multi={true} endpoint="influencer"/> */}
+                <MultiSelect data={influencers} endpoint="influencer" value={guests} setValue={setGuests} setData={setInfluencers}/>
               </div>
             )}
 
