@@ -16,6 +16,7 @@ use App\Http\Controllers\StorageController;
 use App\Http\Controllers\SseController;
 use App\Http\Controllers\TranscriptionController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\GatewayController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,8 +48,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/get-video-snippets/{video_id}', [SnippetController::class, 'getVideoSnippets']);
     Route::post('/cut/{snippet}', [SnippetController::class, 'cutVideo']);
 
-    Route::get('video_parameters', [VideoController::class, 'retriveVideoParameters']);
-
     Route::get('/auth/google/redirect',[GoogleDriveController::class,'redirectToGoogle']);
     Route::post('/upload-video/{video}',[VideoController::class,'uploadVideo']);
     Route::post('/upload-image/{video}',[VideoController::class,'uploadImage']);
@@ -57,10 +56,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/snippet/{snippetId}/sendProgressUpdate', [SnippetController::class, 'sendProgressUpdate']);
 
     Route::get('/transcribe', [TranscriptionController::class, 'transcribe']);
+
+    
     Route::get('/search', [SearchController::class, 'search']);
 
     Route::get('/snippet-list', [SnippetController::class, 'getSnippetList']);
 
+    Route::get('/video_parameters', [GatewayController::class, 'retriveVideoParameters']);
+    Route::get('/get_video_data/{video}', [GatewayController::class, 'getVideoData']);
 
 });
 

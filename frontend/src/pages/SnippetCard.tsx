@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axiosClient from "@/axios";
 import { MultiSelect } from "@/components/MultiSelect";
-import { MultiSelect2 } from "@/components/SingleSelect";
 import { TimespanInput } from "@/components/TimespanInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

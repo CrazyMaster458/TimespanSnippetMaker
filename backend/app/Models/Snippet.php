@@ -14,12 +14,10 @@ class Snippet extends Model
         'starts_at',
         'ends_at',
         'file_path',
-        'downloaded',
         'snippet_code',
         'video_id',
         'user_id',
         'video_type_id',
-        'snippet_code',
         'transcript',
     ];
 

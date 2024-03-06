@@ -14,6 +14,7 @@ export default function DetailForm() {
   //   const { userToken, currentUser } = useStateContext();
   const [videoDetailData, setVideoDetailData] = useState(null);
   const [snippetData, setSnippetData] = useState(null);
+  const [tagsData, setTagsData] = useState(null);
   const [snippets, setSnippets] = useState<JSX.Element[]>([]); // State to track an array of snippets
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
@@ -26,11 +27,12 @@ export default function DetailForm() {
 
   useEffect(() => {
     axiosClient
-      .get(`/video/${id}`)
+      .get(`/get_video_data/${id}`)
       .then(({ data }) => {
-        console.log(data.data);
-        setVideoDetailData(data.data);
-        setSnippetData(data.data.snippets)
+        console.log(data);
+        setVideoDetailData(data.video);
+        setSnippetData(data.video.snippets)
+        setTagsData(data.tags)
         setLoading(true);
       })
       .catch((error) => {
@@ -60,7 +62,7 @@ export default function DetailForm() {
       setSnippetData(snippetData);
 
       setSnippets(snippetData.map((snippet) => (
-        <SnippetCard key={snippet.id} snippetData={snippet} tagsData={[]}/>
+        <SnippetCard key={snippet.id} snippetData={snippet} tagsData={tagsData} setTagsData={setTagsData}/>
         // <Snippet key={snippet.id} videoId={id} snippetData={snippet} snippetId={snippet.id}/>
       )));
       setLoading(false);

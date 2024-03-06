@@ -3,26 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\Guest;
-use App\Models\Status;
 use App\Models\Video;
 use App\Http\Requests\StoreVideoRequest;
 use App\Http\Requests\UpdateVideoRequest;
 use App\Http\Requests\UploadVideoRequest;
 use App\Http\Requests\UploadImageRequest;
 use App\Http\Resources\VideoResource;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Request;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\File;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\StorageController;
-use App\Models\Snippet;
 use App\Http\Controllers\SnippetController;
-use App\Http\Resources\InfluencerResource;
-use App\Http\Resources\VideoTypeResource;
-use App\Models\Influencer;
-use App\Models\VideoType;
-
 
 class VideoController extends Controller
 {
@@ -53,17 +43,6 @@ class VideoController extends Controller
         });
     
         return $videos;
-    }
-
-    public function retriveVideoParameters()
-    {
-        $influencers = InfluencerResource::collection(Influencer::all());
-        $videoTypes = VideoTypeResource::collection(VideoType::all());
-
-        return [
-            'influencers' => $influencers,
-            'videoTypes' => $videoTypes,
-        ];
     }
 
     /**
@@ -108,7 +87,7 @@ class VideoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Video $video, Request $request)
+    public function show(Video $video)
     {
         $user = Auth::user();
         if ($user->id !== $video->user_id) {
@@ -124,6 +103,7 @@ class VideoController extends Controller
         $video->snippets = $snippets;
 
         return new VideoResource($video);
+
     }
 
     public function uploadVideo(UploadVideoRequest $request, Video $video) 

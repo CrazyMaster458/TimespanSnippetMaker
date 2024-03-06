@@ -21,19 +21,20 @@ class SearchController extends Controller
         $videoResults = Video::where('title', 'like', "%$query%")
                             ->get();
 
-        $snippetResults = Snippet::where('description', 'like', "%$query%")
-                                ->get();
+        // $snippetResults = Snippet::where('description', 'like', "%$query%")
+        //                         ->get();
 
-        $influencerResults = Influencer::where('name', 'like', "%$query%")
-                                     ->get();
+        // $influencerResults = Influencer::where('name', 'like', "%$query%")
+        //                              ->get();
 
         // Combine and return the search results as JSON
-        $combinedResults = [
-            'videos' => $videoResults,
-            'snippets' => $snippetResults,
-            'influencers' => $influencerResults,
-        ];
-        return response()->json($combinedResults);
+        return response()->json(
+            [
+                'videos' => $videoResults,
+                // 'snippets' => $snippetResults,
+                // 'influencers' => $influencerResults,
+            ]
+        );
 
         // $results = Video::where('title', 'like', "%$query%")->get();
 
