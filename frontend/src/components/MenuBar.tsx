@@ -40,7 +40,7 @@ export const MenuBar = () => {
                 </div>
                 <div>
                     <li>
-                        <Link to="/settings" className="tooltip tooltip-right" data-tip="Settings">
+                        <Link to="/settings/account" className="tooltip tooltip-right" data-tip="Settings">
                             <Settings className=" h-5 w-5" viewBox="0 0 24 24"/>
                         </Link>
                     </li>

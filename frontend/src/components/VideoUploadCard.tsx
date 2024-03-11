@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import * as api from "./api";
-import { MultiSelect } from "./MultiSelect";
+import { MultiSelect } from "./MultiSelectOld";
 import { SingleSelect } from "./SingleSelect";
 
 const steps = [

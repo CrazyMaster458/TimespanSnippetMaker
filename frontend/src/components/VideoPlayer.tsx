@@ -1,9 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable no-fallthrough */
 import React, { ChangeEvent, useEffect, useState } from "react";
 
-export const VideoPlayer = ({videoUrl} : {videoUrl: string}) => {
+export const VideoPlayer = ({videoUrl, snippetTimes} : {videoUrl: string, snippetTimes: object | null}) => {
   // Video player
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
   const videoContainerRef = React.useRef<HTMLDivElement | null>(null);
@@ -24,6 +25,7 @@ export const VideoPlayer = ({videoUrl} : {videoUrl: string}) => {
   const thumbnailImgRef = React.useRef<HTMLImageElement | null>(null);
   const previewImgRef = React.useRef<HTMLImageElement | null>(null);
   const timelineContainerRef = React.useRef<HTMLDivElement | null>(null);
+  const SectionRef = React.useRef<HTMLDivElement | null>(null);
 
   const [sliderValue, setSliderValue] = useState(1);
 
@@ -71,6 +73,34 @@ export const VideoPlayer = ({videoUrl} : {videoUrl: string}) => {
     videoElement.playbackRate = newPlaybackRate;
     speedBtnElement.textContent = `${newPlaybackRate}x`;
   }
+
+  const convertTimeStringToSeconds = (timeString: string): number => {
+    if (timeString) {
+      const [hours, minutes, seconds] = timeString.split(':').map(Number);
+      return hours * 3600 + minutes * 60 + seconds;
+    }
+    return 0;
+  }
+  
+  const handleSectionUpdate = (startTime: string, endTime: string) => {
+    const videoElement = videoRef.current!;
+    const timelineContainerElement = timelineContainerRef.current!;
+
+    const startTimeInSeconds = convertTimeStringToSeconds(startTime);
+    const endTimeInSeconds = convertTimeStringToSeconds(endTime);
+
+    const startPosition = ((startTimeInSeconds / videoElement.duration) * 100).toFixed(2) + '%';
+    const endPosition = ((endTimeInSeconds / videoElement.duration) * 100).toFixed(2) + '%';
+
+    timelineContainerElement.style.setProperty("--start-position", startPosition);
+    timelineContainerElement.style.setProperty("--end-position", endPosition);
+  }
+
+  useEffect(() => {
+    if(snippetTimes){
+      handleSectionUpdate(snippetTimes.snippetStart, snippetTimes.snippetEnd);
+    }
+  }, [snippetTimes])
 
   useEffect(() => {
     // Video player
@@ -298,6 +328,7 @@ export const VideoPlayer = ({videoUrl} : {videoUrl: string}) => {
             toggleMiniPlayerMode();
             break;
           case "m":
+            // console.log(videoElement.currentTime);
             toggleMute();
             break;
           case "arrowleft":
@@ -324,9 +355,9 @@ export const VideoPlayer = ({videoUrl} : {videoUrl: string}) => {
     }
   }, []);
 
-  useEffect(() => {
-    console.log(videoUrl);
-  }, [videoUrl]);
+  // useEffect(() => {
+  //   console.log(videoUrl);
+  // }, [videoUrl]);
 
   return (
     <div
@@ -341,6 +372,7 @@ export const VideoPlayer = ({videoUrl} : {videoUrl: string}) => {
             <img className="preview-img" ref={previewImgRef} />
             <div className="thumb-indicator"></div>
           </div>
+          <div className="section" ref={SectionRef}></div>
         </div>
         <div className="controls">
           <button className="play-pause-btn" onClick={togglePlayPause}>
@@ -458,8 +490,9 @@ export const VideoPlayer = ({videoUrl} : {videoUrl: string}) => {
           <track kind={"captions"} srcLang="en" src="subtitles.vtt" />
           <source
             // src="https://tecdn.b-cdn.net/img/video/Sail-Away.mp4"
-            // src="https://hugh.cdn.rumble.cloud/video/s8/2/K/F/p/a/KFpaq.caa.mp4?u=3&b=0"
-            src={videoUrl}
+            //src="Lift_run_shoot.mp4"
+            src="https://hugh.cdn.rumble.cloud/video/s8/2/K/F/p/a/KFpaq.caa.mp4?u=3&b=0"
+            // src={videoUrl}
             type="video/mp4"
           />
         </video>

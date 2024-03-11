@@ -1,13 +1,15 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useCallback } from 'react';
 import axios from '@/axios';
 import CreatableSelect from 'react-select/creatable';
+import { useTagsDataStore, useTagsStore } from '@/utils/StateStore';
+import { Tag } from '@/types/type';
 
 interface SelectComponentProps {
-  data: { id: number; name: string }[];
-  setValue: (value: number[]) => void;
+  data: Tag[];
   value: number[];
   endpoint: string;
-  setData: (data: { id: string; name: string }[]) => void;
+  setValue: (value: Tag[]) => void;
 }
 
 interface Option {
@@ -15,8 +17,17 @@ interface Option {
   label: string;
 }
 
-export const MultiSelect: React.FC<SelectComponentProps> = ({ data, endpoint, value, setValue, setData }) => {
+export const MultiSelect: React.FC<SelectComponentProps> = ({ data, endpoint, value, setValue }) => {
   const [options, setOptions] = useState<Option[]>(data.map((item) => ({ value: item.id, label: item.name })));
+
+  const { addTag } = useTagsDataStore((state) => ({
+    addTag: state.addTag,
+  }));
+
+  // const { addTag2, setTags } = useTagsStore((state) => ({
+  //   addTag2: state.addTag,
+  //   setTags: state.setTags,
+  // }));
 
   const handleCreateOption = useCallback(async (inputValue: string) => {
     try {
@@ -28,14 +39,18 @@ export const MultiSelect: React.FC<SelectComponentProps> = ({ data, endpoint, va
       setOptions((currentOptions) => [...currentOptions, newOption]);
       
       // Update value state
+      // setValue((currentValue) => [...currentValue, newItem.id]);
       setValue((currentValue) => [...currentValue, newItem.id]);
 
       // Update data state using setTagsData callback
-      setData((currentData) => [...currentData, { id: newItem.id.toString(), name: newItem.name }]);
+      // setData((currentData) => [...currentData, { id: newItem.id.toString(), name: newItem.name }]);
+      // setTagsData2((currentData) => [...currentData, { id: newItem.id.toString(), name: newItem.name }]);
+      // const newItem = { id: 'someId', name: 'someName' };
+      addTag(newItem);
     } catch (error) {
       console.error('Error creating the item:', error);
     }
-  }, [endpoint, setValue, setData]);
+  }, [endpoint]);
 
   const handleChange = (selectedOptions: Option[] | null) => {
     const selectedValues = selectedOptions ? selectedOptions.map((option) => option.value) : [];

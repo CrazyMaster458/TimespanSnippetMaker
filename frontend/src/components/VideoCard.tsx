@@ -7,7 +7,7 @@ export const VideoCard = ({videoData, videoId}: {videoData: object, videoId: str
   const navigate = useNavigate();
 
   const HandleRedirect = () => {
-    navigate(`/detailform/${videoId}`);
+    navigate(`/detail/${videoId}`);
   };
 
   console.log(videoData);

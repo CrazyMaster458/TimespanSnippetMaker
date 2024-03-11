@@ -286,6 +286,40 @@ input[type="range"]::-webkit-slider-runnable-track {
   background-color: red;
 }
 
+.section {
+  height: 4px;
+  width: 100%;
+  position: absolute;
+}
+
+.section::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  /* background-color: rgba(150, 150, 150); */
+  display: block; /* Change display to block to show the pseudo-element */
+}
+
+.section::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%; /* Set the width to cover the entire timeline */
+  background: linear-gradient(
+    to right,
+    transparent var(--start-position),
+    rgba(255, 255, 0, 0.75) var(--start-position),
+    rgba(255, 255, 0, 0.75) var(--end-position),
+    transparent var(--end-position)
+  );
+  display: block; /* Change display to block to show the pseudo-element */
+}
+
+
 .timeline .thumb-indicator {
   --scale: 0;
   position: absolute;
@@ -539,12 +573,10 @@ input[type="number"]::-webkit-outer-spin-button {
 
 [id^="react-select-"][id$="-listbox"] {
   padding: 8px;
-  z-index: 0;
 }
 
 [id^="react-select-"][id$="-listbox"] > * > * {
   border-radius: 6px;
-  z-index: 0;
 }
 
 .video-card {
@@ -564,5 +596,13 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .collapse-content{
+
+}
+
+.create__control {
+  padding: 0.2rem 0.1rem;
+}
+
+.input-bordered {
 
 }

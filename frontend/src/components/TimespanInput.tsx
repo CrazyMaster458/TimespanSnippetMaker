@@ -1,17 +1,10 @@
+import { TimeProp } from '@/types/type';
 import React, { useRef, useState } from 'react';
 
-interface TimespanInputProps {
-  snippetTime: {
-    hours: string;
-    minutes: string;
-    seconds: string;
-  };
+type TimespanInputProps = {
+  snippetTime: TimeProp;
   setSnippetTime: React.Dispatch<
-    React.SetStateAction<{
-      hours: string;
-      minutes: string;
-      seconds: string;
-    }>
+    React.SetStateAction<TimeProp>
   >;
 }
 
