@@ -12,16 +12,18 @@ use App\Http\Controllers\StorageController;
 
 class AuthController extends Controller
 {
+    protected $userController;
+    protected $storageController;
+
+    public function __construct(UserController $userController, StorageController $storageController)
+    {
+        $this->userController = $userController;
+        $this->storageController = $storageController;
+    }
+
     public function signup(SignupRequest $request)
     {
         $data = $request->validated();
-
-        /** @var \App\Models\User $user */
-        // $user = User::create([
-        //     'username' => $data['username'],
-        //     'email' => $data['email'],
-        //     'access_token' => $data['access_token'],
-        // ]);
 
         $user = User::create($data);
 
@@ -29,35 +31,13 @@ class AuthController extends Controller
             'password' => bcrypt($data['password'])
         ]);
 
-        app(StorageController::class)->createFolder($user->secret_name);
-
-        // $user = User::create([
-        //     'username' => $data['username'],
-        //     'email' => $data['email'],
-        //     'password' => bcrypt($data['password'])
-        // ]);
-
-        // if($data['password'] !== null && $data['password'] !== ""){
-        //     $user = User::create([
-        //         'username' => $data['username'],
-        //         'email' => $data['email'],
-        //         'password' => bcrypt($data['password'])
-        //     ]);
-        // }
-        // else if ($data['access_token'] !== null && $data['access_token'] !== "")
-        // {
-        //     $user = User::create([
-        //         'username' => $data['username'],
-        //         'email' => $data['email'],
-        //         'access_token' => $data['access_token'],
-        //     ]);
-        // }
+        $this->storageController->createFolder($user->secret_name);
 
         $token = $user->createToken('main')->plainTextToken;
 
         return response([
             'user' => $user,
-            'token' => $token
+            'token' => $token,
         ]);
     }
 
@@ -100,4 +80,5 @@ class AuthController extends Controller
     {
         return $request->user();
     }
+
 }

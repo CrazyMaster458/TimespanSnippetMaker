@@ -1,17 +1,17 @@
-import { TimeProp } from '@/types/type';
-import React, { useRef, useState } from 'react';
+import { TimeProp } from "@/types/types";
+import React, { useRef, useState } from "react";
 
 type TimespanInputProps = {
   snippetTime: TimeProp;
-  setSnippetTime: React.Dispatch<
-    React.SetStateAction<TimeProp>
-  >;
-}
+  setSnippetTime: (newTime: TimeProp) => void;
+};
 
 const MAX_TIME_UNIT = 59;
 
-export const TimespanInput: React.FC<TimespanInputProps> = ({ snippetTime, setSnippetTime }) => {
-
+export const TimespanInput: React.FC<TimespanInputProps> = ({
+  snippetTime,
+  setSnippetTime,
+}) => {
   const inputRefHours = useRef<HTMLInputElement>(null);
   const inputRefMinutes = useRef<HTMLInputElement>(null);
   const inputRefSeconds = useRef<HTMLInputElement>(null);
@@ -19,10 +19,12 @@ export const TimespanInput: React.FC<TimespanInputProps> = ({ snippetTime, setSn
   const [isArrowKey, setIsArrowKey] = useState(false);
 
   const handleArrowKeys = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    setIsArrowKey(e.key === 'ArrowUp' || e.key === 'ArrowDown');
+    setIsArrowKey(e.key === "ArrowUp" || e.key === "ArrowDown");
   };
 
-  const focusNextInput = (currentInputRef: React.RefObject<HTMLInputElement> | null) => {
+  const focusNextInput = (
+    currentInputRef: React.RefObject<HTMLInputElement> | null,
+  ) => {
     if (currentInputRef?.current) {
       currentInputRef.current.focus();
     }
@@ -55,13 +57,12 @@ export const TimespanInput: React.FC<TimespanInputProps> = ({ snippetTime, setSn
           default:
             break;
         }
-        
       }
 
       setSnippetTime({
         ...snippetTime,
         [name]: leadingZeroFormatter.format(
-          Number(value) < MAX_TIME_UNIT ? Number(value) : MAX_TIME_UNIT
+          Number(value) < MAX_TIME_UNIT ? Number(value) : MAX_TIME_UNIT,
         ),
       });
     }
@@ -69,7 +70,7 @@ export const TimespanInput: React.FC<TimespanInputProps> = ({ snippetTime, setSn
 
   return (
     <div>
-      <div className="timespaninput flex group items-center h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background">
+      <div className="timespaninput group flex h-10 w-full items-center rounded-md border bg-background px-3 py-2 text-sm ring-offset-background">
         <input
           type="number"
           name="hours"
@@ -79,8 +80,8 @@ export const TimespanInput: React.FC<TimespanInputProps> = ({ snippetTime, setSn
           max={MAX_TIME_UNIT}
           min={0}
           style={{
-            width: '20px',
-            textAlign: 'center',
+            width: "20px",
+            textAlign: "center",
           }}
           ref={inputRefHours}
           onClick={() => inputRefHours.current!.select()}
@@ -96,7 +97,7 @@ export const TimespanInput: React.FC<TimespanInputProps> = ({ snippetTime, setSn
           maxLength={2}
           max={MAX_TIME_UNIT}
           min={0}
-          style={{ width: '20px', textAlign: 'center' }}
+          style={{ width: "20px", textAlign: "center" }}
           ref={inputRefMinutes}
           onClick={() => inputRefMinutes.current!.select()}
           onFocus={(e) => e.target.select()}
@@ -111,7 +112,7 @@ export const TimespanInput: React.FC<TimespanInputProps> = ({ snippetTime, setSn
           maxLength={2}
           max={MAX_TIME_UNIT}
           min={0}
-          style={{ width: '20px', textAlign: 'center' }}
+          style={{ width: "20px", textAlign: "center" }}
           ref={inputRefSeconds}
           onClick={() => inputRefSeconds.current!.select()}
           onFocus={(e) => e.target.select()}

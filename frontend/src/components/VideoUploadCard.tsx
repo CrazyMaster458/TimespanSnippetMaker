@@ -15,8 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import * as api from "./api";
-import { MultiSelect } from "./MultiSelectOld";
-import { SingleSelect } from "./SingleSelect";
+import { Select } from "./Select";
 
 const steps = [
   {
@@ -35,7 +34,7 @@ const steps = [
     title: "Visibility",
     description: "Upload a viddeo file and fill in details.",
   },
-]
+];
 
 export function CardWithForm() {
   const [title, setTitle] = useState("");
@@ -52,7 +51,8 @@ export function CardWithForm() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.fetchVideoParameters()
+    api
+      .fetchVideoParameters()
       .then((res) => {
         setInfluencers(res.influencers || []);
         setVideoTypes(res.videoTypes || []);
@@ -63,53 +63,63 @@ export function CardWithForm() {
   }, []);
 
   const handleNext = () => {
-    if(stepNum + 1 < 5){
+    if (stepNum + 1 < 5) {
       setStepNum(stepNum + 1);
     }
   };
 
   const handleBack = () => {
-    if(stepNum - 1 > 0){
+    if (stepNum - 1 > 0) {
       setStepNum(stepNum - 1);
     }
   };
-    
+
   const handleVideoChange = async (e: any) => {
     if (e.target.files && e.target.files.length > 0) {
-      // setFilePath(e.target.files[0]);  
+      // setFilePath(e.target.files[0]);
 
       try {
         const id = await api.createVideo();
         setVideoId(id);
 
-        await api.uploadFile(`/upload-video/${id}`, e.target.files[0], "video", (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setUploadProgress(`${percentCompleted}%`);
-          // console.log(`Upload Progress: ${percentCompleted}%`);
-        });
+        await api.uploadFile(
+          `/upload-video/${id}`,
+          e.target.files[0],
+          "video",
+          (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setUploadProgress(`${percentCompleted}%`);
+            // console.log(`Upload Progress: ${percentCompleted}%`);
+          }
+        );
       } catch (error) {
         console.error("Error handling video change:", error);
       }
     }
-};
-
+  };
 
   const handleThumbnailChange = async (e: any) => {
     if (e.target.files && e.target.files.length > 0) {
       // setThumbnailPath(e.target.files[0]);
 
       try {
-        await api.uploadFile(`/upload-image/${videoId}`, e.target.files[0], "image");
+        await api.uploadFile(
+          `/upload-image/${videoId}`,
+          e.target.files[0],
+          "image"
+        );
       } catch (error) {
         console.error("Error handling video change:", error);
       }
     }
-  }
+  };
 
   const updateVideo = async () => {
     setError([]);
 
-      try {
+    try {
       await api.updateVideo(videoId!, {
         title: title,
         host_id: host,
@@ -126,9 +136,9 @@ export function CardWithForm() {
   };
 
   const handleHostSelect = (value: any) => {
-    setHost(typeof value[0] === 'number' ? value[0] : null);
+    setHost(typeof value[0] === "number" ? value[0] : null);
   };
-  
+
   const handleGuestsSelect = (value: any) => {
     setGuests(Array.isArray(value) ? value : []);
   };
@@ -136,7 +146,6 @@ export function CardWithForm() {
   const handleVideoSelect = (value: any) => {
     setVideoType(value.length > 0 ? value[0] : null);
   };
-  
 
   return (
     <div className="overflow-hidden absolute inset-0 flex justify-center h-full w-full items-center">
@@ -144,7 +153,10 @@ export function CardWithForm() {
         <CardHeader className="px-12">
           <ul className="steps pb-4 pt-4">
             {steps.map((step, index) => (
-              <li key={index} className={`step ${stepNum > index ? 'step-primary' : ''}`}>
+              <li
+                key={index}
+                className={`step ${stepNum > index ? "step-primary" : ""}`}
+              >
                 {step.title}
               </li>
             ))}
@@ -177,7 +189,10 @@ export function CardWithForm() {
               <div className="details grid grid-cols-7 gap-8">
                 <div className="col-span-4">
                   <div className="border-2 rounded pt-2 px-3 pb-4">
-                    <Label htmlFor="title" className="text-gray-500 text-xs font-medium">
+                    <Label
+                      htmlFor="title"
+                      className="text-gray-500 text-xs font-medium"
+                    >
                       Title (required)
                     </Label>
                     <input
@@ -192,7 +207,13 @@ export function CardWithForm() {
                   </div>
 
                   <Label htmlFor="video_type">Video Type</Label>
-                  <SingleSelect data={videoTypes} endpoint="video_type" value={videoType} setValue={setVideoType} setData={setVideoTypes}/>
+                  {/* <SingleSelect
+                    data={videoTypes}
+                    endpoint="video_type"
+                    value={videoType}
+                    setValue={setVideoType}
+                    setData={setVideoTypes}
+                  /> */}
                 </div>
                 <div className="col-span-3">
                   <Label htmlFor="thumbnail">Upload Thumbnail</Label>
@@ -212,11 +233,23 @@ export function CardWithForm() {
             {stepNum === 3 && (
               <div className="guests">
                 <Label htmlFor="host">Host</Label>
-                <SingleSelect data={influencers} endpoint="influencer" value={host} setValue={setHost} setData={setInfluencers}/>
+                {/* <SingleSelect
+                  data={influencers}
+                  endpoint="influencer"
+                  value={host}
+                  setValue={setHost}
+                  setData={setInfluencers}
+                /> */}
 
                 <Label htmlFor="guests">Guests</Label>
                 {/* <SelectComponent data={influencers} onSelect={handleGuestsSelect} multi={true} endpoint="influencer"/> */}
-                <MultiSelect data={influencers} endpoint="influencer" value={guests} setValue={setGuests} setData={setInfluencers}/>
+                {/* <MultiSelect
+                  data={influencers}
+                  endpoint="influencer"
+                  value={guests}
+                  setValue={setGuests}
+                  setData={setInfluencers}
+                /> */}
               </div>
             )}
 
@@ -234,9 +267,19 @@ export function CardWithForm() {
           </form>
         </CardContent>
         <CardFooter className="flex justify-between">
-          {stepNum !== 1 ? <Button onClick={handleBack} variant="outline">Back</Button> : <p></p>}
+          {stepNum !== 1 ? (
+            <Button onClick={handleBack} variant="outline">
+              Back
+            </Button>
+          ) : (
+            <p></p>
+          )}
           {uploadProgress}
-          {stepNum !== 4 ? <Button onClick={handleNext}>Next</Button> : <Button onClick={updateVideo}>Create</Button>}
+          {stepNum !== 4 ? (
+            <Button onClick={handleNext}>Next</Button>
+          ) : (
+            <Button onClick={updateVideo}>Create</Button>
+          )}
         </CardFooter>
       </Card>
     </div>

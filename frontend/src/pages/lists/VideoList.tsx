@@ -1,138 +1,160 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { VideoCard } from "@/components/VideoCard";
-import { useEffect, useState } from "react";
-import axiosClient from "@/axios";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/SearchBar";
-import { SelectComponent } from "@/components/SingleSelect.tsx";
-import * as api from "../../components/api.tsx";
-import { useFetch } from "../../utils/useFetch.tsx";
-// import { SelectComponent2 } from "@/components/MultiSelect copy.tsx";
+import { Select } from "@/components/Select";
+import { Skeleton } from "@/components/ui/skeleton.tsx";
+import { VideoOff } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState.tsx";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import { fetchData, fetchPost } from "@/api/index.ts";
+import { Option } from "@/types/types";
 
 export default function VideoList() {
-    const [loading, setLoading] = useState(true);
-    const [videoData, setVideoData] = useState(null);
-    const [videos, setVideos] = useState<JSX.Element[]>([]);
+  const {
+    data: videosData,
+    isLoading: areVideosDataLoading,
+    error,
+  } = useQuery({
+    queryKey: ["videos"],
+    queryFn: () => fetchData("/videos"),
+  });
 
+  const { data: videoTypesData, isLoading: areVideoTypesDataLoading } =
+    useQuery({
+      queryKey: ["video_types"],
+      queryFn: () => fetchData("/video_types"),
+    });
 
-    const [influencers, setInfluencers] = useState<any[]>([]);
-    const [videoTypes, setVideoTypes] = useState<any[]>([]);
+  const { data: influencersData, isLoading: areInfluencersDataLoading } =
+    useQuery({
+      queryKey: ["influencers"],
+      queryFn: () => fetchData("/influencers"),
+    });
 
-    const [videoType, setVideoType] = useState<number | null>(null);
+  // const { data, fetchNextPage, isFetchingNextPage } = useInfiniteQuery({
+  //   queryKey: ["videos"],
+  //   queryFn: async ({ pageParam = 1 }) => {
+  //     const response = await fetchPost("/videos", pageParam);
+  //     return response;
+  //   },
+  //   getNextPageParam: (lastPage) => lastPage.length + 1,
+  //   initialPageParam: 1,
+  // });
 
-    const {data, isPending, error} = useFetch('/video');
+  // useEffect(() => {
+  //   console.log(influencersData);
+  // }, [influencersData]);
+  // useEffect(() => {
+  //   console.log(videosData);
+  // }, [videosData]);
+  // useEffect(() => {
+  //   console.log(videoTypesData);
+  // }, [videoTypesData]);
 
-      useEffect(() => {console.log(data)},[data])
+  const [selectedVideoType, setSelectedVideoType] = useState<Option[]>([]);
+  const [selectedInfluencers, setSelectedInfluencers] = useState<Option[]>([]);
+  const [searchedTerm, setSearchedTerm] = useState("");
 
-  
-    // useEffect(() => {
-    //   setLoading(true);
-    //   axiosClient
-    //     .get(`/video`)
-    //     .then(({data}) => {
-    //       console.log(data);
-    //       setVideoData(data);
-    //     })
-    //     .catch((error) => {
-    //       setLoading(false);
-    //       console.log("error");
-    //     });
-    // }, []);
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        api.fetchVideoParameters()
-          .then((res) => {
-            setInfluencers(res.influencers || []);
-            setVideoTypes(res.videoTypes || []);
-          })
-          .catch((error) => {
-            console.error("Error fetching video parameters:", error);
-          });
-      }, []);
-  
-    const navigate = useNavigate();
+  const handleRedirect = () => {
+    navigate(`/cardform`);
+  };
 
-    
-    const handleVideoSelect = (value: any) => {
-        setVideoType(value.length > 0 ? value[0] : null);
-    };
-  
-    const HandleRedirect = () => {
-      navigate(`/cardform`);
-    };
-  
-    useEffect(() => {
-      // This useEffect will run whenever snippetData is updated
-      if (videoData) {
-        // Update snippetData state
-        setVideoData(videoData);
-  
-        // Map over the new snippetData and update the snippets state
-        setVideos(videoData.map((video) => (
-          <VideoCard key={video.id} videoData={video} videoId={video.id}/>
-        )));
-      }
-    }, [videoData]);
+  const filteredVideos = useMemo(() => {
+    if (!videosData) return [];
 
-    const [filteredVideos, setFilteredVideos] = useState<JSX.Element[]>([]);
+    let filtered = [...videosData];
 
-    useEffect(() => {
-      if (videoData) {
-        setFilteredVideos(
-          videoData.map((video) => <VideoCard key={video.id} videoData={video} videoId={video.id} />)
-        );
-      }
-    }, [videoData]);
-  
-    // Callback function to handle search term changes
-    const handleSearch = (searchTerm: string) => {
-      // If the search term is empty, show all videos
-      if (searchTerm.trim() === "") {
-        setFilteredVideos(
-          videoData.map((video) => <VideoCard key={video.id} videoData={video} videoId={video.id} />)
-        );
-      } else {
-        // Otherwise, filter videos based on the search term
-        const filtered = videoData.filter((video) =>
-          video.title.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-  
-        setFilteredVideos(
-          filtered.map((video) => <VideoCard key={video.id} videoData={video} videoId={video.id} />)
-        );
-      }
-    };
+    if (searchedTerm) {
+      filtered = filtered.filter((video) =>
+        video.title.toLowerCase().includes(searchedTerm.toLowerCase()),
+      );
+    }
 
+    if (selectedVideoType && selectedVideoType.length > 0) {
+      filtered = filtered.filter(
+        (video) => video.video_type.id === selectedVideoType[0].value,
+      );
+    }
 
-    // const handleSearch = (searchTerm: string) => {
-    //   const filtered = videoData.filter((video) =>
-    //     video.title.toLowerCase().includes(searchTerm.toLowerCase())
-    //   );
-  
-    //   setFilteredVideos(
-    //     filtered.map((video) => <VideoCard key={video.id} videoData={video} videoId={video.id} />)
-    //   );
-    // };
+    if (selectedInfluencers && selectedInfluencers.length > 0) {
+      filtered = filtered.filter((video) =>
+        selectedInfluencers.some((v) => v.value === video.host_id.id),
+      );
+    }
+
+    return filtered.map((video) => (
+      <VideoCard key={video.id} videoData={video} />
+    ));
+  }, [videosData, selectedVideoType, selectedInfluencers, searchedTerm]);
 
   return (
-      <div>
-        <div className="flex flex-row justify-between pb-8 content-center items-center place-content-center place-items-center">
-            <div>
-                {/* <SelectComponent2 data={videoTypes} onSelect={handleVideoSelect} multi={false} /> */}
-            </div>
-            <div><SearchBar onSearch={handleSearch}/></div>
-            {/* <div className="flex flex-row gap-3">
-                <button><Image /></button>
-                <button><LayoutList /></button>
-                <button><LayoutGrid /></button>
-            </div> */}
-        </div>
+    <>
+      <div className="flex flex-row place-content-center place-items-center content-center items-center justify-between pb-5">
+        {!areInfluencersDataLoading && !areVideoTypesDataLoading ? (
+          <>
+            <section className="flex flex-row gap-4">
+              <span className="w-[15rem]">
+                <Select
+                  data={videoTypesData}
+                  endpoint="video_types"
+                  selectedOptions={selectedVideoType}
+                  setSelectedOptions={setSelectedVideoType}
+                  placeholder="Select Video Type"
+                />
+              </span>
+              <span className="w-[15rem]">
+                <Select
+                  data={influencersData}
+                  endpoint="influencers"
+                  selectedOptions={selectedInfluencers}
+                  setSelectedOptions={setSelectedInfluencers}
+                  isMulti={true}
+                  placeholder="Select Influencers"
+                />
+              </span>
+            </section>
 
-        <div className="grid grid-cols-4 gap-4">
-            {/* {videos.length > 0 ? videos : <p>Loading...</p>} */}
-            {filteredVideos.length > 0 ? filteredVideos : <p>Loading...</p>}
-        </div>
-        <Button className="mt-5" onClick={HandleRedirect}>Create Video</Button>
-        </div>
-      );
+            <section className="w-[30rem]">
+              <SearchBar search={searchedTerm} setSearch={setSearchedTerm} />
+            </section>
+          </>
+        ) : (
+          <>
+            <section className="flex flex-row gap-4">
+              <Skeleton className="h-12 w-[15rem]" />
+              <Skeleton className="h-12 w-[15rem]" />
+            </section>
+            <Skeleton className="h-12 w-[30rem]" />
+          </>
+        )}
+      </div>
+
+      <section className="grid grid-cols-4 gap-4 pb-8">
+        {areVideosDataLoading ? (
+          <>
+            <Skeleton className="h-[250px] w-[full]" />
+            <Skeleton className="h-[250px] w-[full]" />
+            <Skeleton className="h-[250px] w-[full]" />
+            <Skeleton className="h-[250px] w-[full]" />
+            <Skeleton className="h-[250px] w-[full]" />
+            <Skeleton className="h-[250px] w-[full]" />
+            <Skeleton className="h-[250px] w-[full]" />
+            <Skeleton className="h-[250px] w-[full]" />
+          </>
+        ) : filteredVideos.length > 0 ? (
+          filteredVideos
+        ) : (
+          <EmptyState
+            objectName="Video"
+            onActionClick={handleRedirect}
+            icon={<VideoOff />}
+          />
+        )}
+      </section>
+    </>
+  );
 }

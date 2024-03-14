@@ -47,13 +47,14 @@ class SignupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => 'required|string',
+            'username' => 'required|string|unique:users,username|max:45|min:3|regex:/^[A-Za-z0-9_]+$/u',
             'email' => 'required|email|string|unique:users,email',
             'secret_name' => 'nullable|string|unique:users,secret_name',
             'password' => [
                 'nullable',
                 'confirmed',
-                Password::min(8)->mixedCase()->numbers()->symbols()
+                'max:50',
+                Password::min(8)->mixedCase()->numbers()->symbols(),
             ],
             'access_token' => 'nullable|string|max:3500',
         ];

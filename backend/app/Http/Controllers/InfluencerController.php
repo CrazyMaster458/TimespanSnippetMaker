@@ -16,8 +16,8 @@ class InfluencerController extends Controller
     {
         return InfluencerResource::collection(
         Influencer::orderBy('created_at', 'desc')
-            ->paginate(10)
-        );
+        ->get()
+    );
     }
 
     /**

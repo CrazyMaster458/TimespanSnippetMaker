@@ -1,8 +1,9 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useStateContext } from "@/contexts/ContextProvider";
-import { Navbar2 } from "../Navbar2";
+import { Navbar } from "../Navbar";
 import { MenuBar } from "../MenuBar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function DefaultLayout() {
   const { userToken } = useStateContext();
@@ -12,18 +13,27 @@ export default function DefaultLayout() {
   }
 
   return (
-    <div>
-      <Navbar2 />
-      <div className="flex flex-row">
-        <div className="grow-0">
+    <>
+      <header>
+        <Navbar />
+      </header>
+      <main className="flex flex-row">
+        <aside className="grow-0">
           <MenuBar />
-        </div>
-        <ScrollArea className="grow overflow-hidden h-[90.8vh]">
-          <div className="ml-9 mr-12 pl-0 mt-4">
+        </aside>
+        <ScrollArea className="h-[90.8vh] grow overflow-hidden">
+          <div className="my-4 ml-9 mr-12 pl-0">
             <Outlet />
           </div>
         </ScrollArea>
-      </div>
-    </div>
+      </main>
+      <Toaster
+        richColors={true}
+        theme="light"
+        position="bottom-right"
+        toastOptions={{ duration: 3000 }}
+      />
+      <footer></footer>
+    </>
   );
 }

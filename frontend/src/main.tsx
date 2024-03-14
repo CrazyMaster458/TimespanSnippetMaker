@@ -5,14 +5,21 @@ import { RouterProvider } from "react-router-dom";
 import "./index.css";
 import router from "./router.tsx";
 import { ContextProvider } from "./contexts/ContextProvider.tsx";
-// import { GoogleOAuthProvider } from '@react-oauth/google';
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import ErrorHandler from "./utils/error.tsx";
+
+const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    {/* <GoogleOAuthProvider clientId="665242793026-cmskapaiveadved5rqgfab5f8rk4p52d.apps.googleusercontent.com"> */}
+    <QueryClientProvider client={queryClient}>
       <ContextProvider>
-        <RouterProvider router={router}></RouterProvider>
+        <ErrorHandler>
+          <RouterProvider router={router}></RouterProvider>
+          <ReactQueryDevtools />
+        </ErrorHandler>
       </ContextProvider>
-    {/* </GoogleOAuthProvider> */}
-  </React.StrictMode>
+    </QueryClientProvider>
+  </React.StrictMode>,
 );

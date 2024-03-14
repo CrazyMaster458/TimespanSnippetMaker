@@ -5,7 +5,6 @@ import Login from "./pages/authentication/Login";
 import Signup from "./pages/authentication/Signup";
 import DefaultLayout from "./components/layouts/DefaultLayout";
 import { CardWithForm } from "./components/VideoUploadCard";
-import ListPage from "./pages/ListPage";
 import VideoList from "./pages/lists/VideoList";
 import SnippetList from "./pages/lists/SnippetList";
 import InfluencerList from "./pages/lists/InfluencerList";
@@ -15,6 +14,7 @@ import Settings from "./pages/settings/Settings";
 import { Account } from "./pages/settings/Account";
 import { Preferences } from "./pages/settings/Preferences";
 import VideoDetail from "./pages/details/VideoDetail";
+import { error } from "./utils/error";
 
 const router = createBrowserRouter([
   {
@@ -31,27 +31,27 @@ const router = createBrowserRouter([
       },
       {
         path: "/videos",
-        element: <VideoList/>,
+        element: <VideoList />,
       },
       {
         path: "/snippets",
-        element: <SnippetList/>,
+        element: <SnippetList />,
       },
       {
         path: "/influencers",
-        element: <InfluencerList/>,
+        element: <InfluencerList />,
       },
       {
         path: "/channels",
-        element: <ChannelList/>,
+        element: <ChannelList />,
       },
       {
         path: "/tags",
-        element: <TagList/>,
+        element: <TagList />,
       },
       {
         path: "/settings",
-        element: <Settings/>,
+        element: <Settings />,
         children: [
           {
             path: "account",

@@ -34,11 +34,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
 
     // CRUD routes
-    Route::apiResource('video', VideoController::class);
-    Route::apiResource('snippet', SnippetController::class);
-    Route::apiResource('tag', TagController::class);
-    Route::apiResource('influencer', InfluencerController::class);
-    Route::apiResource('video_type', VideoTypeController::class);
+    Route::apiResource('videos', VideoController::class);
+    Route::apiResource('snippets', SnippetController::class);
+    Route::apiResource('tags', TagController::class);
+    Route::apiResource('influencers', InfluencerController::class);
+    Route::apiResource('video_types', VideoTypeController::class);
     Route::apiResource('status', StatusController::class);
 
     Route::get('/folder', [StorageController::class, 'createFolder']);
@@ -65,6 +65,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/video_parameters', [GatewayController::class, 'retriveVideoParameters']);
     Route::get('/get_video_data/{video}', [GatewayController::class, 'getVideoData']);
 
+    Route::get('/get_video_list', [GatewayController::class, 'getVideoList']);
 });
 
 

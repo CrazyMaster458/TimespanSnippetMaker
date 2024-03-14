@@ -570,13 +570,26 @@ input[type="number"]::-webkit-outer-spin-button {
   background: black;
 }
 
+.create__control [id^="react-select-"][id$="-listbox"]{
+}
 
 [id^="react-select-"][id$="-listbox"] {
   padding: 8px;
+  max-height: 9.5rem;
+  overflow-y: hidden; /* Vertical scrollbar */
+}
+
+[id^="react-select-"][id$="-listbox"] > * {
+  border-radius: 6px;
+  max-height: 7.8rem;
+  overflow-y: scroll; /* Vertical scrollbar */
 }
 
 [id^="react-select-"][id$="-listbox"] > * > * {
   border-radius: 6px;
+}
+
+.create__control {
 }
 
 .video-card {
@@ -605,4 +618,10 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .input-bordered {
 
+}
+
+.empty_state > svg {
+  height: 2.5rem; /* h-10: height 10 */
+  width: 2.5rem; /* w-10: width 10 */
+  color: #9ca3af; /* text-[#9ca3af]: text color #9ca3af */
 }

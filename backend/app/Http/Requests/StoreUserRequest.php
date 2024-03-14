@@ -18,7 +18,8 @@ class StoreUserRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'secret_name' => $this->generateSecretName()
+            'secret_name' => $this->generateSecretName(),
+            'password' => bcrypt($this->input('password')),
         ]);
     }
 

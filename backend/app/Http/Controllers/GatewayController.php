@@ -23,6 +23,19 @@ class GatewayController extends Controller
         ]);
     }
 
+    public function getVideoList(){
+        
+        $videoData = app(VideoController::class)->getVideoList();
+        $influencers = app(InfluencerController::class)->index();
+        $videoTypes = app(VideoTypeController::class)->index();
+
+        return response()->json([
+            'videos' => $videoData,
+            'video_types' => $videoTypes,
+            'influencers' => $influencers,
+        ]);
+    }
+
     public function retriveVideoParameters()
     {
         $influencers = app(InfluencerController::class)->index();

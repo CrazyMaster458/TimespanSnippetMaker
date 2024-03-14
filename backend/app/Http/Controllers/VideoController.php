@@ -36,13 +36,34 @@ class VideoController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
         $videos = $videos->map(function ($video) {
-            // $video->video_url = $this->storageController->getFileUrl($video->file_path);
+            $video->video_url = $this->storageController->getFileUrl($video->file_path);
             $video->image_url = $this->storageController->getFileUrl($video->thumbnail_path);
     
             return new VideoResource($video);
         });
     
-        return $videos;
+        return VideoResource::collection($videos);
+    }
+
+    public function getVideoList(){
+        $user = Auth::user();
+
+        $videos = Video::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->with('guests')
+            ->get();
+
+        $videoList = $videos->map(function ($video) {
+            return [
+                'id' => $video->id,
+                'title' => $video->title,
+                'host_id' => $video->host,
+                'video_type' => $video->video_type,
+                'image_url' => $this->storageController->getFileUrl($video->thumbnail_path),
+            ];
+        });
+
+        return $videoList;
     }
 
     /**

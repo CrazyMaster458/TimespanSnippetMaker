@@ -68,6 +68,12 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => \App\Models\User::class,
+            'table' => 'users',
+            'throttle' => [
+                'enabled' => true,
+                'decay_minutes' => 5,
+                'max_attempts' => 5,   
+            ],
         ],
 
         // 'users' => [

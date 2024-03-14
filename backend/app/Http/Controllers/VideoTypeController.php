@@ -20,7 +20,7 @@ class VideoTypeController extends Controller
 
         return VideoTypeResource::collection(
         VideoType::orderBy('created_at', 'desc')
-            ->paginate(10)
+            ->get()
         );
     }
 
