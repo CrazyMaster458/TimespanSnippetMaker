@@ -6,6 +6,7 @@ use App\Http\Resources\InfluencerResource;
 use App\Models\Influencer;
 use App\Http\Requests\StoreInfluencerRequest;
 use App\Http\Requests\UpdateInfluencerRequest;
+use Illuminate\Http\Request;
 
 class InfluencerController extends Controller
 {
@@ -57,7 +58,10 @@ class InfluencerController extends Controller
      */
     public function destroy(Influencer $influencer)
     {
-        // TODO: Check permisions + existance
+        $influencer->videos()->update(['host_id' => null]);
+
+        $influencer->guests()->delete();
+
         $influencer->delete();
 
         return response('', 204);

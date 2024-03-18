@@ -16,8 +16,6 @@ class VideoTypeController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
-
         return VideoTypeResource::collection(
         VideoType::orderBy('created_at', 'desc')
             ->get()
@@ -61,12 +59,7 @@ class VideoTypeController extends Controller
      */
     public function destroy(VideoType $videoType, Request $request)
     {
-        $user = $request->user();
-        // TODO: Check if the user has the right permissions
-        // TODO: check if the video type is already being used
-        // if ($user->id == $video->user_id) {
-        //     return abort(403, 'Unauthorized action');
-        // }
+        $videoType->videos()->update(['video_type_id' => null]);
 
         $videoType->delete();
 

@@ -5,9 +5,8 @@ import { ValueType } from "react-select";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addNewItem, handleSuccess } from "@/api";
 import { v4 as uuidv4 } from "uuid";
-import { Option, SimpleProp } from "@/types/types";
-import { toast } from "sonner";
-import { getErrorMessage } from "@/utils/getErrorMessage";
+import { Option, SimpleProp } from "@/lib/types";
+import { Schema } from "zod";
 
 type SelectComponentProps = {
   data: SimpleProp[];
@@ -16,15 +15,17 @@ type SelectComponentProps = {
   endpoint: string;
   isMulti?: boolean;
   placeholder: string;
+  schema: Schema;
 };
 
-export const Select: React.FC<SelectComponentProps> = ({
+export const SelectCreate: React.FC<SelectComponentProps> = ({
   data,
   endpoint,
   selectedOptions,
   setSelectedOptions,
   isMulti = false,
   placeholder,
+  schema,
 }) => {
   const [options, setOptions] = useState<Option[]>(
     data.map((item) => ({ value: item.id, label: item.name })),
@@ -55,46 +56,50 @@ export const Select: React.FC<SelectComponentProps> = ({
   const { mutateAsync: optimisticUpdate } = useMutation({
     mutationFn: addNewItem,
     onSuccess: async (newItem) => {
-      await handleSuccess({ queryClient, endpoint, newItem });
+      await handleSuccess({ queryClient, queryName: [endpoint], newItem });
 
       setOptions(removeLastItem(options, newItem));
       setSelectedOptions(removeLastItem(selectedOptions, newItem));
     },
     onMutate: async (newItem) => {
-      const { endpoint, inputValue } = newItem;
-      await queryClient.cancelQueries([endpoint]);
-      const previousData = queryClient.getQueryData<Option[]>([endpoint]);
+      const { endpoint: queryName, data } = newItem;
+      await queryClient.cancelQueries([queryName]);
+      const previousData = queryClient.getQueryData<Option[]>([queryName]);
 
-      const newOption: Option = { value: uuidv4(), label: inputValue };
+      const newOption: Option = { value: uuidv4(), label: data.name };
 
-      queryClient.setQueryData<Option[]>([endpoint], (prevData) => [
+      queryClient.setQueryData<Option[]>([queryName], (prevData) => [
         ...prevData,
         newOption,
       ]);
 
       updateOptionsAndSelected(newOption);
 
-      return { previousData, endpoint };
+      return { previousData, queryName, data };
     },
     onError: (error, context) => {
-      const { endpoint } = context;
-      queryClient.setQueryData([endpoint], context.previousData);
+      const { endpoint: queryName, data } = context;
+      queryClient.setQueryData([queryName], context.previousData);
+      setOptions(removeLastItem(options, data));
+      setSelectedOptions(removeLastItem(selectedOptions, data));
+      console.log("Error creating the item:", error);
     },
     onSettled: () => {
-      queryClient.invalidateQueries([endpoint]);
+      const queryName = endpoint;
+      queryClient.invalidateQueries([queryName]);
     },
   });
 
   const handleCreateOption = useCallback(
     async (inputValue: string) => {
       try {
-        const newItem = await optimisticUpdate({ endpoint, inputValue });
+        const data = { name: inputValue };
+        const newItem = await optimisticUpdate({ endpoint, data, schema });
         const newOption = { value: newItem.id, label: newItem.name };
 
         updateOptionsAndSelected(newOption);
       } catch (error) {
         console.error("Error creating the item:", error);
-        toast.error(getErrorMessage(error));
       }
     },
     [optimisticUpdate, endpoint, isMulti],

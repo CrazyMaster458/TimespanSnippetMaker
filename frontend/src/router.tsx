@@ -14,7 +14,6 @@ import Settings from "./pages/settings/Settings";
 import { Account } from "./pages/settings/Account";
 import { Preferences } from "./pages/settings/Preferences";
 import VideoDetail from "./pages/details/VideoDetail";
-import { error } from "./utils/error";
 
 const router = createBrowserRouter([
   {

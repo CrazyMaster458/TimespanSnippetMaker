@@ -7,7 +7,7 @@ import { SearchBar } from "@/components/SearchBar";
 import { SnippetCard } from "../../components/SnippetCard";
 // import { MultiSelect } from "@/components/MultiSelectOld";
 import { useFetch } from "@/utils/useFetch";
-import { Snippet, Tag } from "@/types/types";
+import { Snippet, Tag } from "@/lib/types";
 
 type FetchProps = {
   snippets: Snippet[];

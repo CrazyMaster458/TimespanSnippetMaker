@@ -28,7 +28,6 @@ class UpdateSnippetRequest extends FormRequest
             'file_path' => 'nullable|string|max:1150',
             'downlaoded' => 'boolean',
             'snippet_code' => 'string|max:8',
-            'video_type_id' => 'exists:video_types,id',
             'video_id' => 'exists:videos,id',
             'user_id' => 'exists:users,id',
             'snippet_tags' => 'array|exists:tags,id',

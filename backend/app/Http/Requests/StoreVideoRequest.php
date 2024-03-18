@@ -21,12 +21,12 @@ class StoreVideoRequest extends FormRequest
         return true;
     }
 
-    // TODO
     protected function prepareForValidation()
     {
         $this->merge([
             'user_id' => $this->user()->id,
             'video_code' => $this->generateVideoID(),
+            'title' => $this->input('title', 'New Video'), 
         ]);
     }
 
@@ -51,15 +51,12 @@ class StoreVideoRequest extends FormRequest
     {
         return [
             'title' => 'nullable|string|max:1100',
-            'video' => 'nullable|mimetypes:video/mp4,video/mpeg,video/quicktime',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'file_path' => 'nullable|string',
             'thumbnail_path' => 'nullable|string',
             'video_code' => 'nullable|string|max:8',
             'user_id' => 'exists:users,id',
             'host_id' => 'nullable|exists:influencers,id',
             'video_type_id' => 'nullable|exists:video_types,id',
-            'guests' => 'array|exists:influencers,id',
         ];
     }
 }

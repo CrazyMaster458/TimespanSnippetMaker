@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import axiosClient from "@/axios";
+import axiosClient from "@/api/axios";
 import { TimespanInput } from "@/components/TimespanInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,8 +8,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { Download } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useSnippetsDataStore } from "../utils/StateStore";
-import { Snippet, Tag, TimeProp } from "@/types/types";
+import {
+  Snippet,
+  SnippetUpdate,
+  Tag,
+  TimeProp,
+  snippetSchema,
+  snippetUpdateSchema,
+} from "@/lib/types";
 import { parseTime } from "@/utils/timeUtils";
+import { SelectCreate } from "./Select";
+import { Option, tagSchema } from "@/lib/types";
+import { deleteData, putData } from "@/api";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { LoadingButton } from "./LoadingButton";
 
 const DEFAULT_DESCRIPTION = "New Snippet";
 const DEFAULT_TIME = "00:00:00";
@@ -32,18 +44,16 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
   onClick,
   setSnippetTimes,
 }) => {
+  const queryClient = useQueryClient();
+
   const [snippetStart, setSnippetStart] = useState<TimeProp>();
   const [snippetEnd, setSnippetEnd] = useState<TimeProp>();
 
-  const [tags, setTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState<Option[]>([]);
 
   const [snippetDuration, setSnippetDuration] = useState("0:00");
   const [description, setDescription] = useState("");
   const [initialLoad, setInitialLoad] = useState(true);
-
-  const { updateSnippet } = useSnippetsDataStore((state) => ({
-    updateSnippet: state.updateSnippet,
-  }));
 
   const handleDescriptionChange: React.ChangeEventHandler<HTMLInputElement> = (
     e,
@@ -58,32 +68,53 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
     [onClick],
   );
 
+  const { mutateAsync: updateSnippetData } = useMutation({
+    mutationFn: (data: SnippetUpdate) =>
+      putData(`/snippets/${data.id}`, data, snippetUpdateSchema),
+    onSuccess: () => {
+      const queryKey = ["videos", snippetData.video_id, "snippets"];
+
+      queryClient.invalidateQueries(queryKey);
+    },
+    onError: (error) => {
+      console.error("Error updating snippet:", error);
+    },
+  });
+
   const updateData = async () => {
     try {
-      const response = await axiosClient.put(`/snippet/${snippetData.id}`, {
+      const tags = selectedTags.map((tag) => tag.value);
+
+      const data: SnippetUpdate = {
+        id: snippetData.id,
         description: description,
         starts_at: Object.values(snippetStart).join(":"),
         ends_at: Object.values(snippetEnd).join(":"),
-        video_type_id: 1,
         video_id: snippetData.video_id,
         snippet_tags: tags,
-      });
-      console.log(response.data);
-      updateSnippet(response.data);
+      };
+
+      await updateSnippetData(data);
     } catch (error) {
       console.log(error);
     }
   };
 
-  // const deleteSnippet = async () => {
-  //     try {
-  //         const response = await axiosClient.delete(`/snippet/${snippetData.id}`);
-  //         console.log(response.data.data);
-  //         onDeleteSnippet(snippetData.id);
-  //     } catch (error) {
-  //         console.log(error);
-  //     }
-  // };
+  const { mutateAsync: deleteSnippet, isPending } = useMutation({
+    mutationFn: () => deleteData(`/snippets/${snippetData.id}`),
+    onSuccess: () => {
+      const queryKey = ["videos", snippetData.video_id, "snippets"];
+
+      queryClient.invalidateQueries(queryKey);
+    },
+    onError: (error) => {
+      console.error("Error updating snippet:", error);
+    },
+  });
+
+  const handleDeleteSnippet = () => {
+    deleteSnippet();
+  };
 
   const cutVideo = async () => {
     try {
@@ -141,14 +172,22 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
       setSnippetStart(parseTime(snippetData.starts_at || DEFAULT_TIME));
       setSnippetEnd(parseTime(snippetData.ends_at || DEFAULT_TIME));
       const mappedTags = snippetData.snippet_tags.map((tag) => tag.tag_id);
-      setTags(mappedTags);
+      setSelectedTags((prevTags) => {
+        return tagsData
+          .filter((tag) => mappedTags.includes(tag.id))
+          .map((tag) => ({ value: tag.id, label: tag.name }));
+      });
       setInitialLoad(false);
     }
   }, [initialLoad, snippetData]);
 
+  useEffect(() => {
+    console.log(selectedTags);
+  }, [selectedTags]);
+
   return (
     <div>
-      <div className="collapse collapse-arrow">
+      <div className="collapse-arrow collapse">
         <input type="radio" name="my-accordion-2" onClick={handleCardClick} />
         <div className="collapse-title">
           <div className="flex justify-between">
@@ -191,33 +230,60 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
 
           <div className="pt-3">
             {/* <SelectComponent data={tagsData} endpoint="tag" multi={true} value={tags} setValue={setTags}/> */}
-            {/* <MultiSelect
-              data={tagsData}
-              endpoint="tag"
-              value={tags}
-              setValue={setTags}
-            /> */}
+            {selectedTags && !initialLoad ? (
+              <>
+                <SelectCreate
+                  data={tagsData}
+                  endpoint="tags"
+                  selectedOptions={selectedTags}
+                  isMulti={true}
+                  setSelectedOptions={setSelectedTags}
+                  placeholder="Select Tags"
+                  schema={tagSchema}
+                />
+              </>
+            ) : (
+              <p>Loading...</p>
+            )}
           </div>
 
           <div className="pt-3">
             <Textarea
-              value={snippetData.transcript}
+              defaultValue={snippetData.transcript}
               placeholder="Transcript not avalible"
+              readOnly
             />
           </div>
 
           <div className="flex w-full place-items-center justify-between pt-5">
             <div className="flex justify-start gap-3">
-              <Button className="px-5" onClick={updateData} variant="default">
+              <Button
+                className="px-5"
+                disabled={isPending}
+                onClick={updateData}
+                variant="default"
+              >
                 Save
               </Button>
-              <Button variant="outline" onClick={cutVideo}>
+              <Button variant="outline" onClick={cutVideo} disabled={isPending}>
                 <Download className="pr-2" /> Download
               </Button>
             </div>
-            <Button variant="outline" className="justify-self-end bg-red-500">
-              DELETE
-            </Button>
+            {isPending ? (
+              <>
+                <LoadingButton className="justify-self-end" />
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={handleDeleteSnippet}
+                  className="justify-self-end bg-red-500"
+                >
+                  DELETE
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

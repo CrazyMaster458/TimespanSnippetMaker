@@ -1,5 +1,5 @@
-import axiosClient from "@/axios";
-import { Button } from "@/components/ui/button"
+import { postData } from "@/api";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,91 +7,105 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useStateContext } from "@/contexts/ContextProvider";
-import { useState } from "react";
+import { TLoginSchema, loginSchema } from "@/lib/types";
+import { handleServerError } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import { LoadingButton } from "./LoadingButton";
 
 export function LoginCard() {
-    const { setCurrentUser, setUserToken } = useStateContext();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState({ __html: "" });
+  const { setCurrentUser, setUserToken } = useStateContext();
 
-    const onSubmit = (e: { preventDefault: () => void }) => {
-        e.preventDefault();
-        setError({ __html: "" });
-        type ErrorArray = string[];
-    
-        axiosClient
-        .post("/login", {
-          email: email,
-          password: password,
-        })
-        .then(({ data }) => {
-          setCurrentUser(data.user);
-          setUserToken(data.token);
-        })
-        .catch((error) => {
-          if (error.response) {
-            const finalErrors = (
-              Object.values(error.response.data.errors) as ErrorArray
-            ).reduce<string[]>((accum, next) => [...accum, ...next], []);
-            setError({ __html: finalErrors.join("<br />") });
-          }
-          console.log(error);
-        });
-      };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError,
+  } = useForm<TLoginSchema>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const { mutateAsync: login, isPending } = useMutation({
+    mutationFn: (formData: TLoginSchema) =>
+      postData("/login", formData, loginSchema),
+    onSuccess: ({ user, token }) => {
+      setCurrentUser(user);
+      setUserToken(token);
+    },
+    onError: (error) => handleServerError(error, setError),
+  });
+
+  const onSubmit = async (data: TLoginSchema) => {
+    login(data);
+  };
 
   return (
-    <div /*className="grid place-content-center h-[90vh]"*/>
-        <Card className="w-[25vw] h-[auto]">
-        <CardHeader>
+    <>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Card className="h-[auto] w-[25vw]">
+          <CardHeader>
             <CardTitle>Login into your account</CardTitle>
-            <CardDescription>To continue to Timestamp Snippet Maker.</CardDescription>
-        </CardHeader>
-        <CardContent>
-            <form>
-              <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input 
-                        id="email" 
-                        placeholder="Email" 
-                        type="text" 
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                    {/* 
-                    {errors && errors.email ?
-                        <p className="error">{errors.email}</p> : null
-                    } */}
+            <CardDescription>
+              To continue to Timestamp Snippet Maker.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                {...register("email")}
+                id="email"
+                placeholder="Email"
+                type="email"
+              />
 
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                        id="password" 
-                        type="password" 
-                        placeholder="Password"
-                        required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-              </div>
-            </form>
-        </CardContent>
-          
-        <CardFooter className="grid justify-stretch gap-2">
-        {error.__html && (
-            <div
-            className="bg-red-500 text-sm rounded mb-2 p-2 px-3 text-white"
-            dangerouslySetInnerHTML={error}
-        ></div>)}
-          <Button onClick={onSubmit}>Login</Button>
-          <p className="redirect-link justify-self-center">Don't have an account? <Link className="text-blue-600 hover:underline underline-offset-3" to={"/signup"}>Singup</Link></p>
-        </CardFooter>
-    </Card>
-    </div>
-  )
+              {errors.email && (
+                <p className="text-sm text-red-500">{`${errors.email.message}`}</p>
+              )}
+
+              <Label htmlFor="password">Password</Label>
+              <Input
+                {...register("password")}
+                id="password"
+                type="password"
+                placeholder="Password"
+              />
+
+              {errors.password && (
+                <p className="text-sm text-red-500">{`${errors.password.message}`}</p>
+              )}
+            </div>
+          </CardContent>
+
+          <CardFooter className="grid justify-stretch gap-2">
+            {isPending ? (
+              <LoadingButton />
+            ) : (
+              <Button type="submit">Login</Button>
+            )}
+
+            {errors.root && (
+              <p className="text-sm text-red-500">{`${errors.root.message}`}</p>
+            )}
+
+            <p className="redirect-link justify-self-center">
+              Don't have an account?{" "}
+              <Link
+                className="underline-offset-3 text-blue-600 hover:underline"
+                to={"/signup"}
+              >
+                Singup
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </form>
+    </>
+  );
 }

@@ -26,7 +26,7 @@ return new class extends Migration
             // Foregin keys
             $table->foreignIdFor(User::class, 'user_id');
             $table->foreignIdFor(Influencer::class, 'host_id')->nullable();
-            $table->foreignIdFor(VideoType::class, 'video_type_id');
+            $table->foreignIdFor(VideoType::class, 'video_type_id')->nullable();
         });
     }
 

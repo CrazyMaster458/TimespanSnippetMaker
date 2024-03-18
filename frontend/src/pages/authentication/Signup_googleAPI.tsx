@@ -2,13 +2,14 @@
 /* eslint-disable no-var */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
-import axiosClient from "../../axios.tsx";
+import axiosClient from "../../api/axios.tsx";
 import { useStateContext } from "@/contexts/ContextProvider.tsx";
-import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
+import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
-import { google } from 'googleapis';
+import { google } from "googleapis";
 
-const CLIENT_ID = "665242793026-cmskapaiveadved5rqgfab5f8rk4p52d.apps.googleusercontent.com";
+const CLIENT_ID =
+  "665242793026-cmskapaiveadved5rqgfab5f8rk4p52d.apps.googleusercontent.com";
 const CLIENT_SECRET = "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";
 const SCOPE = "https://www.googleapis.com/auth/drive.metadata.readonly";
 
@@ -19,7 +20,7 @@ export default function SignupAPI() {
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [error, setError] = useState({ __html: "" });
-  const [gData, setGData] = useState<GoogleData>({  });
+  const [gData, setGData] = useState<GoogleData>({});
   const [accessToken, setAccessToken] = useState<string>();
   const [tokenClient, setTokenClient] = useState({});
 
@@ -29,17 +30,15 @@ export default function SignupAPI() {
     "http://localhost:3000",
   );
 
-  const scopes = [
-    'https://www.googleapis.com/auth/drive.metadata.readonly'
-  ];
+  const scopes = ["https://www.googleapis.com/auth/drive.metadata.readonly"];
 
   const authorizationUrl = oauth2Client.generateAuthUrl({
-    access_type: 'offline',
+    access_type: "offline",
     scope: scopes,
-    include_granted_scopes: true
+    include_granted_scopes: true,
   });
 
-  res.writeHead(301, { "Location": authorizationUrl });
+  res.writeHead(301, { Location: authorizationUrl });
 
   interface GoogleData {
     name: string;
@@ -47,29 +46,29 @@ export default function SignupAPI() {
     azp: string;
   }
 
-  function handleCallbackResponse(response :any){
+  function handleCallbackResponse(response: any) {
     console.log(response);
     console.log(response.credential);
-  };
+  }
 
   // function createDriveFile(authorizationCode: string){
-    // const tokenEndpoint = 'https://oauth2.googleapis.com/token';
-    
-    // axiosClient.post(tokenEndpoint, {
-    //   code: authorizationCode,
-    //   client_id: CLIENT_ID,
-    //   client_secret: CLIENT_SECRET,
-    //   redirect_uri: "http://localhost:3000/signup",
-    //   grant_type: 'authorization_code',
-    // })
-    //   .then(response => {
-    //     const refreshToken = response.data.refresh_token;
-    //     console.log('Refresh Token:', refreshToken);
-    //   })
-    //   .catch(error => {
-    //     console.error('Error obtaining tokens:', error.response.data);
-    //   });
-    // tokenClient.requestAccessToken();
+  // const tokenEndpoint = 'https://oauth2.googleapis.com/token';
+
+  // axiosClient.post(tokenEndpoint, {
+  //   code: authorizationCode,
+  //   client_id: CLIENT_ID,
+  //   client_secret: CLIENT_SECRET,
+  //   redirect_uri: "http://localhost:3000/signup",
+  //   grant_type: 'authorization_code',
+  // })
+  //   .then(response => {
+  //     const refreshToken = response.data.refresh_token;
+  //     console.log('Refresh Token:', refreshToken);
+  //   })
+  //   .catch(error => {
+  //     console.error('Error obtaining tokens:', error.response.data);
+  //   });
+  // tokenClient.requestAccessToken();
 
   //   const requestBody = {
   //     client_id: '<YOUR_CLIENT_ID>',
@@ -77,7 +76,7 @@ export default function SignupAPI() {
   //     refresh_token: '<REFRESH_TOKEN_FOR_THE_USER>',
   //     grant_type: 'refresh_token'
   //   };
-    
+
   //   fetch('https://www.googleapis.com/oauth2/v4/token', {
   //     method: 'POST',
   //     headers: {
@@ -98,7 +97,6 @@ export default function SignupAPI() {
   //     console.error('Error:', error);
   //   });
   // }
-
 
   useEffect(() => {
     /* global google */
@@ -126,17 +124,15 @@ export default function SignupAPI() {
       response_type: "code",
       access_type: "offline",
       redirect_uri: "http://localhost:3000",
-      callback: async  (response :any) => {
+      callback: async (response: any) => {
         console.log(response);
-      }
+      },
     });
 
-    google.accounts.id.renderButton(
-      document.getElementById("signInDiv"),
-      {theme: "outline", size: "large"}
-    );
-
-
+    google.accounts.id.renderButton(document.getElementById("signInDiv"), {
+      theme: "outline",
+      size: "large",
+    });
 
     // setTokenClient(
     //   google.accounts.oauth2.initTokenClient({
@@ -170,9 +166,8 @@ export default function SignupAPI() {
     //     },
     //   })
     // );
-    
-    //tokenClient.requestAccessToken();
 
+    //tokenClient.requestAccessToken();
 
     //This block will be executed whenever gData is updated
     // if (gData.name && gData.email) {
@@ -228,16 +223,14 @@ export default function SignupAPI() {
   const login = useGoogleLogin({
     onSuccess: (tokenResponse) => {
       console.log(tokenResponse);
-  }});
+    },
+  });
 
   return (
     <>
       <h1>Signup</h1>
-
       {/* <button onClick={createDriveFile}>get access token</button> */}
-
       <div id="signInDiv">Click here fool</div>
-
       {/* <GoogleLogin
         onSuccess={credentialResponse => {
           if (credentialResponse.credential) {
@@ -269,17 +262,13 @@ export default function SignupAPI() {
         }}
         // auto_select
       />; */}
-
       <button onClick={() => login()}>Sign in with Google 🚀</button>;
-
-
       {error.__html && (
         <div
-          className="bg-red-500 rounded py-2 px-3 text-white"
+          className="rounded bg-red-500 px-3 py-2 text-white"
           dangerouslySetInnerHTML={error}
         ></div>
       )}
-
       <form onSubmit={onSubmit}>
         <input
           type="text"

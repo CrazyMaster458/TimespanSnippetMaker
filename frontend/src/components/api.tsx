@@ -1,5 +1,4 @@
-import axiosClient, { AxiosProgressEvent } from "@/axios";
-
+import axiosClient, { AxiosProgressEvent } from "@/api/axios";
 
 export interface VideoParameters {
   influencers: any[];
@@ -18,7 +17,7 @@ export const fetchVideoParameters = async (): Promise<VideoParameters> => {
 
 export const createVideo = async (): Promise<number> => {
   try {
-    const response = await axiosClient.post("/video");
+    const response = await axiosClient.post("/videos");
     return response.data.data.id;
   } catch (error) {
     console.error("Error creating video:", error);
@@ -30,7 +29,7 @@ export const uploadFile = async (
   url: string,
   file: File,
   type: string,
-  onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
+  onUploadProgress?: (progressEvent: AxiosProgressEvent) => void,
 ): Promise<any> => {
   try {
     const formData = new FormData();
@@ -51,20 +50,19 @@ export const uploadFile = async (
 };
 
 export const updateVideo = async (
-    videoId: number,
-    data: {
-      title: string;
-      host_id: number | null;
-      guests: string[];
-      video_type_id: number | null;
-    }
-  ): Promise<any> => {
-    try {
-      const response = await axiosClient.put(`/video/${videoId}`, data);
-      return response.data;
-    } catch (error) {
-      console.error("Error updating video:", error);
-      throw error;
-    }
+  videoId: number,
+  data: {
+    title: string;
+    host_id: number | null;
+    guests: string[];
+    video_type_id: number | null;
+  },
+): Promise<any> => {
+  try {
+    const response = await axiosClient.put(`/videos/${videoId}`, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating video:", error);
+    throw error;
+  }
 };
-  

@@ -88,11 +88,11 @@ export function CardWithForm() {
           "video",
           (progressEvent) => {
             const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
+              (progressEvent.loaded * 100) / progressEvent.total,
             );
             setUploadProgress(`${percentCompleted}%`);
             // console.log(`Upload Progress: ${percentCompleted}%`);
-          }
+          },
         );
       } catch (error) {
         console.error("Error handling video change:", error);
@@ -108,7 +108,7 @@ export function CardWithForm() {
         await api.uploadFile(
           `/upload-image/${videoId}`,
           e.target.files[0],
-          "image"
+          "image",
         );
       } catch (error) {
         console.error("Error handling video change:", error);
@@ -148,8 +148,8 @@ export function CardWithForm() {
   };
 
   return (
-    <div className="overflow-hidden absolute inset-0 flex justify-center h-full w-full items-center">
-      <Card className="w-[60vw] h-[78vh] flex flex-col">
+    <div className="absolute inset-0 flex h-full w-full items-center justify-center overflow-hidden">
+      <Card className="flex h-[78vh] w-[60vw] flex-col">
         <CardHeader className="px-12">
           <ul className="steps pb-4 pt-4">
             {steps.map((step, index) => (
@@ -188,10 +188,10 @@ export function CardWithForm() {
             {stepNum === 2 && (
               <div className="details grid grid-cols-7 gap-8">
                 <div className="col-span-4">
-                  <div className="border-2 rounded pt-2 px-3 pb-4">
+                  <div className="rounded border-2 px-3 pb-4 pt-2">
                     <Label
                       htmlFor="title"
-                      className="text-gray-500 text-xs font-medium"
+                      className="text-xs font-medium text-gray-500"
                     >
                       Title (required)
                     </Label>
@@ -256,7 +256,7 @@ export function CardWithForm() {
             {stepNum === 4 && (
               <>
                 {error.length > 0 && (
-                  <div className="bg-red-500 text-sm rounded mb-2 p-2 px-3 text-white">
+                  <div className="mb-2 rounded bg-red-500 p-2 px-3 text-sm text-white">
                     {error.map((errMsg, index) => (
                       <div key={index}>{errMsg}</div>
                     ))}

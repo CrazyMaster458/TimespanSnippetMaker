@@ -1,6 +1,6 @@
 // src/components/AudioInput.js
-import { useState } from 'react';
-import axiosClient from "../axios.tsx";
+import { useState } from "react";
+import axiosClient from "../api/axios.tsx";
 
 const Whisper = () => {
   const [audioFile, setAudioFile] = useState(null);
@@ -12,7 +12,7 @@ const Whisper = () => {
   const handleTranscribe = () => {
     if (audioFile) {
       const formData = new FormData();
-      formData.append('file', audioFile);
+      formData.append("file", audioFile);
 
       axiosClient
         .get("/transcribe")
@@ -22,10 +22,8 @@ const Whisper = () => {
         .catch((error) => {
           console.error(error);
         });
-
-
     } else {
-      alert('Please select an audio file.');
+      alert("Please select an audio file.");
     }
   };
 

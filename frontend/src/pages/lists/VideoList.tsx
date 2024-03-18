@@ -1,47 +1,46 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { VideoCard } from "@/components/VideoCard";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { SearchBar } from "@/components/SearchBar";
-import { Select } from "@/components/Select";
+import { SelectCreate } from "@/components/Select";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
-import { VideoOff } from "lucide-react";
+import { Search, VideoOff } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState.tsx";
-import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
-import { fetchData, fetchPost } from "@/api/index.ts";
-import { Option } from "@/types/types";
+import { useQuery } from "@tanstack/react-query";
+import { getData } from "@/api/index.ts";
+import {
+  SimpleProp,
+  Option,
+  influencerSchema,
+  videoTypeSchema,
+} from "@/lib/types";
+
+import { SimpleSelect } from "@/components/Select copy";
+import { UploadFileDialog2 } from "@/components/UploadFileDialog copy";
 
 export default function VideoList() {
+  const navigate = useNavigate();
   const {
     data: videosData,
     isLoading: areVideosDataLoading,
     error,
   } = useQuery({
     queryKey: ["videos"],
-    queryFn: () => fetchData("/videos"),
+    queryFn: () => getData("/videos"),
   });
 
   const { data: videoTypesData, isLoading: areVideoTypesDataLoading } =
     useQuery({
       queryKey: ["video_types"],
-      queryFn: () => fetchData("/video_types"),
+      queryFn: () => getData("/video_types"),
     });
 
   const { data: influencersData, isLoading: areInfluencersDataLoading } =
     useQuery({
       queryKey: ["influencers"],
-      queryFn: () => fetchData("/influencers"),
+      queryFn: () => getData("/influencers"),
     });
-
-  // const { data, fetchNextPage, isFetchingNextPage } = useInfiniteQuery({
-  //   queryKey: ["videos"],
-  //   queryFn: async ({ pageParam = 1 }) => {
-  //     const response = await fetchPost("/videos", pageParam);
-  //     return response;
-  //   },
-  //   getNextPageParam: (lastPage) => lastPage.length + 1,
-  //   initialPageParam: 1,
-  // });
 
   // useEffect(() => {
   //   console.log(influencersData);
@@ -53,11 +52,31 @@ export default function VideoList() {
   //   console.log(videoTypesData);
   // }, [videoTypesData]);
 
+  const [searchParams, setSearchParams] = useSearchParams({
+    q: "",
+    vt: "",
+    i: "",
+  });
+  const searchedQuery = searchParams.get("q");
+  const searchedVideoTypeQuery = searchParams.get("vt");
+  const searchedInfluencersQuery = searchParams.get("vt");
+
+  const [videoType, setVideoType] = useState<number[]>([]);
+  const [influencers, setInfluencers] = useState<number[]>([]);
+
   const [selectedVideoType, setSelectedVideoType] = useState<Option[]>([]);
   const [selectedInfluencers, setSelectedInfluencers] = useState<Option[]>([]);
-  const [searchedTerm, setSearchedTerm] = useState("");
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    // Set selected video type based on URL parameter when component mounts
+    const vtParam = searchParams.get("vt");
+    if (vtParam) {
+      const selectedOptions = vtParam
+        .split(",")
+        .map((value) => parseInt(value));
+      setVideoType(selectedOptions);
+    }
+  }, [searchParams]);
 
   const handleRedirect = () => {
     navigate(`/cardform`);
@@ -68,9 +87,9 @@ export default function VideoList() {
 
     let filtered = [...videosData];
 
-    if (searchedTerm) {
+    if (searchedQuery) {
       filtered = filtered.filter((video) =>
-        video.title.toLowerCase().includes(searchedTerm.toLowerCase()),
+        video.title.toLowerCase().includes(searchedQuery.toLowerCase()),
       );
     }
 
@@ -89,7 +108,7 @@ export default function VideoList() {
     return filtered.map((video) => (
       <VideoCard key={video.id} videoData={video} />
     ));
-  }, [videosData, selectedVideoType, selectedInfluencers, searchedTerm]);
+  }, [videosData, selectedVideoType, selectedInfluencers, searchedQuery]);
 
   return (
     <>
@@ -97,13 +116,14 @@ export default function VideoList() {
         {!areInfluencersDataLoading && !areVideoTypesDataLoading ? (
           <>
             <section className="flex flex-row gap-4">
-              <span className="w-[15rem]">
+              {/* <span className="w-[15rem]">
                 <Select
                   data={videoTypesData}
                   endpoint="video_types"
                   selectedOptions={selectedVideoType}
                   setSelectedOptions={setSelectedVideoType}
                   placeholder="Select Video Type"
+                  schema={videoTypeSchema}
                 />
               </span>
               <span className="w-[15rem]">
@@ -114,12 +134,49 @@ export default function VideoList() {
                   setSelectedOptions={setSelectedInfluencers}
                   isMulti={true}
                   placeholder="Select Influencers"
+                  schema={influencerSchema}
+                />
+              </span> */}
+              <span className="w-[15rem]">
+                <SimpleSelect
+                  data={videoTypesData}
+                  selectedOptions={videoType}
+                  setSelectedOptions={setVideoType}
+                  isMulti={true}
+                  placeholder="Select Video Type"
+                />
+              </span>
+              <span className="w-[15rem]">
+                <SimpleSelect
+                  data={influencersData}
+                  selectedOptions={influencers}
+                  setSelectedOptions={setInfluencers}
+                  isMulti={true}
+                  placeholder="Select Influencers"
                 />
               </span>
             </section>
 
             <section className="w-[30rem]">
-              <SearchBar search={searchedTerm} setSearch={setSearchedTerm} />
+              <label className="input input-bordered input-md flex items-center gap-2">
+                <input
+                  type="search"
+                  className="grow"
+                  placeholder="Search"
+                  value={searchedQuery}
+                  onChange={(e) =>
+                    setSearchParams(
+                      (prev) => {
+                        prev.set("q", e.target.value);
+                        return prev;
+                      },
+                      { replace: true },
+                    )
+                  }
+                />
+                <Search className="w-[1.2rem]" />
+              </label>
+              {/* <SearchBar search={searchedTerm} setSearch={setSearchParams} /> */}
             </section>
           </>
         ) : (
@@ -150,7 +207,7 @@ export default function VideoList() {
         ) : (
           <EmptyState
             objectName="Video"
-            onActionClick={handleRedirect}
+            onClick={handleRedirect}
             icon={<VideoOff />}
           />
         )}

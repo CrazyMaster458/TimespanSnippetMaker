@@ -74,7 +74,7 @@
 
 .video-container {
   max-width: 1000px;
-  width: 90%;
+  width: 100%;
   position: relative;
   display: flex;
   justify-content: center;
@@ -195,7 +195,9 @@
   /* change to 0 */
   transform: scaleX(1);
   height: 3px;
-  transition: width 150ms ease-in-out, transfrom 150ms ease-in-out;
+  transition:
+    width 150ms ease-in-out,
+    transfrom 150ms ease-in-out;
 }
 
 .volume-container:hover .volume-slider,
@@ -318,7 +320,6 @@ input[type="range"]::-webkit-slider-runnable-track {
   );
   display: block; /* Change display to block to show the pseudo-element */
 }
-
 
 .timeline .thumb-indicator {
   --scale: 0;
@@ -458,7 +459,6 @@ input[type="number"]::-webkit-outer-spin-button {
   height: 0.25rem;
 }
 
-
 .error {
   font-size: small;
   color: red;
@@ -541,10 +541,10 @@ input[type="number"]::-webkit-outer-spin-button {
   /* Add your centering styles here */
 }
 
-.upload-input{
+.upload-input {
   display: none;
 }
-.upload-label{
+.upload-label {
   border-radius: 6px;
   border: 1px dashed #999;
   display: inline-block;
@@ -557,20 +557,19 @@ input[type="number"]::-webkit-outer-spin-button {
   letter-spacing: 1.5px;
   user-select: none;
   cursor: pointer;
-  box-shadow: 5px 15px 25px rgba(0,0,0,0.35);
+  box-shadow: 5px 15px 25px rgba(0, 0, 0, 0.35);
   border-radius: 3px;
-
 }
-.upload-label:hover{
+.upload-label:hover {
   color: #de0611;
-  border: 1px dashed #de0611
+  border: 1px dashed #de0611;
 }
 
 .create__menu .css-1nmdiq5-menu {
   background: black;
 }
 
-.create__control [id^="react-select-"][id$="-listbox"]{
+.create__control [id^="react-select-"][id$="-listbox"] {
 }
 
 [id^="react-select-"][id$="-listbox"] {
@@ -596,20 +595,17 @@ input[type="number"]::-webkit-outer-spin-button {
   border: #e5e7eb 1px solid;
 }
 
-
 .collapse {
   border: 1px solid grey;
   border-radius: 0.5rem;
-  margin-bottom: 0.5rem;
 }
 
-.collapse-title{
+.collapse-title {
   font-size: 13pt;
   font-weight: 500;
 }
 
-.collapse-content{
-
+.collapse-content {
 }
 
 .create__control {
@@ -617,11 +613,28 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .input-bordered {
-
 }
 
 .empty_state > svg {
   height: 2.5rem; /* h-10: height 10 */
   width: 2.5rem; /* w-10: width 10 */
+  color: #9ca3af; /* text-[#9ca3af]: text color #9ca3af */
+}
+
+.uploadButton {
+  display: none;
+}
+
+.uploadLabel {
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  /* color: #ffffff;
+  background-color: #2563eb; */
+}
+
+.uploadArrow {
+  height: 5rem; /* h-10: height 10 */
+  width: 5rem; /* w-10: width 10 */
   color: #9ca3af; /* text-[#9ca3af]: text color #9ca3af */
 }

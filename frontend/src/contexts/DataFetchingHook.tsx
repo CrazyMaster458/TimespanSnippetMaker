@@ -1,4 +1,4 @@
-import axiosClient from "@/axios";
+import axiosClient from "@/api/axios";
 import { useState, useEffect } from "react";
 
 const useDataFetching = (url) => {

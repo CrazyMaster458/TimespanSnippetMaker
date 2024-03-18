@@ -17,17 +17,12 @@ class Snippet extends Model
         'snippet_code',
         'video_id',
         'user_id',
-        'video_type_id',
         'transcript',
     ];
 
     public function video()
     {
         return $this->belongsTo(Video::class, 'video_id');
-    }
-    public function video_type()
-    {
-        return $this->belongsTo(VideoType::class, 'video_type_id');
     }
     public function snippet_tags()
     {

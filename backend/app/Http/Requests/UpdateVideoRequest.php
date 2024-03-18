@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class UpdateVideoRequest extends FormRequest
 {
@@ -11,11 +12,13 @@ class UpdateVideoRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $video = $this->route('video');
+        // $video = $this->route('videos');
 
-        if($this->user()->id !== $video->user_id) {
-            return false;
-        }
+        // $user = Auth::user();
+
+        // if($user->id !== $video->user_id) {
+        //     return false;
+        // }
 
         return true;
     }
@@ -29,10 +32,9 @@ class UpdateVideoRequest extends FormRequest
     {
         return [
             'title' => 'required|string|max:1100',
-            'user_id' => 'exists:users,id',
-            'host_id' => 'required|exists:influencers,id',
-            'video_type_id' => 'required|exists:video_types,id',
-            'guests' => 'array|exists:influencers,id',
+            'host_id' => 'nullable|exists:influencers,id',
+            'video_type_id' => 'nullable|exists:video_types,id',
+            'guests' => 'nullable|array|exists:influencers,id',
         ];
     }
 }

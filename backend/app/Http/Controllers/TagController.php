@@ -17,8 +17,6 @@ class TagController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
-
         return TagResource::collection(
         Tag::orderBy('created_at', 'desc')
             ->get()
@@ -62,11 +60,7 @@ class TagController extends Controller
      */
     public function destroy(Tag $tag, Request $request)
     {
-        $user = $request->user();
-        // TODO: check permissions
-        // if ($user->id != $snippet->user_id || $user->id != ($video->id == $snippet->video_id)) {
-        //     return abort(403, 'Unauthorized action');
-        // }
+        $tag->snippet_tags()->delete();
 
         $tag->delete();
 

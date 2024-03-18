@@ -15,8 +15,9 @@ import { useMutation } from "@tanstack/react-query";
 import { postData } from "@/api";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TSignUpSchema, signUpSchema } from "@/types/types";
+import { TSignUpSchema, signUpSchema } from "@/lib/types";
 import { LoadingButton } from "./LoadingButton";
+import { handleServerError } from "@/lib/utils";
 
 export function SignupCard() {
   const { setCurrentUser, setUserToken } = useStateContext();
@@ -24,37 +25,20 @@ export function SignupCard() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     setError,
   } = useForm<TSignUpSchema>({
     resolver: zodResolver(signUpSchema),
   });
 
   const { mutateAsync: signUp, isPending } = useMutation({
-    mutationFn: (formData: object) => postData("/signup", formData),
+    mutationFn: (formData: TSignUpSchema) =>
+      postData("/signup", formData, signUpSchema),
     onSuccess: ({ token, user }) => {
-      console.log("User signed up successfully.", user, token);
       setCurrentUser(user);
       setUserToken(token);
     },
-    onError: (error) => {
-      let errorMessage = "An error occurred during signup.";
-      //@ts-ignore
-      if (error.response && error.response.data && error.response.data.errors) {
-        //@ts-ignore
-        const serverErrors = error.response.data.errors;
-        Object.entries(serverErrors).forEach(([key, value]) => {
-          const message = Array.isArray(value) ? value[0] : value;
-          setError(key as keyof TSignUpSchema, {
-            type: "server",
-            message: message,
-          });
-        });
-      } else {
-        setError("root", { type: "server", message: errorMessage });
-        console.error("Server error:", error);
-      }
-    },
+    onError: (error) => handleServerError(error, setError),
   });
 
   const onSubmit = async (data: TSignUpSchema) => {
@@ -62,7 +46,7 @@ export function SignupCard() {
   };
 
   return (
-    <div /*className="grid place-content-center h-[90vh]"*/>
+    <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card className="w-[25vw]">
           <CardHeader>
@@ -90,7 +74,7 @@ export function SignupCard() {
                 {...register("email")}
                 id="email"
                 placeholder="Email"
-                type="text"
+                type="email"
               />
 
               {errors.email && (
@@ -146,6 +130,6 @@ export function SignupCard() {
           </CardFooter>
         </Card>
       </form>
-    </div>
+    </>
   );
 }

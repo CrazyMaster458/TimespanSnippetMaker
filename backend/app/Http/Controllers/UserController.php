@@ -8,6 +8,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -61,15 +62,36 @@ class UserController extends Controller
      */
     public function destroy(User $user, Request $request)
     {
-        $user = $request->user();
-        // TODO: is it's the user and if admin has the permissions
-        // if ($user->id != $snippet->user_id || $user->id != ($video->id == $snippet->video_id)) {
-        //     return abort(403, 'Unauthorized action');
-        // }
+        
+        $loggedInUser = Auth::user();
 
-        $user->delete();
+        if ($loggedInUser->id !== $user->id) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
 
-        return response('', 204);
+        try {
+            DB::beginTransaction();
+    
+            $userFolder = "public/{$user->secret_name}";
+            app(StorageController::class)->deleteFolder($userFolder);
+    
+            $user->videos()->guests()->delete();
+            $user->videos()->snippets()->snippet_tags()->delete();
+            $user->videos()->snippets()->delete();
+            $user->videos()->delete();
+            $user->snippets()->snippet_tags()->delete();
+            $user->snippets()->delete();
+            $user->tokens()->delete();
+    
+            $user->delete();
+    
+            DB::commit();
+    
+            return response('', 204);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
 }

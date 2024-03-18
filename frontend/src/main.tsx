@@ -7,7 +7,7 @@ import router from "./router.tsx";
 import { ContextProvider } from "./contexts/ContextProvider.tsx";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import ErrorHandler from "./utils/error.tsx";
+import ErrorBoundary from "./utils/ErrorBoundary.tsx";
 
 const queryClient = new QueryClient();
 
@@ -15,10 +15,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <ContextProvider>
-        <ErrorHandler>
-          <RouterProvider router={router}></RouterProvider>
+        <ErrorBoundary>
+          <RouterProvider router={router} />
           <ReactQueryDevtools />
-        </ErrorHandler>
+        </ErrorBoundary>
       </ContextProvider>
     </QueryClientProvider>
   </React.StrictMode>,

@@ -19,7 +19,11 @@ class StoreSnippetRequest extends FormRequest
     public function prepareForValidation()
     {
         $this->merge([
+            'user_id' => $this->user()->id,
             'snippet_code' => $this->generateSnippetID(),
+            'description' => $this->input('description', 'New Snippet'), 
+            'starts_at' => $this->input('starts_at', '00:00:00'), 
+            'ends_at' => $this->input('ends_at', '00:00:00'), 
         ]);
     }
 
@@ -49,7 +53,6 @@ class StoreSnippetRequest extends FormRequest
             'file_path' => 'nullable|string|max:1150',
             'downlaoded' => 'boolean',
             'snippet_code' => 'string|max:11',
-            'video_type_id' => 'exists:video_types,id',
             'video_id' => 'exists:videos,id',
             'user_id' => 'exists:users,id',
             'snippet_tags' => 'array|exists:tags,id',

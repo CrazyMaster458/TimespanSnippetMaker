@@ -9,7 +9,7 @@ export default function DefaultLayout() {
   const { userToken } = useStateContext();
 
   if (!userToken) {
-    return <Navigate to={"login"} />;
+    return <Navigate to={"/login"} />;
   }
 
   return (
@@ -22,7 +22,7 @@ export default function DefaultLayout() {
           <MenuBar />
         </aside>
         <ScrollArea className="h-[90.8vh] grow overflow-hidden">
-          <div className="my-4 ml-9 mr-12 pl-0">
+          <div className="mt-4 ml-9 mr-12 pl-0">
             <Outlet />
           </div>
         </ScrollArea>
@@ -31,7 +31,8 @@ export default function DefaultLayout() {
         richColors={true}
         theme="light"
         position="bottom-right"
-        toastOptions={{ duration: 3000 }}
+        toastOptions={{ duration: 4500 }}
+        closeButton={true}
       />
       <footer></footer>
     </>

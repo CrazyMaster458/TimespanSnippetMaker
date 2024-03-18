@@ -9,8 +9,8 @@ export default function GuestLayout() {
   }
 
   return (
-    <div>
+    <main className="flex h-screen w-screen items-center justify-center">
       <Outlet />
-    </div>
+    </main>
   );
 }

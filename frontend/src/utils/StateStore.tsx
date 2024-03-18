@@ -1,4 +1,4 @@
-import { Snippet, Tag } from "@/types/types";
+import { Snippet, Tag } from "@/lib/types";
 import { create } from "zustand";
 
 type TagsData = {

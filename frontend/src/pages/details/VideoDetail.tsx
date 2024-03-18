@@ -1,20 +1,25 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
-import axiosClient from "../../axios.tsx";
+import axiosClient from "../../api/axios.tsx";
 import { useNavigate, useParams } from "react-router-dom";
 import { VideoPlayer } from "@/components/VideoPlayer.tsx";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Button } from "@/components/ui/button.tsx";
 import { SnippetCard } from "../../components/SnippetCard.tsx";
-import {
-  useSnippetsDataStore,
-  useTagsDataStore,
-} from "../../utils/StateStore.tsx";
-import { Snippet, Tag, Video } from "@/types/types.ts";
-import { useFetch } from "@/utils/useFetch.tsx";
-// import { useStateContext } from "@/contexts/ContextProvider.tsx";
+import { Snippet, Tag, Video } from "@/lib/types.ts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  addNewItem,
+  createNewItem,
+  getData,
+  getQueryData,
+  handleSuccess,
+} from "@/api/index.ts";
+import { EmptyState } from "@/components/EmptyState.tsx";
+import { Film } from "lucide-react";
+import { LoadingButton } from "@/components/LoadingButton.tsx";
 
 type FetchProps = {
   video: Video;
@@ -27,24 +32,46 @@ type SnippetTime = {
 };
 
 export default function VideoDetail() {
-  //   const { userToken, currentUser } = useStateContext();
-  const [snippets, setSnippets] = useState<JSX.Element[]>([]);
-  const [snippetTimes, setSnippetTimes] = useState<SnippetTime | null>();
+  const queryClient = useQueryClient();
   const { id } = useParams();
-  const [loading, setLoading] = useState(true);
+  const {
+    data: videoData,
+    isLoading: isVideoDataLoading,
+    error: videoDataError,
+  } = useQuery({
+    queryKey: ["videos", id],
+    queryFn: () => getData("/videos/" + id),
+  });
 
-  const { tagsData, setTagsData } = useTagsDataStore((state) => ({
-    tagsData: state.tagsData,
-    setTagsData: state.setTagsData,
-  }));
+  const {
+    data: snippetsData,
+    isLoading: areSnippetsDataLoading,
+    error: snippetsDataError,
+  } = useQuery({
+    queryKey: ["videos", id, "snippets"],
+    queryFn: () => getData("/get-video-snippets/" + id),
+  });
 
-  const { snippetsData, setSnippetsData, addSnippet } = useSnippetsDataStore(
-    (state) => ({
-      snippetsData: state.snippetsData,
-      setSnippetsData: state.setSnippetsData,
-      addSnippet: state.addSnippet,
-    }),
-  );
+  // const {
+  //   data: snippetsData,
+  //   isLoading: areSnippetsDataLoading,
+  //   error: snippetsDataError,
+  // } = useQuery({
+  //   queryKey: ["videos", id, "snippets"],
+  //   queryFn: () => getQueryData(queryClient, ["videos", id], "snippets"),
+  //   enabled: !!videoData,
+  // });
+
+  const {
+    data: tagsData,
+    isLoading: areTagsDataLoading,
+    error: tagsDataError,
+  } = useQuery({
+    queryKey: ["tags"],
+    queryFn: () => getData("/tags/"),
+  });
+
+  const [snippetTimes, setSnippetTimes] = useState<SnippetTime | null>();
 
   const navigate = useNavigate();
 
@@ -59,20 +86,9 @@ export default function VideoDetail() {
     });
   };
 
-  const { data, isPending, error } = useFetch<FetchProps>(
-    `/get_video_data/${id}`,
-  );
-
-  useEffect(() => {
-    if (data && !isPending) {
-      setSnippetsData(data.video.snippets);
-      setTagsData(data.tags);
-    }
-  }, [data]);
-
   function handleDelete() {
     axiosClient
-      .delete(`/video/` + id)
+      .delete(`/videos/` + id)
       .then(({ data }) => {
         console.log(data.data);
         HandleRedirect();
@@ -90,52 +106,38 @@ export default function VideoDetail() {
     );
   }
 
-  useEffect(() => {
-    if (snippetsData && tagsData) {
-      setSnippets(
-        snippetsData.map((snippet) => (
-          <SnippetCard
-            key={snippet.id}
-            snippetData={snippet}
-            tagsData={tagsData}
-            setSnippetTimes={setSnippetTimes}
-            onClick={() => handleSnippetCardClick(snippet)}
-          />
-          // <Snippet key={snippet.id} videoId={id} snippetData={snippet} snippetId={snippet.id}/>
-        )),
-      );
-      setLoading(false);
-    }
-  }, [snippetsData, tagsData]);
-
-  const createSnippet = async () => {
-    try {
-      const response = await axiosClient.post("/snippet", {
-        video_type_id: 1,
-        video_id: id,
-      });
-
-      // console.log(response.data);
-      addSnippet(response.data.data);
-      // console.log(snippetsData);
-    } catch (error) {
+  const { mutateAsync: createNewSnippet, isPending } = useMutation({
+    mutationFn: createNewItem,
+    onSuccess: (newItem) => {
+      const queryName = ["videos", id, "snippets"];
+      handleSuccess({ queryClient, queryName, newItem });
+    },
+    onError: (error) => {
       console.log(error);
-    }
+    },
+  });
+
+  const handleSnippetCreation = () => {
+    const endpoint = "/snippets";
+    const data = { video_id: id };
+    createNewSnippet({ endpoint, data });
   };
 
   return (
     <>
-      <div className="grid grid-cols-7 content-center gap-2">
+      <div className="grid grid-cols-7 content-center gap-10">
         <div className="col-span-4">
-          {data?.video && data?.video.video_url ? (
+          {videoData && !isVideoDataLoading && videoData.video_url ? (
             <>
-              <VideoPlayer
-                videoUrl={data?.video.video_url}
-                snippetTimes={snippetTimes ? snippetTimes : null}
-              />
-              <div className="pt-2">
+              <AspectRatio ratio={16 / 9}>
+                <VideoPlayer
+                  videoUrl={videoData.video_url}
+                  snippetTimes={snippetTimes ? snippetTimes : null}
+                />
+              </AspectRatio>
+              <div className="pt-3">
                 <h3 className="text-left font-sans text-xl font-bold">
-                  {data?.video.title}
+                  {videoData.title}
                 </h3>
                 <Button
                   variant="outline"
@@ -151,31 +153,63 @@ export default function VideoDetail() {
               <AspectRatio ratio={16 / 9}>
                 <Skeleton className="h-[100%] w-[100%] rounded-xl" />
               </AspectRatio>
-              <div className="pt-2">
-                <Skeleton className="h-4 w-[250px]" />
-                <Skeleton className="h-4 w-[250px]" />
+              <div className="flex flex-col gap-2 pt-3">
+                <Skeleton className="h-8 w-96" />
+                <Skeleton className="h-8 w-48" />
               </div>
             </>
           )}
         </div>
         <div className="col-span-3">
-          <ScrollArea className="flex h-[88.5vh] w-[full] flex-col overflow-scroll">
-            {!loading ? (
-              snippets !== null ? (
-                snippets.length > 0 ? (
-                  snippets
-                ) : (
-                  <p>No data found...</p>
-                )
+          <ScrollArea className="flex h-[88.5vh] w-[full] flex-col gap-2 overflow-scroll">
+            {!areSnippetsDataLoading && !areTagsDataLoading && snippetsData ? (
+              snippetsData.length > 0 ? (
+                <>
+                  {snippetsData.map((snippet) => (
+                    <SnippetCard
+                      key={snippet.id}
+                      snippetData={snippet}
+                      tagsData={tagsData}
+                      setSnippetTimes={setSnippetTimes}
+                      onClick={() => handleSnippetCardClick(snippet)}
+                    />
+                  ))}
+                  {isPending ? (
+                    <>
+                      <LoadingButton className="rounded-lg py-7" />
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="w-[full] rounded-lg py-7"
+                        onClick={handleSnippetCreation}
+                      >
+                        Create Snippet
+                      </Button>
+                    </>
+                  )}
+                </>
               ) : (
-                <p>No data found.</p>
+                <EmptyState
+                  objectName="Snippet"
+                  onClick={handleSnippetCreation}
+                  isPending={isPending}
+                  icon={<Film />}
+                />
               )
             ) : (
-              <p>Loading...</p>
+              <>
+                <Skeleton className="w-[full] py-8" />
+                <Skeleton className="w-[full] py-8" />
+                <Skeleton className="w-[full] py-8" />
+                <Skeleton className="w-[full] py-8" />
+                <Skeleton className="w-[full] py-8" />
+                <Skeleton className="w-[full] py-8" />
+                <Skeleton className="w-[full] py-8" />
+                <Skeleton className="w-[full] py-8" />
+              </>
             )}
-            <Button variant="outline" onClick={createSnippet}>
-              Create Snippet
-            </Button>
           </ScrollArea>
         </div>
       </div>

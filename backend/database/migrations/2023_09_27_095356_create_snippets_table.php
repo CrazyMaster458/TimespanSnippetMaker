@@ -28,7 +28,6 @@ return new class extends Migration
             // Foregin keys
             $table->foreignIdFor(Video::class, 'video_id');
             $table->foreignIdFor(User::class, 'user_id')->nullable();
-            $table->foreignIdFor(VideoType::class, 'video_type_id');
         });
     }
 

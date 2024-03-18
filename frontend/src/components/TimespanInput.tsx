@@ -1,4 +1,4 @@
-import { TimeProp } from "@/types/types";
+import { TimeProp } from "@/lib/types";
 import React, { useRef, useState } from "react";
 
 type TimespanInputProps = {

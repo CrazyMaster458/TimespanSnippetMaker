@@ -3,6 +3,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable no-fallthrough */
 import React, { ChangeEvent, useEffect, useState } from "react";
+import { AspectRatio } from "./ui/aspect-ratio";
 
 export const VideoPlayer = ({
   videoUrl,
@@ -102,7 +103,7 @@ export const VideoPlayer = ({
 
     timelineContainerElement.style.setProperty(
       "--start-position",
-      startPosition
+      startPosition,
     );
     timelineContainerElement.style.setProperty("--end-position", endPosition);
   };
@@ -170,7 +171,7 @@ export const VideoPlayer = ({
       previewImgElement.src = previewImgSrc;
       timelineContainerElement.style.setProperty(
         "--preview-position",
-        String(percent)
+        String(percent),
       );
 
       if (isScrubbing) {
@@ -178,7 +179,7 @@ export const VideoPlayer = ({
         thumbnailImgElement.src = previewImgSrc;
         timelineContainerElement.style.setProperty(
           "--progress-position",
-          String(percent)
+          String(percent),
         );
       }
     }
@@ -192,7 +193,7 @@ export const VideoPlayer = ({
         return `${minutes}:${leadingZeroFormatter.format(seconds)}`;
       } else {
         return `${hours}${leadingZeroFormatter.format(
-          minutes
+          minutes,
         )}:${leadingZeroFormatter.format(seconds)}`;
       }
     }
@@ -232,7 +233,7 @@ export const VideoPlayer = ({
       // Timeline
       timelineContainerElement.addEventListener(
         "mousemove",
-        handleTimelineUpdate
+        handleTimelineUpdate,
       );
       timelineContainerElement.addEventListener("mousedown", toggleScrubbling);
 
@@ -248,7 +249,7 @@ export const VideoPlayer = ({
       speedBtnElement.addEventListener("click", changePlaybackSpeed);
 
       // Captions
-      videoElement.textTracks[0].mode = "hidden";
+      // videoElement.textTracks[0].mode = "hidden";
       captionsBtnElement.addEventListener("click", toggleCaptions);
 
       // Duration
@@ -258,12 +259,12 @@ export const VideoPlayer = ({
 
       videoElement.addEventListener("timeupdate", () => {
         currentTimeElement.textContent = formatDuration(
-          videoElement.currentTime
+          videoElement.currentTime,
         );
         const percent = videoElement.currentTime / videoElement.duration;
         timelineContainerElement.style.setProperty(
           "--progress-position",
-          String(percent)
+          String(percent),
         );
       });
 
@@ -373,7 +374,7 @@ export const VideoPlayer = ({
   return (
     <div
       ref={videoContainerRef}
-      className="video-container paused drop-shadow-lg"
+      className="video-container paused w-[full] drop-shadow-lg"
       data-volume-level="high"
     >
       <img className="thumbnail-img" ref={thumbnailImgRef} />
@@ -493,20 +494,22 @@ export const VideoPlayer = ({
         </div>
       </div>
       {videoUrl && (
-        <video
-          ref={videoRef}
-          className="video-player"
-          onClick={togglePlayPause}
-        >
-          {/* <track kind={"captions"} srcLang="en" src="subtitles.vtt" /> */}
-          <source
-            // src="https://tecdn.b-cdn.net/img/video/Sail-Away.mp4"
-            //src="Lift_run_shoot.mp4"
-            src="https://hugh.cdn.rumble.cloud/video/s8/2/K/F/p/a/KFpaq.caa.mp4?u=3&b=0"
-            // src={videoUrl}
-            type="video/mp4"
-          />
-        </video>
+        <AspectRatio ratio={16 / 9}>
+          <video
+            ref={videoRef}
+            className="video-player"
+            onClick={togglePlayPause}
+          >
+            {/* <track kind={"captions"} srcLang="en" src="subtitles.vtt" /> */}
+            <source
+              // src="https://tecdn.b-cdn.net/img/video/Sail-Away.mp4"
+              //src="Lift_run_shoot.mp4"
+              src="https://hugh.cdn.rumble.cloud/video/s8/2/K/F/p/a/KFpaq.caa.mp4?u=3&b=0"
+              // src={videoUrl}
+              type="video/mp4"
+            />
+          </video>
+        </AspectRatio>
       )}
     </div>
   );

@@ -16,12 +16,10 @@ class StorageController extends Controller
             $this->user = Auth::user();
         }
     }
-
+    
     public function getFileUrl($filePath)
     {
-        $fullPath = "storage/" . $filePath;
-
-        return asset($fullPath);
+        return asset(Storage::url($filePath));
     }
 
     public function uploadFile(Request $request, string $videoFolder, string $fileType)
@@ -32,25 +30,18 @@ class StorageController extends Controller
 
         if ($request->hasFile($fileKey)) {
             $file = $request->file($fileKey);
-            // $filename = $file->getClientOriginalName();
             $extension = $file->getClientOriginalExtension();   
+            $finalName = $fileType === 'image' ? 'thumbnail' : 'video';
 
-            if($fileType == 'image'){
-                $finalName = "thumbnail" . "." . $extension;
-            } else {
-                $finalName = "video" . "." . $extension;
-            }
+            $filePath = "public/{$this->user->secret_name}/{$videoFolder}/{$finalName}.{$extension}";
+            $file->storeAs($filePath);
 
-            $filePath = "public/{$this->user->secret_name}/{$videoFolder}/{$finalName}";
-            $request->file($fileKey)->storeAs($filePath);
-
-            return "{$this->user->secret_name}/{$videoFolder}/{$finalName}";
+            return "{$this->user->secret_name}/{$videoFolder}/{$finalName}.{$extension}";
         } else {
-            return response()->json(["message" => "You must select a {$fileType}"]);
+            return null;
         }
     }
 
-    // DELETE FILE
     public function deleteFile($filePath)
     {     
         $fullPath = "public/" . $filePath;
@@ -64,9 +55,8 @@ class StorageController extends Controller
         }
     }
 
-    // DELETE FOLDER
     public function deleteFolder(string $folderPath)
-    {
+    {        
         if (Storage::exists($folderPath)) {
             Storage::deleteDirectory($folderPath);
 
@@ -75,10 +65,13 @@ class StorageController extends Controller
             return response()->json(["message" => "Folder not found"]);
         }
     }
+    
     public function createFolder(string $folderName)
     {
         $this->retrieveUser();
 
+        // If the user is null, then that means that user has just signed up so we create the user's folder in the public directory
+        // If the user is not null (is logged in), then that means we're creating a folder inside of the usere's folder
         if($this->user === null){
             $path = "public/{$folderName}";
         } else {

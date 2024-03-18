@@ -39,7 +39,7 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
     email: "",
   });
   const [userToken, _setUserToken] = useState<string | null>(
-    localStorage.getItem("TOKEN") || ""
+    localStorage.getItem("TOKEN") || "",
   );
 
   const setUserToken = (token: any) => {
