@@ -41,7 +41,7 @@ export const UpdateaVideoData = ({
   queryClient,
   setOpen,
 }: {
-  uploadProgress: string;
+  uploadProgress?: string;
   videoId: number;
   queryClient: any;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -93,10 +93,10 @@ export const UpdateaVideoData = ({
     mutationFn: (data: VideoUpdateData) =>
       putData(`/videos/${data.id}`, data, videoUpdateSchema),
     onSuccess: (data) => {
+      setOpen(false);
       const queryKey = ["videos", data.id];
 
       queryClient.invalidateQueries(queryKey);
-      setOpen(false);
     },
     onError: (error) => {
       console.error("Error updating snippet:", error);

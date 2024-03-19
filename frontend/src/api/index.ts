@@ -46,6 +46,7 @@ export const getItemData = async (endpoint: string) => {
 
 export const deleteData = async (endpoint: string) => {
   try {
+    console.log("endpoint deleting", endpoint);
     const response = await axiosClient.delete(endpoint);
     return response.data;
   } catch (error) {

@@ -119,7 +119,9 @@ class VideoController extends Controller
         }
 
         $video->guests()->delete();
-        $video->snippets()->snippet_tags()->delete();
+        $video->snippets()->each(function ($snippet) {
+            $snippet->snippet_tags()->delete();
+        });
         $video->snippets()->delete();
 
         $videoFolder = "public/{$user->secret_name}/{$video->video_code}";

@@ -2,20 +2,15 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Video } from "@/lib/types";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { UpdateDialong } from "./UploadFileDialog copy";
 
 export const VideoCard = ({ videoData }: { videoData: Video }) => {
   return (
     <>
       <Link to={`/detail/${videoData.id}`} className="no-underline">
-        <Card className="video-card flex h-full w-full cursor-pointer flex-col overflow-hidden pb-4 drop-shadow-md">
+        <Card className="video-card group flex h-full w-full cursor-pointer flex-col overflow-hidden pb-4 drop-shadow-md">
+          <UpdateDialong itemData={videoData} />
+
           <img
             src={videoData.image_url || ""}
             alt=""
