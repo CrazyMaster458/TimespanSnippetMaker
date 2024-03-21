@@ -70,9 +70,6 @@ export const UploadFileDialog = () => {
             <FolderPlus className="h-5 w-5" />
           </button>
         </DialogTrigger>
-        {/* <DialogContent>
-          <Button onClick={(e) => setOpen(false)}>Close</Button>
-        </DialogContent> */}
         {isSuccess && !isPending ? (
           <>
             <UpdateaVideoData

@@ -56,6 +56,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/snippet/{snippetId}/sendProgressUpdate', [SnippetController::class, 'sendProgressUpdate']);
 
     Route::get('/transcribe', [TranscriptionController::class, 'transcribe']);
+    Route::get('/download/{snippet}', [SnippetController::class, 'downloadFullVideo']);
 
     
     Route::get('/search', [SearchController::class, 'search']);

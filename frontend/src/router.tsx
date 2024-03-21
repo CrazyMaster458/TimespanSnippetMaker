@@ -4,11 +4,10 @@ import GuestLayout from "./components/layouts/GuestLayout";
 import Login from "./pages/authentication/Login";
 import Signup from "./pages/authentication/Signup";
 import DefaultLayout from "./components/layouts/DefaultLayout";
-import { CardWithForm } from "./components/VideoUploadCard";
 import VideoList from "./pages/lists/VideoList";
 import SnippetList from "./pages/lists/SnippetList";
 import InfluencerList from "./pages/lists/InfluencerList";
-import ChannelList from "./pages/lists/ChannelList";
+import VideoTypeList from "./pages/lists/VideoTypeList";
 import TagList from "./pages/lists/TagList";
 import Settings from "./pages/settings/Settings";
 import { Account } from "./pages/settings/Account";
@@ -25,10 +24,6 @@ const router = createBrowserRouter([
         element: <VideoDetail />,
       },
       {
-        path: "/cardform",
-        element: <CardWithForm />,
-      },
-      {
         path: "/videos",
         element: <VideoList />,
       },
@@ -41,8 +36,8 @@ const router = createBrowserRouter([
         element: <InfluencerList />,
       },
       {
-        path: "/channels",
-        element: <ChannelList />,
+        path: "/video-types",
+        element: <VideoTypeList />,
       },
       {
         path: "/tags",

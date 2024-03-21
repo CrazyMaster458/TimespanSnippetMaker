@@ -4,71 +4,17 @@ const usernameRegex = /^[a-zA-Z0-9_]{3,45}$/;
 const hashTagRegex = /^[a-zA-Z0-9_]{3,25}$/;
 const nameRegex = /^[a-zA-Z0-9_& ]{3,25}$/;
 
-export const basicSchema = z.object({
-  id: z.number().optional(),
-  name: z.string().trim(),
+const basicSchema = z.object({
+  id: z.number(),
+  name: z.string(),
 });
 
-export const tagSchema = basicSchema.extend({
-  name: z
-    .string()
-    .trim()
-    .min(3, { message: "Tag must be at least 3 characters" })
-    .max(25, { message: "Tag must be less than 25 characters" })
-    .regex(hashTagRegex, {
-      message: "Tag must contain only letters, numbers, or underscores",
-    }),
-});
-
-export const videoTypeSchema = basicSchema.extend({
-  name: z
-    .string()
-    .trim()
-    .min(3, "Video type must be at least 3 characters")
-    .max(25, "Video type must be less than 25 characters")
-    .regex(
-      nameRegex,
-      "Video type must contain only letters, digits, underscores, ampersands, and spaces",
-    ),
-});
-
-export const influencerSchema = basicSchema.extend({
-  name: z
-    .string()
-    .trim()
-    .min(3, { message: "Influencer must be at least 3 characters" })
-    .max(25, { message: "Influencer must be less than 25 characters" })
-    .regex(nameRegex, {
-      message:
-        "Influencer must contain only letters, digits, underscores, ampersands, and spaces",
-    }),
-});
-
-export const snippetTagSchema = z.object({
+const snippetTagSchema = z.object({
   tag_id: z.number(),
   snippet_id: z.number(),
 });
 
-export const loginSchema = z.object({
-  email: z.string().trim().email(),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(50, "Password must be less than 50 characters"),
-});
-
-export const snippetUpdateSchema = z.object({
-  id: z.number(),
-  description: z.string(),
-  starts_at: z.string(),
-  ends_at: z.string(),
-  video_id: z.number(),
-  snippet_tags: z.array(z.number()),
-});
-
-export type SnippetUpdate = z.infer<typeof snippetUpdateSchema>;
-
-export const snippetSchema = z.object({
+const snippetSchema = z.object({
   id: z.number(),
   description: z.string(),
   starts_at: z.string(),
@@ -77,6 +23,97 @@ export const snippetSchema = z.object({
   video_url: z.string(),
   video_id: z.number(),
   snippet_tags: z.array(snippetTagSchema),
+});
+
+const videoSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  image_url: z.string(),
+  video_url: z.string(),
+  host_id: basicSchema,
+  video_type_id: basicSchema,
+  guests: z.array(basicSchema),
+});
+
+const timePropSchema = z.object({
+  hours: z.string().max(2),
+  minutes: z.string().max(2),
+  seconds: z.string().max(2),
+});
+
+const optionSchema = z.object({
+  value: z.number(),
+  label: z.string(),
+});
+
+// UPDATE/CREATE SCHEMAS
+
+// Generic function to generate schema and type for entities
+const generateSchema = (
+  entityName: string,
+  regex: RegExp,
+  message?: string,
+) => {
+  const schema = z.object({
+    id: z.number().optional(),
+    name: z
+      .string()
+      .trim()
+      .min(3, `${entityName} must be at least 3 characters`)
+      .max(25, `${entityName} must be less than 25 characters`)
+      .regex(
+        regex,
+        `${entityName} must contain only letters, digits${message} and underscores`,
+      ),
+  });
+
+  return { schema };
+};
+
+// Generate schemas and types for different entities
+export const { schema: tagSchema } = generateSchema("Tag", hashTagRegex);
+export const { schema: videoTypeSchema } = generateSchema(
+  "Video type",
+  nameRegex,
+  ", ampersands, spaces",
+);
+export const { schema: influencerSchema } = generateSchema(
+  "Influencer",
+  nameRegex,
+  ", ampersands, spaces",
+);
+
+export const updateSnippetSchema = z.object({
+  id: z.number(),
+  description: z
+    .string()
+    .max(255, "Description must be less than 255 characters")
+    .min(3, "Description must be at least 3 characters"),
+  starts_at: z.string(),
+  ends_at: z.string(),
+  video_id: z.number(),
+  snippet_tags: z.array(z.number()).optional(),
+});
+
+export const updateVideoSchema = z.object({
+  id: z.number(),
+  title: z
+    .string()
+    .max(255, "Title must be less than 255 characters")
+    .min(3, "Title must be at least 3 characters"),
+  host_id: z.number(),
+  video_type_id: z.number(),
+  guests: z.array(z.number()).optional(),
+});
+
+// AUTH SCHEMAS
+
+export const loginSchema = z.object({
+  email: z.string().trim().email(),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(50, "Password must be less than 50 characters"),
 });
 
 export const signUpSchema = loginSchema
@@ -97,52 +134,20 @@ export const signUpSchema = loginSchema
     path: ["password_confirmation"],
   });
 
+// TYPES
+
 export type TSignUpSchema = z.infer<typeof signUpSchema>;
 export type TLoginSchema = z.infer<typeof loginSchema>;
+export type UpdateSnippet = z.infer<typeof updateSnippetSchema>;
+export type UpdateVideo = z.infer<typeof updateVideoSchema>;
 
 export type Snippet = z.infer<typeof snippetSchema>;
+export type Video = z.infer<typeof videoSchema>;
 export type SnippetTag = z.infer<typeof snippetTagSchema>;
 
-export type BasicData = z.infer<typeof basicSchema>;
-export type Tag = z.infer<typeof tagSchema>;
-export type VideoType = z.infer<typeof videoTypeSchema>;
-export type Influencer = z.infer<typeof influencerSchema>;
+export type Tag = z.infer<typeof basicSchema>;
+export type VideoType = z.infer<typeof basicSchema>;
+export type Influencer = z.infer<typeof basicSchema>;
 
-export type SimpleProp = {
-  id: number;
-  name: string;
-};
-
-export const videoUpdateSchema = z.object({
-  id: z.number(),
-  title: z
-    .string()
-    .max(255, "Title must be less than 255 characters")
-    .min(3, "Title must be at least 3 characters"),
-  host_id: z.number().optional(),
-  video_type_id: z.number().optional(),
-  guests: z.array(z.number()).optional(),
-});
-
-export type VideoUpdateData = z.infer<typeof videoUpdateSchema>;
-
-export type Video = {
-  id: number;
-  title: string;
-  image_url: string;
-  video_url: string;
-  host_id: Influencer;
-  video_type: VideoType;
-  snippets: Snippet[];
-};
-
-export type TimeProp = {
-  hours: string;
-  minutes: string;
-  seconds: string;
-};
-
-export type Option = {
-  value: number;
-  label: string;
-};
+export type TimeProp = z.infer<typeof timePropSchema>;
+export type Option = z.infer<typeof optionSchema>;

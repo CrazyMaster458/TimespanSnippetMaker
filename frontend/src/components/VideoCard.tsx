@@ -8,8 +8,8 @@ export const VideoCard = ({ videoData }: { videoData: Video }) => {
   return (
     <>
       <Link to={`/detail/${videoData.id}`} className="no-underline">
-        <Card className="video-card group flex h-full w-full cursor-pointer flex-col overflow-hidden pb-4 drop-shadow-md">
-          <UpdateDialong itemData={videoData} />
+        <Card className="flex h-full w-full cursor-pointer flex-col overflow-hidden pb-4 drop-shadow-md">
+          <UpdateDialong endpoint="video" itemData={videoData} />
 
           <img
             src={videoData.image_url || ""}

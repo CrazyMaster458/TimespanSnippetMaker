@@ -7,14 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Download } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useSnippetsDataStore } from "../utils/StateStore";
 import {
   Snippet,
-  SnippetUpdate,
+  UpdateSnippet,
   Tag,
   TimeProp,
-  snippetSchema,
-  snippetUpdateSchema,
+  updateSnippetSchema,
 } from "@/lib/types";
 import { parseTime } from "@/utils/timeUtils";
 import { SelectCreate } from "./Select";
@@ -23,14 +21,11 @@ import { deleteData, putData } from "@/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LoadingButton } from "./LoadingButton";
 
-const DEFAULT_DESCRIPTION = "New Snippet";
-const DEFAULT_TIME = "00:00:00";
-
 type SnippetCardProps = {
   snippetData: Snippet;
   tagsData: Tag[];
   onClick: React.MouseEventHandler<HTMLDivElement>;
-  setSnippetTimes: (newTime: SnippetTime) => void;
+  setSnippetTimes?: (newTime: SnippetTime) => void;
 };
 
 type SnippetTime = {
@@ -46,20 +41,25 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
 }) => {
   const queryClient = useQueryClient();
 
-  const [snippetStart, setSnippetStart] = useState<TimeProp>();
-  const [snippetEnd, setSnippetEnd] = useState<TimeProp>();
+  const [snippetStart, setSnippetStart] = useState<TimeProp>(
+    parseTime(snippetData.starts_at),
+  );
+  const [snippetEnd, setSnippetEnd] = useState<TimeProp>(
+    parseTime(snippetData.ends_at),
+  );
 
-  const [selectedTags, setSelectedTags] = useState<Option[]>([]);
+  // This code saves any tags that are already associated with the snippet into the selectedTags state so it can be diplayed in the SelectCreate component
+  const mappedSnippetTags = snippetData.snippet_tags
+    ? snippetData.snippet_tags.map((tag) => tag.tag_id)
+    : [];
+  const [selectedTags, setSelectedTags] = useState<Option[]>(
+    tagsData
+      .filter((tag) => mappedSnippetTags.includes(tag.id))
+      .map((tag) => ({ value: tag.id, label: tag.name }) as Option),
+  );
 
+  const [description, setDescription] = useState(snippetData.description || "");
   const [snippetDuration, setSnippetDuration] = useState("0:00");
-  const [description, setDescription] = useState("");
-  const [initialLoad, setInitialLoad] = useState(true);
-
-  const handleDescriptionChange: React.ChangeEventHandler<HTMLInputElement> = (
-    e,
-  ) => {
-    setDescription(e.target.value);
-  };
 
   const handleCardClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
@@ -69,8 +69,8 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
   );
 
   const { mutateAsync: updateSnippetData } = useMutation({
-    mutationFn: (data: SnippetUpdate) =>
-      putData(`/snippets/${data.id}`, data, snippetUpdateSchema),
+    mutationFn: (data: UpdateSnippet) =>
+      putData(`/snippets/${data.id}`, data, updateSnippetSchema),
     onSuccess: () => {
       const queryKey = ["videos", snippetData.video_id, "snippets"];
 
@@ -80,25 +80,6 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
       console.error("Error updating snippet:", error);
     },
   });
-
-  const updateData = async () => {
-    try {
-      const tags = selectedTags.map((tag) => tag.value);
-
-      const data: SnippetUpdate = {
-        id: snippetData.id,
-        description: description,
-        starts_at: Object.values(snippetStart).join(":"),
-        ends_at: Object.values(snippetEnd).join(":"),
-        video_id: snippetData.video_id,
-        snippet_tags: tags,
-      };
-
-      await updateSnippetData(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const { mutateAsync: deleteSnippet, isPending } = useMutation({
     mutationFn: () => deleteData(`/snippets/${snippetData.id}`),
@@ -112,27 +93,46 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
     },
   });
 
+  const updateData = async () => {
+    try {
+      const data: UpdateSnippet = {
+        id: snippetData.id,
+        description: description,
+        starts_at: Object.values(snippetStart).join(":"),
+        ends_at: Object.values(snippetEnd).join(":"),
+        video_id: snippetData.video_id,
+        snippet_tags:
+          selectedTags.length > 0
+            ? selectedTags.map((tag) => tag.value)
+            : undefined,
+      };
+      await updateSnippetData(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleDeleteSnippet = () => {
     deleteSnippet();
   };
 
   const cutVideo = async () => {
     try {
-      const response = await axiosClient.post(`/cut/${snippetData.id}`);
+      const response = await axiosClient.get(`/download/${snippetData.id}`);
       console.log(response.data.data);
     } catch (error) {
       console.log(error);
     }
   };
 
-  useEffect(() => {
-    if (snippetStart && snippetEnd && !initialLoad) {
-      setSnippetTimes({
-        starts_at: Object.values(snippetStart).join(":"),
-        ends_at: Object.values(snippetEnd).join(":"),
-      });
-    }
-  }, [snippetStart, snippetEnd]);
+  // useEffect(() => {
+  //   if (snippetStart && snippetEnd && !initialLoad) {
+  //     setSnippetTimes({
+  //       starts_at: Object.values(snippetStart).join(":"),
+  //       ends_at: Object.values(snippetEnd).join(":"),
+  //     });
+  //   }
+  // }, [snippetStart, snippetEnd]);
 
   useEffect(() => {
     if (snippetEnd && snippetStart) {
@@ -166,28 +166,9 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
     }
   }, [snippetEnd, snippetStart]);
 
-  useEffect(() => {
-    if (snippetData && initialLoad) {
-      setDescription(snippetData.description || DEFAULT_DESCRIPTION);
-      setSnippetStart(parseTime(snippetData.starts_at || DEFAULT_TIME));
-      setSnippetEnd(parseTime(snippetData.ends_at || DEFAULT_TIME));
-      const mappedTags = snippetData.snippet_tags.map((tag) => tag.tag_id);
-      setSelectedTags((prevTags) => {
-        return tagsData
-          .filter((tag) => mappedTags.includes(tag.id))
-          .map((tag) => ({ value: tag.id, label: tag.name }));
-      });
-      setInitialLoad(false);
-    }
-  }, [initialLoad, snippetData]);
-
-  useEffect(() => {
-    console.log(selectedTags);
-  }, [selectedTags]);
-
   return (
     <div>
-      <div className="collapse-arrow collapse">
+      <div className="collapse collapse-arrow">
         <input type="radio" name="my-accordion-2" onClick={handleCardClick} />
         <div className="collapse-title">
           <div className="flex justify-between">
@@ -222,15 +203,14 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
                 className="w-full"
                 value={description}
                 maxLength={255}
-                onChange={handleDescriptionChange}
+                onChange={(e) => setDescription(e.target.value)}
                 placeholder="Description"
               />
             </div>
           </div>
 
           <div className="pt-3">
-            {/* <SelectComponent data={tagsData} endpoint="tag" multi={true} value={tags} setValue={setTags}/> */}
-            {selectedTags && !initialLoad ? (
+            {selectedTags && tagsData ? (
               <>
                 <SelectCreate
                   data={tagsData}

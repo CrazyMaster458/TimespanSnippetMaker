@@ -12,19 +12,20 @@ import { deleteData } from "@/api";
 import { LoadingButton } from "./LoadingButton";
 
 export const DeleteDialog = ({
-  videoId,
+  itemId,
   queryClient,
   setOpen,
+  endpoint,
 }: {
-  videoId: number;
+  itemId: number;
   queryClient: any;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  endpoint: string;
 }) => {
   const { mutateAsync: deleteItem, isPending } = useMutation({
-    mutationFn: () => deleteData(`/videos/${videoId}`),
+    mutationFn: () => deleteData(`/${endpoint}s/${itemId}`),
     onSuccess: () => {
-      console.log("Video deleted");
-      queryClient.invalidateQueries("videos");
+      queryClient.invalidateQueries([`${endpoint}s`]);
       setOpen(false);
     },
     onError: (error) => {
@@ -38,14 +39,14 @@ export const DeleteDialog = ({
 
   return (
     <>
-      <DialogContent className="h-[24vh] min-w-[36vw]">
+      <DialogContent className="min-w-[36vw]">
         <DialogHeader className="flex flex-row gap-5">
           <AlertTriangle color="red" height={50} size={75} />
           <section>
-            <DialogTitle className="">Delete Video</DialogTitle>
+            <DialogTitle className="pb-2">Delete {endpoint}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this video? All snippets from this
-              video will be permanently removed. This action cannot be undone.
+              Are you sure you want to delete this {endpoint}? This action
+              cannot be undone.
             </DialogDescription>
           </section>
         </DialogHeader>

@@ -22,7 +22,7 @@ export default function DefaultLayout() {
           <MenuBar />
         </aside>
         <ScrollArea className="h-[90.8vh] grow overflow-hidden">
-          <div className="mt-4 ml-9 mr-12 pl-0">
+          <div className="ml-9 mr-12 mt-4 pl-0">
             <Outlet />
           </div>
         </ScrollArea>
@@ -30,7 +30,7 @@ export default function DefaultLayout() {
       <Toaster
         richColors={true}
         theme="light"
-        position="bottom-right"
+        position="top-center"
         toastOptions={{ duration: 4500 }}
         closeButton={true}
       />

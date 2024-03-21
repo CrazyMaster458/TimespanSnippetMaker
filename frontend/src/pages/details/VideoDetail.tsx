@@ -52,23 +52,13 @@ export default function VideoDetail() {
     queryFn: () => getData("/get-video-snippets/" + id),
   });
 
-  // const {
-  //   data: snippetsData,
-  //   isLoading: areSnippetsDataLoading,
-  //   error: snippetsDataError,
-  // } = useQuery({
-  //   queryKey: ["videos", id, "snippets"],
-  //   queryFn: () => getQueryData(queryClient, ["videos", id], "snippets"),
-  //   enabled: !!videoData,
-  // });
-
   const {
     data: tagsData,
     isLoading: areTagsDataLoading,
     error: tagsDataError,
   } = useQuery({
     queryKey: ["tags"],
-    queryFn: () => getData("/tags/"),
+    queryFn: () => getData("/tags"),
   });
 
   const [snippetTimes, setSnippetTimes] = useState<SnippetTime | null>();

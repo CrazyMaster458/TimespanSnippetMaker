@@ -16,6 +16,9 @@ use App\Http\Controllers\TagController;
 use App\Http\Resources\TagResource;
 use App\Models\Tag;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Response;
+
 
 class SnippetController extends Controller
 {
@@ -144,6 +147,41 @@ class SnippetController extends Controller
         return response('', 204);
     }
 
+    public function downloadFullVideo(Snippet $snippet, Request $request)
+    {
+        $user = $request->user();
+        $video = Video::find($snippet->video_id);
+        $videoPathInfo = pathinfo($video->file_path);
+        $videoExtension = $videoPathInfo['extension'];
+
+        // Construct the full path to the video file
+        // $videoFilePath = "public/{$user->secret_name}/{$video->video_code}/video.mp4";
+        $videoFilePath = "public/{$video->file_path}";
+
+
+        // Check if the file exists
+        // if (!Storage::exists($videoFilePath)) {
+        //     return response()->json(["error" => "Video file not found"], 404);
+        // }
+
+        // Set the headers for the download response
+        $headers = [
+            'Content-Type' => 'video/mp4', // Modify the content type according to your video format
+            'Content-Disposition' => 'attachment; filename="' . "video.mp4" . '"',
+        ];
+
+
+        $fileContents = Storage::get($videoFilePath);
+
+        // Return the video file as a download response
+        // return response($fileContents, 200, $headers);
+        // return response()->download(Storage::path($videoFilePath),"video.mp4" , $headers);
+
+        // Return the video file as a download response
+        // return Response::download($videoFilePath, "video.mp4", $headers);
+        return Response::download($fileContents, "video.mp4", $headers);
+
+    }
 
     public function cutVideo(Snippet $snippet, Request $request) {
         $user = $request->user();
@@ -173,8 +211,14 @@ class SnippetController extends Controller
             'file_path' => $snippetDestination
         ]);
 
-        app(TranscriptionController::class)->transcribe($snippetDestination, $snippet->id);
+        // Queue::push(function () use ($snippetDestination, $snippet) {
+        //     app(TranscriptionController::class)->transcribe($snippetDestination, $snippet->id);
+        // });
 
-        return response()->json(["message" => "Success?"]);
+        // app(TranscriptionController::class)->transcribe($snippetDestination, $snippet->id);
+
+        $this->downloadFullVideo($snippet, $request);
+
+        return response()->json(["message" => "Success"]);
     }
 }

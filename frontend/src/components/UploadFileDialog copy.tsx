@@ -3,7 +3,6 @@ import { CircleEllipsis } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { UpdateaVideoData } from "./UpdateVideoData";
 import React from "react";
-import { Video } from "@/lib/types";
 
 import {
   DropdownMenu,
@@ -12,8 +11,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DeleteDialog } from "./DeleteDialog";
+import { UpdateItemData } from "./UpdateItemData";
 
-export const UpdateDialong = ({ itemData }: { itemData: Video }) => {
+export const UpdateDialong = ({
+  endpoint,
+  itemData,
+}: {
+  endpoint: string;
+  itemData: any;
+}) => {
   const [open, setOpen] = React.useState(false);
   const [isDeleteing, setIsDeleting] = React.useState(false);
   const queryClient = useQueryClient();
@@ -22,7 +28,7 @@ export const UpdateDialong = ({ itemData }: { itemData: Video }) => {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DropdownMenu>
-          <DropdownMenuTrigger className="fixed right-2 top-2">
+          <DropdownMenuTrigger className="fixed right-1.5 top-1.5">
             <CircleEllipsis className="h-7 w-7 rounded-lg border border-gray-400 bg-white p-[2px] hover:bg-gray-200" />
           </DropdownMenuTrigger>
           <DialogTrigger onClick={(e) => e.stopPropagation()}>
@@ -44,25 +50,25 @@ export const UpdateDialong = ({ itemData }: { itemData: Video }) => {
         </DropdownMenu>
         <div onClick={(e) => e.stopPropagation()}>
           {isDeleteing && itemData ? (
-            <>
-              <DeleteDialog
-                videoId={itemData.id}
-                queryClient={queryClient}
-                setOpen={setOpen}
-              />
-            </>
+            <DeleteDialog
+              itemId={itemData.id}
+              queryClient={queryClient}
+              setOpen={setOpen}
+              endpoint={endpoint}
+            />
+          ) : itemData && endpoint === "video" ? (
+            <UpdateaVideoData
+              videoId={itemData.id}
+              queryClient={queryClient}
+              setOpen={setOpen}
+            />
           ) : (
-            <>
-              {itemData && (
-                <>
-                  <UpdateaVideoData
-                    videoId={itemData.id}
-                    queryClient={queryClient}
-                    setOpen={setOpen}
-                  />
-                </>
-              )}
-            </>
+            <UpdateItemData
+              itemData={itemData}
+              queryClient={queryClient}
+              setOpen={setOpen}
+              endpoint={endpoint}
+            />
           )}
         </div>
       </Dialog>

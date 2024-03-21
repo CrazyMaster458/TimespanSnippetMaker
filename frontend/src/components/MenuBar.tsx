@@ -1,9 +1,4 @@
-import { Video } from "lucide-react";
-import { Film } from "lucide-react";
-import { Users } from "lucide-react";
-import { Settings } from "lucide-react";
-import { Tag } from "lucide-react";
-import { BadgeCheck } from "lucide-react";
+import { Tv, Video, Film, Users, Settings, Tag } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const MenuBar = () => {
@@ -40,11 +35,12 @@ export const MenuBar = () => {
           </li>
           <li>
             <Link
-              to="/channels"
+              to="/video-types"
               className="tooltip tooltip-right"
-              data-tip="Channels"
+              data-tip="Video Types"
             >
-              <BadgeCheck className=" h-5 w-5" viewBox="0 0 24 24" />
+              <Tv className=" h-5 w-5" viewBox="0 0 24 24" />
+              {/* <BadgeCheck className=" h-5 w-5" viewBox="0 0 24 24" /> */}
             </Link>
           </li>
           <li>

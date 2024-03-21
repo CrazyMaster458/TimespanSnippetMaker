@@ -5,7 +5,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { getData, putData, uploadFile } from "@/api";
+import { getData, putData, uploadFile, validateNulls } from "@/api";
 import { useState } from "react";
 import { Label } from "@radix-ui/react-label";
 import { Button } from "./ui/button";
@@ -14,10 +14,10 @@ import { SelectCreate } from "./Select";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Option,
-  VideoUpdateData,
+  UpdateVideo,
   influencerSchema,
   videoTypeSchema,
-  videoUpdateSchema,
+  updateVideoSchema,
 } from "@/lib/types";
 
 const steps = [
@@ -90,8 +90,8 @@ export const UpdateaVideoData = ({
   };
 
   const { mutateAsync: updateVideoData } = useMutation({
-    mutationFn: (data: VideoUpdateData) =>
-      putData(`/videos/${data.id}`, data, videoUpdateSchema),
+    mutationFn: (data: UpdateVideo) =>
+      putData(`/videos/${data.id}`, data, updateVideoSchema),
     onSuccess: (data) => {
       setOpen(false);
       const queryKey = ["videos", data.id];
@@ -104,11 +104,20 @@ export const UpdateaVideoData = ({
   });
 
   const updateVideo = async () => {
-    const data: VideoUpdateData = {
+    const areErrors = validateNulls([selectedHost, selectedVideoTypes]);
+
+    if (areErrors) {
+      return;
+    }
+
+    const data: UpdateVideo = {
       id: videoId,
       title: title,
       host_id: selectedHost[0].value,
-      guests: selectedGuests.map((guest) => guest.value) || null,
+      guests:
+        selectedGuests.length > 0
+          ? selectedGuests.map((guest) => guest.value)
+          : undefined,
       video_type_id: selectedVideoTypes[0].value,
     };
 
@@ -138,7 +147,7 @@ export const UpdateaVideoData = ({
         <form className="grow px-8 pt-4">
           {stepNum === 1 && (
             <section className="grid grid-cols-7 gap-8">
-              <div className="col-span-4">
+              <div className="col-span-4 flex flex-col gap-2">
                 <div className="rounded border-2 px-3 pb-4 pt-2">
                   <Label
                     htmlFor="title"
@@ -157,15 +166,17 @@ export const UpdateaVideoData = ({
                   />
                 </div>
 
-                <Label htmlFor="video_type">Video Type</Label>
-                <SelectCreate
-                  data={videoTypesData}
-                  endpoint="video_types"
-                  selectedOptions={selectedVideoTypes}
-                  setSelectedOptions={setSelectedVideoTypes}
-                  placeholder="Select Video Type"
-                  schema={videoTypeSchema}
-                />
+                <div>
+                  <Label htmlFor="video_type">Video Type</Label>
+                  <SelectCreate
+                    data={videoTypesData}
+                    endpoint="video_types"
+                    selectedOptions={selectedVideoTypes}
+                    setSelectedOptions={setSelectedVideoTypes}
+                    placeholder="Select Video Type"
+                    schema={videoTypeSchema}
+                  />
+                </div>
               </div>
               <div className="col-span-3">
                 <Label htmlFor="thumbnail">Upload Thumbnail</Label>
@@ -183,27 +194,31 @@ export const UpdateaVideoData = ({
           )}
 
           {stepNum === 2 && (
-            <section className="">
-              <Label htmlFor="host">Host</Label>
-              <SelectCreate
-                data={influencersData}
-                endpoint="influencers"
-                selectedOptions={selectedHost}
-                setSelectedOptions={setSelectedHost}
-                placeholder="Select Host"
-                schema={influencerSchema}
-              />
+            <section className="grid grid-cols-2 justify-stretch gap-5">
+              <div className="">
+                <Label htmlFor="host">Host</Label>
+                <SelectCreate
+                  data={influencersData}
+                  endpoint="influencers"
+                  selectedOptions={selectedHost}
+                  setSelectedOptions={setSelectedHost}
+                  placeholder="Select Host"
+                  schema={influencerSchema}
+                />
+              </div>
 
-              <Label htmlFor="guests">Guests</Label>
-              <SelectCreate
-                data={influencersData}
-                endpoint="influencers"
-                isMulti={true}
-                selectedOptions={selectedGuests}
-                setSelectedOptions={setSelectedGuests}
-                placeholder="Select Host"
-                schema={influencerSchema}
-              />
+              <div className="">
+                <Label htmlFor="guests">Guests</Label>
+                <SelectCreate
+                  data={influencersData}
+                  endpoint="influencers"
+                  isMulti={true}
+                  selectedOptions={selectedGuests}
+                  setSelectedOptions={setSelectedGuests}
+                  placeholder="Select Host"
+                  schema={influencerSchema}
+                />
+              </div>
             </section>
           )}
 

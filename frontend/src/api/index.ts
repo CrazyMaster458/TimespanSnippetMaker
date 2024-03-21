@@ -4,6 +4,7 @@ import { validateData } from "@/lib/validations";
 import { AxiosProgressEvent } from "axios";
 import { toast } from "sonner";
 import { Schema } from "zod";
+import { Option } from "@/lib/types";
 
 // type AddNewItemParams = {
 //   endpoint: string;
@@ -55,6 +56,21 @@ export const deleteData = async (endpoint: string) => {
   }
 };
 
+export const validateNulls = (data: Option[][]) => {
+  let errors = false;
+  Object.values(data).forEach((item) => {
+    if (item.length === 0) {
+      errors = true;
+    }
+  });
+
+  if (errors) {
+    toast.error("Please select a host and video type");
+  }
+
+  return errors;
+};
+
 export const putData = async (
   endpoint: string,
   data: object,
@@ -63,10 +79,16 @@ export const putData = async (
   const { result, errors } = validateData(data, schema);
 
   if (errors) {
+    console.log("errors", errors);
     return { errors: errors };
   } else if (result) {
-    const response = await axiosClient.put(endpoint, result.data);
-    return response.data;
+    try {
+      const response = await axiosClient.put(endpoint, result.data);
+      return response.data;
+    } catch (error) {
+      toast.error(error.response.data.message);
+      // console.log(error.response.data.message);
+    }
   }
 };
 
@@ -92,7 +114,14 @@ export const postData = async (
   const { result, errors } = validateData(data, schema);
 
   if (errors) {
-    return { errors: errors };
+    Object.values(errors).forEach((errorMessage) => {
+      toast.error(errorMessage);
+    });
+
+    // Throw an error with all error messages concatenated
+    const errorMessages = Object.values(errors).join("\n");
+    throw new Error(errorMessages);
+    // return { errors: errors };
   } else if (result) {
     const response = await axiosClient.post(endpoint, result.data);
     return response.data;
