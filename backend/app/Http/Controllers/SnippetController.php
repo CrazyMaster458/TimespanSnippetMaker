@@ -13,11 +13,9 @@ use Illuminate\Http\Request;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use App\Http\Controllers\StorageController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\TranscriptionController;
 use App\Http\Resources\TagResource;
 use App\Models\Tag;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Facades\Response;
 
 
 class SnippetController extends Controller
@@ -138,7 +136,7 @@ class SnippetController extends Controller
             return abort(403, 'Unauthorized action');
         }
 
-        app(StorageController::class)->deleteFile($snippet->file_path);
+        app(StorageController::class)->deleteFile("users/".$snippet->file_path);
 
         $snippet->snippet_tags()->delete();
 
@@ -147,40 +145,28 @@ class SnippetController extends Controller
         return response('', 204);
     }
 
-    public function downloadFullVideo(Snippet $snippet, Request $request)
+    public function downloadSnippet(Snippet $snippet, Request $request)
     {
         $user = $request->user();
         $video = Video::find($snippet->video_id);
-        $videoPathInfo = pathinfo($video->file_path);
+        $videoPathInfo = pathinfo($snippet->file_path);
         $videoExtension = $videoPathInfo['extension'];
 
-        // Construct the full path to the video file
-        // $videoFilePath = "public/{$user->secret_name}/{$video->video_code}/video.mp4";
-        $videoFilePath = "public/{$video->file_path}";
-
+        $videoName = "snippet{$snippet->snippet_code}.{$videoExtension}";
+        $videoFilePath = "app/users/{$user->secret_name}/{$video->video_code}/snippets/{$videoName}";
 
         // Check if the file exists
         // if (!Storage::exists($videoFilePath)) {
         //     return response()->json(["error" => "Video file not found"], 404);
         // }
 
-        // Set the headers for the download response
         $headers = [
-            'Content-Type' => 'video/mp4', // Modify the content type according to your video format
-            'Content-Disposition' => 'attachment; filename="' . "video.mp4" . '"',
+            'Content-Type' => 'video/mp4', 
+            'Content-Disposition' => 'attachment; filename="' . $videoName . '"',
+            'X-Filename' => $videoName,
         ];
 
-
-        $fileContents = Storage::get($videoFilePath);
-
-        // Return the video file as a download response
-        // return response($fileContents, 200, $headers);
-        // return response()->download(Storage::path($videoFilePath),"video.mp4" , $headers);
-
-        // Return the video file as a download response
-        // return Response::download($videoFilePath, "video.mp4", $headers);
-        return Response::download($fileContents, "video.mp4", $headers);
-
+        return response()->download(storage_path($videoFilePath), $videoName, $headers);
     }
 
     public function cutVideo(Snippet $snippet, Request $request) {
@@ -194,30 +180,26 @@ class SnippetController extends Controller
 
         $snippetDestination = "{$videoFolderPath}/snippets/snippet{$snippet->snippet_code}.{$videoExtension}";
 
-        $ffmpeg = FFMpeg::fromDisk('public')
+        $ffmpeg = FFMpeg::fromDisk('users')
             ->open("{$videoFolderPath}/video.{$videoExtension}")
             ->export()
-            ->toDisk('public')
-            ->inFormat(new \FFMpeg\Format\Video\X264)
+            ->toDisk('users')
+            // ->inFormat(new \FFMpeg\Format\Video\X264)
             ->addFilter([
-                '-c:v', 'copy',
+                '-c', 'copy',
                 '-ss', $snippet->starts_at,
                 '-to', $snippet->ends_at,
             ])
             ->save($snippetDestination);
 
-    
+        $transcript = app(TranscriptionController::class)->transcribe($snippetDestination);
+
         $snippet->update([
-            'file_path' => $snippetDestination
+            'file_path' => $snippetDestination,
+            'transcript' => $transcript,
         ]);
 
-        // Queue::push(function () use ($snippetDestination, $snippet) {
-        //     app(TranscriptionController::class)->transcribe($snippetDestination, $snippet->id);
-        // });
-
-        // app(TranscriptionController::class)->transcribe($snippetDestination, $snippet->id);
-
-        $this->downloadFullVideo($snippet, $request);
+        // $this->downloadFullVideo($snippet, $request);
 
         return response()->json(["message" => "Success"]);
     }

@@ -4,6 +4,7 @@ use App\Http\Controllers\GoogleDriveController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DataController;
 use App\Http\Controllers\ProviderController;
+use App\Http\Controllers\PrivateController;
 use Laravel\Socialite\Facades\Socialite;
 
 /*

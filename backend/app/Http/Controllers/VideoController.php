@@ -64,15 +64,13 @@ class VideoController extends Controller
         $videoFilePath = $video->file_path;
 
             // Use FFmpeg to get the duration of the video
-        $duration = FFMpeg::fromDisk('public')->open($videoFilePath)->getDurationInSeconds();
+        $duration = FFMpeg::fromDisk('users')->open($videoFilePath)->getDurationInSeconds();
 
         // Add the duration to the video object
         $video->duration = $duration;
 
         $video->video_url = app(StorageController::class)->getFileUrl($video->file_path);
         $video->image_url = app(StorageController::class)->getFileUrl($video->thumbnail_path);
-
-        $video->snippets = app(SnippetController::class)->getVideoSnippets($video->id);
     
         $video->load('guests');
 
@@ -124,8 +122,8 @@ class VideoController extends Controller
         });
         $video->snippets()->delete();
 
-        $videoFolder = "public/{$user->secret_name}/{$video->video_code}";
-        app(StorageController::class)->deleteFolder($videoFolder);
+        $videoFolder = "{$user->secret_name}/{$video->video_code}";
+        app(StorageController::class)->deleteFolder("users/".$videoFolder);
 
         $video->delete();
 

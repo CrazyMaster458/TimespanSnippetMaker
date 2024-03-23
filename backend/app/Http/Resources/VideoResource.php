@@ -22,7 +22,6 @@ class VideoResource extends JsonResource
             'host_id' => $this->host,
             'video_type' => $this->video_type,
             'guests' => $this->guests,
-            'snippets' => $this->snippets,
             'duration' => $this->duration,
         ];
     }

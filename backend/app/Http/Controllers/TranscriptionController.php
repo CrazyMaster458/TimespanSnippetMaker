@@ -2,27 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Snippet;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
-use App\Jobs\TranscribeAudioJob;
+use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\StorageController;
 
 class TranscriptionController extends Controller
 {
-    public function transcribe($file_path, $snippetId)
+    public function transcribe(string $snippetPath)
     {
-        // $output = Artisan::call('transcribe:audio', [
-        //     // 'file_path' => $request->input('file_path'),
-        //     'file_path' => storage_path('app/public/'. $file_path),
-        // ]);
+        $isAudioCreated = app(StorageController::class)->createAudioFile($snippetPath);
 
-        // // Get the output of the command
-        // $transcriptionResult = Artisan::output();
+        if($isAudioCreated){
+            $file_path = 'temp\audio.mp3';
+            $fullFilePath = app(StorageController::class)->getFullPath($file_path);
 
-        // return $transcriptionResult;
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . env('OPENAI_API_KEY'),
+            ])->attach('file', file_get_contents($fullFilePath), 'audio.mp3')
+              ->post('https://api.openai.com/v1/audio/transcriptions', [
+                  'model' => 'whisper-1',
+              ]);
 
-        // Dispatch the job for audio transcription
-        TranscribeAudioJob::dispatch($file_path, $snippetId)->onQueue('transcription');
-
-        return response()->json(['message' => 'Transcription started in the background']);
+            app(StorageController::class)->deleteFile($file_path);
+            
+            return $response->json()["text"];
+        }
     }
 }

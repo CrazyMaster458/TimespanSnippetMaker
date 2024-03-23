@@ -20,6 +20,7 @@ import { Option, tagSchema } from "@/lib/types";
 import { deleteData, putData } from "@/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LoadingButton } from "./LoadingButton";
+import { AxiosProgressEvent } from "axios";
 
 type SnippetCardProps = {
   snippetData: Snippet;
@@ -118,8 +119,47 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
 
   const cutVideo = async () => {
     try {
-      const response = await axiosClient.get(`/download/${snippetData.id}`);
-      console.log(response.data.data);
+      const response = await axiosClient.post(`/cut/${snippetData.id}`);
+      console.log(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const downloadSnippet = async () => {
+    try {
+      const response = await axiosClient.get(`/download/${snippetData.id}`, {
+        responseType: "blob", // Set the response type to "blob" to handle binary data
+        onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
+          if (progressEvent.event.lengthComputable) {
+            console.log(
+              ((progressEvent.loaded / progressEvent.total!) * 100).toFixed() +
+                "%",
+            );
+          } else {
+            console.log("Download in progress, please wait...");
+          }
+        },
+      });
+      console.log(response);
+
+      // Extract the filename from response headers
+      const filename = response.headers["X-Filename"] || "video.mp4";
+
+      // Create a URL for the blob object received in the response
+      // const url = window.URL.createObjectURL(new Blob([response.data]));
+      const url = window.URL.createObjectURL(response.data);
+
+      // Create a link element to trigger the download
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", filename); // Set the filename here
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
     } catch (error) {
       console.log(error);
     }
@@ -168,7 +208,7 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
 
   return (
     <div>
-      <div className="collapse collapse-arrow">
+      <div className="collapse-arrow collapse">
         <input type="radio" name="my-accordion-2" onClick={handleCardClick} />
         <div className="collapse-title">
           <div className="flex justify-between">
@@ -245,7 +285,11 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
               >
                 Save
               </Button>
-              <Button variant="outline" onClick={cutVideo} disabled={isPending}>
+              <Button
+                variant="outline"
+                onClick={downloadSnippet}
+                disabled={isPending}
+              >
                 <Download className="pr-2" /> Download
               </Button>
             </div>

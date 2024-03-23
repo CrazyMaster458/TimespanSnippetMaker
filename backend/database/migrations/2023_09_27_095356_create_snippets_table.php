@@ -16,18 +16,17 @@ return new class extends Migration
     {
         Schema::create('snippets', function (Blueprint $table) {
             $table->id();
-            $table->string('description', 1100)->default("New Snippet // <-- to split the hook from description");
+            $table->string('description', 1100)->default("New Snippet");
             $table->time('starts_at')->default("00:00:00");
             $table->time('ends_at')->default("00:00:00");
             $table->string('file_path', 1150)->nullable();
             $table->text('transcript')->nullable();
             $table->string('snippet_code', 11)->unique();
-            $table->boolean('downloaded')->default(false);
             $table->timestamps();
 
             // Foregin keys
             $table->foreignIdFor(Video::class, 'video_id');
-            $table->foreignIdFor(User::class, 'user_id')->nullable();
+            $table->foreignIdFor(User::class, 'user_id');
         });
     }
 

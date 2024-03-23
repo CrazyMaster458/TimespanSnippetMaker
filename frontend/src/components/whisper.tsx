@@ -15,9 +15,9 @@ const Whisper = () => {
       formData.append("file", audioFile);
 
       axiosClient
-        .get("/transcribe")
+        .get("/assets")
         .then((response) => {
-          console.log(response.data);
+          console.log(response);
         })
         .catch((error) => {
           console.error(error);

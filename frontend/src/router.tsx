@@ -13,6 +13,7 @@ import Settings from "./pages/settings/Settings";
 import { Account } from "./pages/settings/Account";
 import { Preferences } from "./pages/settings/Preferences";
 import VideoDetail from "./pages/details/VideoDetail";
+import Whisper from "./components/whisper";
 
 const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
       {
         path: "/detail/:id",
         element: <VideoDetail />,
+      },
+      {
+        path: "/whisper",
+        element: <Whisper />,
       },
       {
         path: "/videos",

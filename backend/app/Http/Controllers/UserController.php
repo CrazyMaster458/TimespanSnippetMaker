@@ -72,7 +72,7 @@ class UserController extends Controller
         try {
             DB::beginTransaction();
     
-            $userFolder = "public/{$user->secret_name}";
+            $userFolder = "users/{$user->secret_name}";
             app(StorageController::class)->deleteFolder($userFolder);
     
             $user->videos()->guests()->delete();
