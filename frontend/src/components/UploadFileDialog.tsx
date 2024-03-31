@@ -1,13 +1,18 @@
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { FolderPlus } from "lucide-react";
-import { createNewVideo, handleSuccess, uploadFile } from "@/api";
+import { createNewVideo, handleSuccess, uploadFile } from "@/services/api";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { UploadVideo } from "./UploadVideo";
 import { UpdateaVideoData } from "./UpdateVideoData";
 import { AxiosProgressEvent } from "axios";
 import React from "react";
-import { Button } from "./ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export const UploadFileDialog = () => {
   const [open, setOpen] = React.useState(false);
@@ -66,15 +71,24 @@ export const UploadFileDialog = () => {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger>
-          <button className="btn btn-circle btn-ghost">
-            <FolderPlus className="h-5 w-5" />
-          </button>
+          <TooltipProvider delayDuration={200}>
+            <Tooltip>
+              <TooltipTrigger>
+                <button className="btn btn-circle btn-ghost">
+                  <FolderPlus />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Create video</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </DialogTrigger>
-        {isSuccess && !isPending ? (
+        {isSuccess && !isPending && data ? (
           <>
             <UpdateaVideoData
               uploadProgress={uploadProgress}
-              videoId={data.id}
+              videoData={data}
               queryClient={queryClient}
               setOpen={setOpen}
             />

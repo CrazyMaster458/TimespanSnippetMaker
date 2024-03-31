@@ -11,6 +11,7 @@ class VideoType extends Model
 
     protected $fillable = [
         'name',
+        'user_id',
     ];
 
     public function videos()
@@ -21,6 +22,11 @@ class VideoType extends Model
     public function snippets()
     {
         return $this->hasMany(Snippet::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
 }

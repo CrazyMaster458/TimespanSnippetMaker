@@ -13,7 +13,7 @@ import {
 import { DeleteDialog } from "./DeleteDialog";
 import { UpdateItemData } from "./UpdateItemData";
 
-export const UpdateDialong = ({
+export const UpdateDialog = ({
   endpoint,
   itemData,
 }: {
@@ -58,7 +58,7 @@ export const UpdateDialong = ({
             />
           ) : itemData && endpoint === "video" ? (
             <UpdateaVideoData
-              videoId={itemData.id}
+              videoData={itemData}
               queryClient={queryClient}
               setOpen={setOpen}
             />

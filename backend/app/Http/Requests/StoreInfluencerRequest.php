@@ -14,6 +14,13 @@ class StoreInfluencerRequest extends FormRequest
         return true;
     }
 
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'user_id' => $this->user()->id,
+        ]);
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -22,7 +29,8 @@ class StoreInfluencerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255|unique:influencers',
+            'name' => 'required|string|max:255',
+            'user_id' => 'exists:users,id',
         ];
     }
 }

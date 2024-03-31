@@ -13,12 +13,25 @@ class InfluencerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $user = $request->user();
+
+        $query = $request->input('q');
+
+        $influencers = Influencer::where('user_id', $user->id);
+
+        if ($query !== null) {
+            $influencers = $influencers->where('name', 'like', "%$query%");
+        } 
+
+        $influencers = $influencers->orderBy('created_at', 'desc')
+        ->get();
+
         return InfluencerResource::collection(
-        Influencer::orderBy('created_at', 'desc')
-        ->get()
-    );
+            $influencers
+        );
+    
     }
 
     /**
@@ -36,8 +49,13 @@ class InfluencerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Influencer $influencer)
+    public function show(Influencer $influencer, Request $request)
     {
+        $user = $request->user();
+        if ($user->id !== $influencer->user_id) {
+            return abort(403, 'Unauthorized action');
+        }
+
         return new InfluencerResource($influencer);
     }
 

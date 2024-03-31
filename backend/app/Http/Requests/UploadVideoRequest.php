@@ -11,11 +11,11 @@ class UploadVideoRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        $video = $this->route('video');
+        // $video = $this->route('videos');
 
-        if($this->user()->id !== $video->user_id) {
-            return false;
-        }
+        // if($this->user()->id !== $video->user_id) {
+        //     return false;
+        // }
 
         return true;
     }

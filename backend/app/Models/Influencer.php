@@ -11,6 +11,7 @@ class Influencer extends Model
 
     protected $fillable = [
         'name',
+        'user_id',
     ];
 
     public function videos()
@@ -20,6 +21,10 @@ class Influencer extends Model
     public function guests()
     {
         return $this->hasMany(Guest::class);
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
 }

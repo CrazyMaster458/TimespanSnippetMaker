@@ -8,7 +8,7 @@ import { Input } from "./ui/input";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { LoadingButton } from "./LoadingButton";
-import { putData } from "@/api";
+import { putData } from "@/services/api";
 import { useMutation } from "@tanstack/react-query";
 import {
   BasicData,

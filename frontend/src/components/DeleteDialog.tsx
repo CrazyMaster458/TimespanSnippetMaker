@@ -8,7 +8,7 @@ import {
 import { Button } from "./ui/button";
 import { AlertTriangle } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
-import { deleteData } from "@/api";
+import { deleteData } from "@/services/api";
 import { LoadingButton } from "./LoadingButton";
 
 export const DeleteDialog = ({

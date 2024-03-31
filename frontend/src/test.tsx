@@ -1,50 +1,41 @@
-import axios from "axios";
-import { useEffect, useRef, useState } from "react";
-
-const VITE_OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-const model = "whisper-1";
+import { useEffect } from "react";
+import axiosClient from "@/services/axios";
 
 export default function Test() {
-  const inputRef = useRef();
-  const [file, setFile] = useState();
-  const [response, setResponse] = useState(null);
-
-  const onChangeFile = () => {
-    setFile(inputRef.current.files[0]);
-  };
+  // const axiosClient = axios.create({
+  //   baseURL: `${import.meta.env.VITE_API_BASE_URL}/api`,
+  //   withCredentials: true,
+  // });
 
   useEffect(() => {
-    const fetchAudioFile = async () => {
-        if(!file){
-            return;
-        }
+    httpCall();
+  }, []);
 
-        const formData = new FormData();
-        formData.append("model", model);
-        formData.append("file", file);
-
-        axios
-        .post("https://api.openai.com/v1/audio/transcriptions", formData, {
-            headers: {
-                "Content-Type" : "multipart/form-data",
-                Authorization: `Bearer ${VITE_OPENAI_API_KEY}`,
-            },
-        })
-        .then((res) => {
-            console.log(res.data);
-            setResponse(res.data);
-        })
-        .catch((err) => {
-            console.log(err);
-        })
-    };
-    fetchAudioFile();
-  }, [file])
+  async function httpCall() {
+    // const crsf = await axiosClient.get("/sanctum/csrf-cookie");
+    // console.log("crsf ", crsf);
+    // const login = await axiosClient.post("/login", {
+    //   email: "mike@gmail.com",
+    //   password: "M1k@123456",
+    // });
+    // console.log("login ", login);
+    // const signup = await axiosClient.post("/signup", {
+    //   username: "mike13",
+    //   email: "mike13@gmail.com",
+    //   password: "M1k@123456",
+    //   password_confirmation: "M1k@123456",
+    // });
+    // console.log("signup ", signup);
+    // const logout = await http.post("/api/logout2");
+    // console.log("login ", logout);
+    const me = await axiosClient.get("/videos");
+    console.log("me: ", me);
+  }
 
   return (
     <>
-        <input type="file" ref={inputRef} accept=".mp3" onChange={onChangeFile} />
-        {response && <div>{JSON.stringify(response, null,2)}</div>}
+      <div>Login</div>
+      <div>Register</div>
     </>
   );
 }

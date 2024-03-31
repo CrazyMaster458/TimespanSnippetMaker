@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Auth;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use Illuminate\Http\Request;
 use FFMpeg\Format\Audio\Mp3;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\File;
 
 class StorageController extends Controller
 {
@@ -28,6 +30,20 @@ class StorageController extends Controller
         return asset("users/$filePath");
     }
 
+    public function copyFolder(string $source, string $destination)
+    {
+        $filesystem = new Filesystem();
+    
+        if ($filesystem->exists($source)) {
+            $filesystem->makeDirectory($destination);
+            $filesystem->copyDirectory($source, $destination);
+    
+            return response()->json(["message" => "Folder copied successfully"]);
+        } else {
+            return response()->json(["message" => "Folder not found"]);
+        }
+    }
+
     public function uploadFile(Request $request, string $videoFolder, string $fileType)
     {
         $this->retrieveUser();
@@ -39,11 +55,13 @@ class StorageController extends Controller
             $extension = $file->getClientOriginalExtension();   
             $finalName = $fileType === 'image' ? 'thumbnail' : 'video';
 
-            $filePath = "{$this->user->secret_name}/{$videoFolder}/{$finalName}.{$extension}";
+            $filePath = "{$this->user->user_code}/{$videoFolder}/{$finalName}.{$extension}";
 
-            $file->storeAs("users/{$filePath}");
+            // $file->move("storage/".$filePath);
 
-            // $filePath = "public\\{$this->user->secret_name}\\{$videoFolder}\\{$finalName}.{$extension}";
+            $file->storeAs("public/{$filePath}");
+
+            // $filePath = "public\\{$this->user->user_code}\\{$videoFolder}\\{$finalName}.{$extension}";
             // $file->storeAs($filePath);
 
             return $filePath;
@@ -82,9 +100,9 @@ class StorageController extends Controller
         // If the user is not null (is logged in), then that means we're creating a folder inside of the usere's folder
 
         if($this->user === null){
-            $path = "users/{$folderName}";
+            $path = "public/{$folderName}";
         } else {
-            $path = "users/{$this->user->secret_name}/{$folderName}";
+            $path = "public/{$this->user->user_code}/{$folderName}";
 
         }
         

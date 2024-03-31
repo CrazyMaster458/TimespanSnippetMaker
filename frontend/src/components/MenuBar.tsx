@@ -1,7 +1,16 @@
-import { Tv, Video, Film, Users, Settings, Tag } from "lucide-react";
+import {
+  Tv,
+  Video,
+  Film,
+  Users,
+  Settings,
+  Tag,
+  Globe,
+  UserCog,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
-export const MenuBar = () => {
+export const MenuBar = ({ isAdmin }: { isAdmin: number }) => {
   return (
     <nav className="border-r-2">
       <ul className="menu flex h-[90.8vh] justify-between">
@@ -48,8 +57,28 @@ export const MenuBar = () => {
               <Tag className=" h-5 w-5" viewBox="0 0 24 24" />
             </Link>
           </li>
+          <li>
+            <Link
+              to="/public"
+              className="tooltip tooltip-right"
+              data-tip="Public"
+            >
+              <Globe className=" h-5 w-5" viewBox="0 0 24 24" />
+            </Link>
+          </li>
         </section>
         <section>
+          {isAdmin === 1 && (
+            <li>
+              <Link
+                to="/admin"
+                className="tooltip tooltip-right"
+                data-tip="Settings"
+              >
+                <UserCog className=" h-5 w-5" viewBox="0 0 24 24" />
+              </Link>
+            </li>
+          )}
           <li>
             <Link
               to="/settings/account"

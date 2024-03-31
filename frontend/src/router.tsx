@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { Navigate, createBrowserRouter } from "react-router-dom";
 import NotFound from "./pages/NotFound";
 import GuestLayout from "./components/layouts/GuestLayout";
 import Login from "./pages/authentication/Login";
@@ -13,7 +13,10 @@ import Settings from "./pages/settings/Settings";
 import { Account } from "./pages/settings/Account";
 import { Preferences } from "./pages/settings/Preferences";
 import VideoDetail from "./pages/details/VideoDetail";
-import Whisper from "./components/whisper";
+import InfiniteScrollTest from "./pages/lists/__test__InfiniteScroll";
+// import PublicList from "./pages/lists/PublicList";
+// import Test from "./test";
+// import Admin from "./pages/Admin";
 
 const router = createBrowserRouter([
   {
@@ -21,13 +24,25 @@ const router = createBrowserRouter([
     element: <DefaultLayout />,
     children: [
       {
+        path: "/",
+        element: <Navigate to="/videos" />,
+      },
+      // {
+      //   path: "/admin",
+      //   element: <Admin />,
+      // },
+      {
         path: "/detail/:id",
         element: <VideoDetail />,
       },
       {
-        path: "/whisper",
-        element: <Whisper />,
+        path: "/infinite-scroll",
+        element: <InfiniteScrollTest />,
       },
+      // {
+      //   path: "/public",
+      //   element: <PublicList />,
+      // },
       {
         path: "/videos",
         element: <VideoList />,
@@ -69,6 +84,10 @@ const router = createBrowserRouter([
     element: <GuestLayout />,
     children: [
       {
+        path: "/",
+        element: <Navigate to="/login" />,
+      },
+      {
         path: "/login",
         element: <Login />,
       },
@@ -82,6 +101,10 @@ const router = createBrowserRouter([
     path: "*",
     element: <NotFound />,
   },
+  // {
+  //   path: "/test",
+  //   element: <Test />,
+  // },
 ]);
 
 export default router;

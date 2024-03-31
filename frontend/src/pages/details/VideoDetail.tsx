@@ -1,30 +1,26 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
-import axiosClient from "../../api/axios.tsx";
 import { useNavigate, useParams } from "react-router-dom";
 import { VideoPlayer } from "@/components/VideoPlayer.tsx";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Button } from "@/components/ui/button.tsx";
-import { SnippetCard } from "../../components/SnippetCard.tsx";
-import { Snippet, Tag, Video } from "@/lib/types.ts";
+import { SnippetCard } from "../../components/cards/SnippetCard.tsx";
+import { Snippet } from "@/lib/types.ts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  addNewItem,
-  createNewItem,
-  getData,
-  getQueryData,
-  handleSuccess,
-} from "@/api/index.ts";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createNewItem, handleSuccess } from "@/services/api.ts";
 import { EmptyState } from "@/components/EmptyState.tsx";
 import { Film } from "lucide-react";
 import { LoadingButton } from "@/components/LoadingButton.tsx";
-
-type FetchProps = {
-  video: Video;
-  tags: Tag[];
-};
+import { useStateContext } from "@/contexts/ContextProvider.tsx";
+import axiosClient from "@/services/axios.ts";
+import {
+  useItemQuery,
+  useGetQuery,
+  useVideoSnippetsQuery,
+} from "@/services/queries.ts";
+import { useCreateSnippetMutation } from "@/services/mutations.ts";
 
 type SnippetTime = {
   starts_at: string;
@@ -33,84 +29,58 @@ type SnippetTime = {
 
 export default function VideoDetail() {
   const queryClient = useQueryClient();
+  const { currentUser } = useStateContext();
   const { id } = useParams();
-  const {
-    data: videoData,
-    isLoading: isVideoDataLoading,
-    error: videoDataError,
-  } = useQuery({
-    queryKey: ["videos", id],
-    queryFn: () => getData("/videos/" + id),
-  });
 
-  const {
-    data: snippetsData,
-    isLoading: areSnippetsDataLoading,
-    error: snippetsDataError,
-  } = useQuery({
-    queryKey: ["videos", id, "snippets"],
-    queryFn: () => getData("/get-video-snippets/" + id),
-  });
+  const parsedId = id ? parseInt(id) : undefined;
+  const { data: videoData, isLoading: isVideoDataLoading } = useItemQuery(
+    "videos",
+    parsedId,
+  );
 
-  const {
-    data: tagsData,
-    isLoading: areTagsDataLoading,
-    error: tagsDataError,
-  } = useQuery({
-    queryKey: ["tags"],
-    queryFn: () => getData("/tags"),
-  });
+  const { data: tagsData, isLoading: areTagsDataLoading } = useGetQuery(
+    "tags",
+    !isVideoDataLoading,
+  );
 
-  const [snippetTimes, setSnippetTimes] = useState<SnippetTime | null>();
+  const { data: snippetsData, isLoading: areSnippetsDataLoading } =
+    useVideoSnippetsQuery("get-video-snippets", parsedId, !isVideoDataLoading);
 
-  const navigate = useNavigate();
+  const isEditable = videoData?.published
+    ? currentUser?.id === videoData.user_id
+      ? true
+      : false
+    : true;
 
-  const HandleRedirect = () => {
-    navigate(`/listview`);
-  };
-
-  const handleSnippetCardClick = (snippet: Snippet) => {
-    setSnippetTimes({
-      starts_at: snippet.starts_at,
-      ends_at: snippet.ends_at,
-    });
-  };
-
-  function handleDelete() {
+  function handleDuplicate() {
     axiosClient
-      .delete(`/videos/` + id)
+      .post(`/videos/${id}/duplicate`)
       .then(({ data }) => {
         console.log(data.data);
-        HandleRedirect();
       })
       .catch((error) => {
         console.log(error);
       });
   }
 
-  function updateSnippetsAfterDelete(deletedSnippetId) {
-    setSnippets((prevSnippets) =>
-      prevSnippets.filter(
-        (snippet) => snippet.props.snippetId !== deletedSnippetId,
-      ),
-    );
-  }
+  const { mutate: makeSnippet, isPending } = useCreateSnippetMutation(parsedId);
 
-  const { mutateAsync: createNewSnippet, isPending } = useMutation({
-    mutationFn: createNewItem,
-    onSuccess: (newItem) => {
-      const queryName = ["videos", id, "snippets"];
-      handleSuccess({ queryClient, queryName, newItem });
-    },
-    onError: (error) => {
-      console.log(error);
-    },
-  });
+  // const { mutateAsync: createNewSnippet, isPending } = useMutation({
+  //   mutationFn: createNewItem,
+  //   onSuccess: (newItem) => {
+  //     const queryName = ["videos", id, "snippets"];
+  //     handleSuccess({ queryClient, queryName, newItem });
+  //   },
+  //   onError: (error) => {
+  //     console.log(error);
+  //   },
+  // });
 
-  const handleSnippetCreation = () => {
-    const endpoint = "/snippets";
-    const data = { video_id: id };
-    createNewSnippet({ endpoint, data });
+  const handleSnippetCreation = async () => {
+    // const endpoint = "/snippets";
+    // const data = { video_id: id };
+    // createNewSnippet({ endpoint, data });
+    await makeSnippet({ video_id: parsedId });
   };
 
   return (
@@ -120,21 +90,14 @@ export default function VideoDetail() {
           {videoData && !isVideoDataLoading && videoData.video_url ? (
             <>
               <AspectRatio ratio={16 / 9}>
-                <VideoPlayer
-                  videoUrl={videoData.video_url}
-                  snippetTimes={snippetTimes ? snippetTimes : null}
-                />
+                <VideoPlayer videoUrl={videoData.video_url} />
               </AspectRatio>
               <div className="pt-3">
                 <h3 className="text-left font-sans text-xl font-bold">
                   {videoData.title}
                 </h3>
-                <Button
-                  variant="outline"
-                  className="bg-red-500"
-                  onClick={handleDelete}
-                >
-                  DELETE
+                <Button variant="outline" onClick={handleDuplicate}>
+                  Duplicate
                 </Button>
               </div>
             </>
@@ -155,13 +118,12 @@ export default function VideoDetail() {
             {!areSnippetsDataLoading && !areTagsDataLoading && snippetsData ? (
               snippetsData.length > 0 ? (
                 <>
-                  {snippetsData.map((snippet) => (
+                  {snippetsData.map((snippet: Snippet) => (
                     <SnippetCard
                       key={snippet.id}
                       snippetData={snippet}
                       tagsData={tagsData}
-                      setSnippetTimes={setSnippetTimes}
-                      onClick={() => handleSnippetCardClick(snippet)}
+                      isEditable={isEditable}
                     />
                   ))}
                   {isPending ? (

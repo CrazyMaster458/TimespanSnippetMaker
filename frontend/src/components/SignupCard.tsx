@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { useStateContext } from "@/contexts/ContextProvider";
 import { Link } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { postData } from "@/api";
+import { postData } from "@/services/api";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TSignUpSchema, signUpSchema } from "@/lib/types";
@@ -49,7 +49,7 @@ export function SignupCard() {
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card className="w-[25vw]">
-          <CardHeader>
+          <CardHeader className="pb-0">
             <CardTitle>Create your account</CardTitle>
             <CardDescription>
               To continue to Timestamp Snippet Maker.

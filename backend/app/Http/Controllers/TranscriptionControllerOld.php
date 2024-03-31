@@ -21,8 +21,8 @@ class TranscriptionController extends Controller
         // return $transcriptionResult;
 
         // Dispatch the job for audio transcription
-        TranscribeAudioJob::dispatch($file_path, $snippetId)->onQueue('transcription');
+        // TranscribeAudioJob::dispatch($file_path, $snippetId)->onQueue('transcription');
 
-        return response()->json(['message' => 'Transcription started in the background']);
+        // return response()->json(['message' => 'Transcription started in the background']);
     }
 }

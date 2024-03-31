@@ -17,7 +17,7 @@ return new class extends Migration
     {
         Schema::create('videos', function (Blueprint $table) {
             $table->id();
-            $table->string('title', 255)->nullable();
+            $table->string('title', 255)->default("New Video");
             $table->string('file_path', 1150)->nullable();
             $table->string('thumbnail_path', 1150)->nullable();
             $table->string('video_code', 8)->unique();

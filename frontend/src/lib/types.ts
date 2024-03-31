@@ -30,6 +30,8 @@ const videoSchema = z.object({
   title: z.string(),
   image_url: z.string(),
   video_url: z.string(),
+  published: z.boolean(),
+  user_id: z.number(),
   host_id: basicSchema,
   video_type_id: basicSchema,
   guests: z.array(basicSchema),
@@ -44,6 +46,12 @@ const timePropSchema = z.object({
 const optionSchema = z.object({
   value: z.number(),
   label: z.string(),
+});
+
+const loggedUserSchema = z.object({
+  id: z.number(),
+  username: z.string(),
+  admin: z.number(),
 });
 
 // UPDATE/CREATE SCHEMAS
@@ -141,10 +149,13 @@ export type TLoginSchema = z.infer<typeof loginSchema>;
 export type UpdateSnippet = z.infer<typeof updateSnippetSchema>;
 export type UpdateVideo = z.infer<typeof updateVideoSchema>;
 
+export type LoggedUser = z.infer<typeof loggedUserSchema>;
+
 export type Snippet = z.infer<typeof snippetSchema>;
 export type Video = z.infer<typeof videoSchema>;
 export type SnippetTag = z.infer<typeof snippetTagSchema>;
 
+export type BasicProp = z.infer<typeof basicSchema>;
 export type Tag = z.infer<typeof basicSchema>;
 export type VideoType = z.infer<typeof basicSchema>;
 export type Influencer = z.infer<typeof basicSchema>;

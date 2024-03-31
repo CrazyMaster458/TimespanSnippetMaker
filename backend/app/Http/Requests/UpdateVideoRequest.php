@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Video;
 
 class UpdateVideoRequest extends FormRequest
 {
@@ -12,15 +13,13 @@ class UpdateVideoRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // $video = $this->route('videos');
+        $video = $this->route('video');
 
-        // $user = Auth::user();
+        if (!$video instanceof Video) {
+            return false;
+        }
 
-        // if($user->id !== $video->user_id) {
-        //     return false;
-        // }
-
-        return true;
+        return auth()->user()->id === $video->user_id;
     }
 
     /**

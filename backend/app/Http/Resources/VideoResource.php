@@ -14,15 +14,18 @@ class VideoResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $isPublished = $this->published()->exists();
+
         return [
             'id' => $this->id,
             'title' => $this->title,
             'video_url' => $this->video_url,
             'image_url' => $this->image_url,
             'host_id' => $this->host,
-            'video_type' => $this->video_type,
+            'video_type_id' => $this->video_type,
             'guests' => $this->guests,
-            'duration' => $this->duration,
+            'published' => $isPublished,
+            'user_id' => $this->user_id,
         ];
     }
 }

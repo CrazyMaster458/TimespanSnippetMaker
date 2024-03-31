@@ -5,13 +5,7 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { AspectRatio } from "./ui/aspect-ratio";
 
-export const VideoPlayer = ({
-  videoUrl,
-  snippetTimes,
-}: {
-  videoUrl: string;
-  snippetTimes: object | null;
-}) => {
+export const VideoPlayer = ({ videoUrl }: { videoUrl: string }) => {
   // Video player
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
   const videoContainerRef = React.useRef<HTMLDivElement | null>(null);
@@ -81,38 +75,32 @@ export const VideoPlayer = ({
     speedBtnElement.textContent = `${newPlaybackRate}x`;
   }
 
-  const convertTimeStringToSeconds = (timeString: string): number => {
-    if (timeString) {
-      const [hours, minutes, seconds] = timeString.split(":").map(Number);
-      return hours * 3600 + minutes * 60 + seconds;
-    }
-    return 0;
-  };
+  // const convertTimeStringToSeconds = (timeString: string): number => {
+  //   if (timeString) {
+  //     const [hours, minutes, seconds] = timeString.split(":").map(Number);
+  //     return hours * 3600 + minutes * 60 + seconds;
+  //   }
+  //   return 0;
+  // };
 
-  const handleSectionUpdate = (startTime: string, endTime: string) => {
-    const videoElement = videoRef.current!;
-    const timelineContainerElement = timelineContainerRef.current!;
+  // const handleSectionUpdate = (startTime: string, endTime: string) => {
+  //   const videoElement = videoRef.current!;
+  //   const timelineContainerElement = timelineContainerRef.current!;
 
-    const startTimeInSeconds = convertTimeStringToSeconds(startTime);
-    const endTimeInSeconds = convertTimeStringToSeconds(endTime);
+  //   const startTimeInSeconds = convertTimeStringToSeconds(startTime);
+  //   const endTimeInSeconds = convertTimeStringToSeconds(endTime);
 
-    const startPosition =
-      ((startTimeInSeconds / videoElement.duration) * 100).toFixed(2) + "%";
-    const endPosition =
-      ((endTimeInSeconds / videoElement.duration) * 100).toFixed(2) + "%";
+  //   const startPosition =
+  //     ((startTimeInSeconds / videoElement.duration) * 100).toFixed(2) + "%";
+  //   const endPosition =
+  //     ((endTimeInSeconds / videoElement.duration) * 100).toFixed(2) + "%";
 
-    timelineContainerElement.style.setProperty(
-      "--start-position",
-      startPosition,
-    );
-    timelineContainerElement.style.setProperty("--end-position", endPosition);
-  };
-
-  useEffect(() => {
-    if (snippetTimes) {
-      handleSectionUpdate(snippetTimes.starts_at, snippetTimes.ends_at);
-    }
-  }, [snippetTimes]);
+  //   timelineContainerElement.style.setProperty(
+  //     "--start-position",
+  //     startPosition,
+  //   );
+  //   timelineContainerElement.style.setProperty("--end-position", endPosition);
+  // };
 
   useEffect(() => {
     // Video player
@@ -280,7 +268,7 @@ export const VideoPlayer = ({
         volumeSliderElement.value = String(videoElement.volume);
 
         let volumeLevel;
-        if (videoElement.muted || video?.volume === 0) {
+        if (videoElement.muted || videoElement?.volume === 0) {
           volumeSliderElement.value = String(0);
           volumeLevel = "muted";
         } else if (videoElement.volume >= 0.5) {

@@ -27,13 +27,13 @@ class Video extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+    public function published()
+    {
+        return $this->hasOne(Published::class);
+    }
     public function snippets()
     {
         return $this->hasMany(Snippet::class);
-    }
-    public function statuses()
-    {
-        return $this->hasMany(Status::class);
     }
     public function guests()
     {

@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useStateContext } from "@/contexts/ContextProvider";
 import { Navbar } from "../Navbar";
 import { MenuBar } from "../MenuBar";
@@ -6,20 +6,21 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toaster } from "@/components/ui/sonner";
 
 export default function DefaultLayout() {
-  const { userToken } = useStateContext();
+  const { userToken, currentUser } = useStateContext();
+  const location = useLocation();
 
-  if (!userToken) {
-    return <Navigate to={"/login"} />;
+  if (!userToken && !currentUser) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return (
     <>
       <header>
-        <Navbar />
+        <Navbar user={currentUser} />
       </header>
       <main className="flex flex-row">
         <aside className="grow-0">
-          <MenuBar />
+          <MenuBar isAdmin={currentUser?.admin || 0} />
         </aside>
         <ScrollArea className="h-[90.8vh] grow overflow-hidden">
           <div className="ml-9 mr-12 mt-4 pl-0">

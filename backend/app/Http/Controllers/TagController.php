@@ -8,19 +8,32 @@ use App\Http\Requests\StoreTagRequest;
 use App\Http\Requests\UpdateTagRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 
 class TagController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $user = $request->user();
+
+        $query = $request->input('q');
+
+        $tags = Tag::where('user_id', $user->id);
+
+        if ($query !== null) {
+            $tags = $tags->where('name', 'like', "%$query%");
+        }
+
+        $tags = $tags->orderBy('created_at', 'desc')
+        ->get();
+
         return TagResource::collection(
-        Tag::orderBy('created_at', 'desc')
-            ->get()
+            $tags
         );
+
     }
 
     /**
@@ -38,8 +51,13 @@ class TagController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Tag $tag)
+    public function show(Tag $tag, Request $request)
     {
+        $user = $request->user();
+        if ($user->id !== $tag->user_id) {
+            return abort(403, 'Unauthorized action');
+        }
+
         return new TagResource($tag);
     }
 

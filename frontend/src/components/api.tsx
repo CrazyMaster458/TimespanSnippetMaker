@@ -1,4 +1,4 @@
-import axiosClient, { AxiosProgressEvent } from "@/api/axios";
+import axiosClient, { AxiosProgressEvent } from "@/services/axios";
 
 export interface VideoParameters {
   influencers: any[];

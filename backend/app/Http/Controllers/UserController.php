@@ -17,8 +17,6 @@ class UserController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
-
         return UserResource::collection(
         User::orderBy('created_at', 'desc')
             ->paginate(10)
@@ -72,7 +70,7 @@ class UserController extends Controller
         try {
             DB::beginTransaction();
     
-            $userFolder = "users/{$user->secret_name}";
+            $userFolder = "users/{$user->user_code}";
             app(StorageController::class)->deleteFolder($userFolder);
     
             $user->videos()->guests()->delete();

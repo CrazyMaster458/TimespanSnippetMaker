@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Guest;
+use App\Models\Published;
 use App\Models\Video;
 use App\Http\Requests\StoreVideoRequest;
 use App\Http\Requests\UpdateVideoRequest;
@@ -13,7 +14,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\StorageController;
 use App\Http\Controllers\SnippetController;
+use App\Http\Controllers\PublishedController;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
+use Illuminate\Support\Str;
 
 class VideoController extends Controller
 {
@@ -23,11 +26,44 @@ class VideoController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+
+        $query = $request->input('q');
+        $videoType = $request->input('vt');
+        $host = $request->input('h');
+        $guests = $request->input('g');
+
+        $videos = Video::where('user_id', $user->id);
+        
+        if ($query !== null || $videoType !== null || $host !== null || $guests !== null) {
     
-        $videos = Video::where('user_id', $user->id)
-            ->with('guests')
-            ->orderBy('created_at', 'desc')
-            ->get();
+            if ($query !== null) {
+                $videos = $videos->where('title', 'like', "%$query%");
+            }
+    
+            if ($videoType !== null) {
+                $videos = $videos->where('video_type_id', 'like', "%$videoType%");
+            }
+    
+            if ($host !== null) {
+                $videos = $videos->where('host', 'like', "%$host%");
+            }
+    
+            if ($guests !== null) {
+                $guestIds = explode(',', $guests);
+                $videos = $videos->where(function ($query) use ($guestIds) {
+                    foreach ($guestIds as $guestId) {
+                        $query->whereHas('guests', function ($subQuery) use ($guestId) {
+                            $subQuery->where('influencer_id', $guestId);
+                        });
+                    }
+                });
+            }
+        }
+
+        $videos = $videos->orderBy('created_at', 'desc')
+        ->with('guests')
+        ->paginate(16);
+
 
         $videos = $videos->map(function ($video) {
             $video->video_url = app(StorageController::class)->getFileUrl($video->file_path);
@@ -57,17 +93,14 @@ class VideoController extends Controller
     public function show(Video $video, Request $request)
     {
         $user = $request->user();
-        if ($user->id !== $video->user_id) {
+
+        // Check if the video is in the published table
+        $isPublished = Published::where('video_id', $video->id)->exists();
+    
+        // If the video is not published, perform authorization check
+        if (!$isPublished && $user->id !== $video->user_id) {
             return abort(403, 'Unauthorized action');
         }
- 
-        $videoFilePath = $video->file_path;
-
-            // Use FFmpeg to get the duration of the video
-        $duration = FFMpeg::fromDisk('users')->open($videoFilePath)->getDurationInSeconds();
-
-        // Add the duration to the video object
-        $video->duration = $duration;
 
         $video->video_url = app(StorageController::class)->getFileUrl($video->file_path);
         $video->image_url = app(StorageController::class)->getFileUrl($video->thumbnail_path);
@@ -82,11 +115,6 @@ class VideoController extends Controller
      */
     public function update(UpdateVideoRequest $request, Video $video)
     {
-        $user = Auth::user();
-        if ($user->id !== $video->user_id) {
-            return abort(403, 'Unauthorized action');
-        }
-
         $data = $request->validated();
 
         $video->update($data);
@@ -103,7 +131,60 @@ class VideoController extends Controller
             }
         }
 
+        app(PublishedController::class)->publish($video);
+
         return new VideoResource($video);
+    }
+
+    public function generateVideoID(){
+        $videoID = Str::random(8);
+
+        $video = Video::where('video_code', $videoID)->first();
+
+        if($video){
+            return $this->generateVideoID();
+        }
+
+        return $videoID;
+    }
+
+    public function duplicate(Request $request, Video $video)
+    {
+        // Check if the video is public
+        if (!$video->published()->exists()){
+            return response()->json(['message' => 'Cannot duplicate private videos.'], 403);
+        }
+    
+        // Get the authenticated user
+        $user = $request->user();
+    
+        // Duplicate the video
+        $duplicatedVideo = $video->replicate();
+        $duplicatedVideo->video_code = $this->generateVideoID();
+        $duplicatedVideo->user_id = $user->id;
+        $duplicatedVideo->file_path = null;
+        $duplicatedVideo->thumbnail_path = null;
+        $duplicatedVideo->save();
+    
+        // Duplicate associated guests, if any
+        foreach ($video->guests as $guest) {
+            $duplicatedGuest = $guest->replicate();
+            $duplicatedGuest->video_id = $duplicatedVideo->id;
+            $duplicatedGuest->save();
+        }
+    
+        // Copy video file to user's storage directory
+        $userFolder = "{$user->user_code}";
+        $videoFolder = "{$user->user_code}/{$duplicatedVideo->video_code}";
+    
+        app(StorageController::class)->copyFolder("users/{$video->user->user_code}/{$video->video_code}", "users/{$videoFolder}");
+    
+        // Update file paths for the duplicated video
+        $duplicatedVideo->file_path = "{$videoFolder}/video.mp4"; // Update with the new file path in user's storage
+        $duplicatedVideo->thumbnail_path = "{$videoFolder}/thumbnail.jpg"; // Update with the new thumbnail path in user's storage
+        $duplicatedVideo->save();
+    
+        return new VideoResource($duplicatedVideo);
     }
 
     /**
@@ -122,7 +203,7 @@ class VideoController extends Controller
         });
         $video->snippets()->delete();
 
-        $videoFolder = "{$user->secret_name}/{$video->video_code}";
+        $videoFolder = "{$user->user_code}/{$video->video_code}";
         app(StorageController::class)->deleteFolder("users/".$videoFolder);
 
         $video->delete();
@@ -147,7 +228,7 @@ class VideoController extends Controller
             return new VideoResource($video);
         }
     
-        return response()->json(['message' => 'Video file not provided.'], 422);
+        return response()->json(['message' => 'Video file not provided'], 422);
     }
 
     public function uploadImage(UploadImageRequest $request, Video $video) 

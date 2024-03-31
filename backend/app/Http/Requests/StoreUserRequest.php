@@ -18,7 +18,7 @@ class StoreUserRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'secret_name' => $this->generateSecretName(),
+            'user_code' => $this->generateSecretName(),
             'password' => bcrypt($this->input('password')),
         ]);
     }
@@ -26,7 +26,7 @@ class StoreUserRequest extends FormRequest
     public function generateSecretName(){
         $secretName = 'user' . Str::random(10);
 
-        $secretName = User::where('secret_name', $secretName)->first();
+        $secretName = User::where('user_code', $secretName)->first();
 
         if($secretName){
             return $this->generateVideoID();
@@ -46,7 +46,7 @@ class StoreUserRequest extends FormRequest
             'username' => 'required|string|max:25',
             'email' => 'required|email|unique:users,email',
             'password'  => 'nullable|string|min:8',
-            'secret_name' => 'nullable|string|unique:users,secret_name',
+            'user_code' => 'nullable|string|unique:users,user_code',
             'access_token'  => 'nullable|string|max:3500',
             'admin'  => 'boolean|integer',
             'master_admin' => 'boolean|integer',

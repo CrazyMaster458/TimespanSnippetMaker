@@ -5,12 +5,12 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { getData, putData, uploadFile, validateNulls } from "@/api";
+import { getData, putData, uploadFile, validateNulls } from "@/services/api";
 import { useState } from "react";
 import { Label } from "@radix-ui/react-label";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { SelectCreate } from "./Select";
+import { CreateSelect } from "./CreateSelect";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Option,
@@ -18,6 +18,9 @@ import {
   influencerSchema,
   videoTypeSchema,
   updateVideoSchema,
+  Video,
+  Influencer,
+  VideoType,
 } from "@/lib/types";
 
 const steps = [
@@ -37,30 +40,59 @@ const steps = [
 
 export const UpdateaVideoData = ({
   uploadProgress,
-  videoId,
+  videoData,
   queryClient,
   setOpen,
 }: {
   uploadProgress?: string;
-  videoId: number;
+  videoData: Video;
   queryClient: any;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
-  const [title, setTitle] = useState("");
-  const [selectedHost, setSelectedHost] = useState<Option[]>([]);
-  const [selectedGuests, setSelectedGuests] = useState<Option[]>([]);
-  const [selectedVideoTypes, setSelectedVideoTypes] = useState<Option[]>([]);
-  const [stepNum, setStepNum] = useState(1);
-
-  const { data: videoTypesData } = useQuery({
+  const { data: videoTypesData } = useQuery<VideoType[]>({
     queryKey: ["video_types"],
     queryFn: () => getData("/video_types"),
   });
 
-  const { data: influencersData } = useQuery({
+  const { data: influencersData } = useQuery<Influencer[]>({
     queryKey: ["influencers"],
     queryFn: () => getData("/influencers"),
   });
+
+  const [title, setTitle] = useState(videoData?.title || "");
+  const [selectedHost, setSelectedHost] = useState<Option[] | []>(
+    videoData
+      ? ([
+          { value: videoData.host_id?.id, label: videoData.host_id?.name },
+        ] as Option[])
+      : [],
+  );
+  const [selectedVideoTypes, setSelectedVideoTypes] = useState<Option[]>(
+    videoData
+      ? ([
+          {
+            value: videoData.video_type_id?.id,
+            label: videoData.video_type_id?.name,
+          },
+        ] as Option[])
+      : [],
+  );
+
+  const mappedGuests = videoData?.guests
+    ? videoData.guests.map((guest) => guest.id)
+    : [];
+  const [selectedGuests, setSelectedGuests] = useState<Option[]>(
+    influencersData
+      ? influencersData
+          .filter((influencer) => mappedGuests.includes(influencer.id))
+          .map(
+            (influencer) =>
+              ({ value: influencer.id, label: influencer.name }) as Option,
+          )
+      : [],
+  );
+
+  const [stepNum, setStepNum] = useState(1);
 
   const { mutateAsync: uploadImageFile } = useMutation({
     mutationFn: ({ file, id }: { file: File; id: number }) =>
@@ -85,7 +117,7 @@ export const UpdateaVideoData = ({
 
   const handleThumbnailChange = async (e: any) => {
     if (e.target.files && e.target.files.length > 0) {
-      await uploadImageFile({ file: e.target.files[0], id: videoId });
+      await uploadImageFile({ file: e.target.files[0], id: videoData.id });
     }
   };
 
@@ -111,7 +143,7 @@ export const UpdateaVideoData = ({
     }
 
     const data: UpdateVideo = {
-      id: videoId,
+      id: videoData.id,
       title: title,
       host_id: selectedHost[0].value,
       guests:
@@ -168,8 +200,8 @@ export const UpdateaVideoData = ({
 
                 <div>
                   <Label htmlFor="video_type">Video Type</Label>
-                  <SelectCreate
-                    data={videoTypesData}
+                  <CreateSelect
+                    data={videoTypesData || []}
                     endpoint="video_types"
                     selectedOptions={selectedVideoTypes}
                     setSelectedOptions={setSelectedVideoTypes}
@@ -197,8 +229,8 @@ export const UpdateaVideoData = ({
             <section className="grid grid-cols-2 justify-stretch gap-5">
               <div className="">
                 <Label htmlFor="host">Host</Label>
-                <SelectCreate
-                  data={influencersData}
+                <CreateSelect
+                  data={influencersData || []}
                   endpoint="influencers"
                   selectedOptions={selectedHost}
                   setSelectedOptions={setSelectedHost}
@@ -209,8 +241,8 @@ export const UpdateaVideoData = ({
 
               <div className="">
                 <Label htmlFor="guests">Guests</Label>
-                <SelectCreate
-                  data={influencersData}
+                <CreateSelect
+                  data={influencersData || []}
                   endpoint="influencers"
                   isMulti={true}
                   selectedOptions={selectedGuests}

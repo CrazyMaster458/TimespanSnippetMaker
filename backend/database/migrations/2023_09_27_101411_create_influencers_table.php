@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('influencers', function (Blueprint $table) {
             $table->id();
-            $table->string('name',255)->unique();
+            $table->string('name',255);
             $table->timestamps();
 
             $table->foreignIdFor(User::class, 'user_id');

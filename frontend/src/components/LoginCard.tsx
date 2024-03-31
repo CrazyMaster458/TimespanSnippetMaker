@@ -1,4 +1,4 @@
-import { postData } from "@/api";
+import { postData } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -49,7 +49,7 @@ export function LoginCard() {
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card className="h-[auto] w-[25vw]">
-          <CardHeader>
+          <CardHeader className="pb-0">
             <CardTitle>Login into your account</CardTitle>
             <CardDescription>
               To continue to Timestamp Snippet Maker.

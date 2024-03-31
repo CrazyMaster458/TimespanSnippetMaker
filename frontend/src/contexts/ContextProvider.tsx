@@ -7,25 +7,24 @@ import {
   useState,
   Dispatch,
   SetStateAction,
+  useEffect,
 } from "react";
 
 interface User {
+  id: number;
   username: string;
-  email: string;
+  admin: number;
 }
 
 interface ContextType {
-  currentUser: User;
+  currentUser: User | null;
   userToken: string | null;
-  setCurrentUser: Dispatch<SetStateAction<User>>;
+  setCurrentUser: Dispatch<SetStateAction<User | null>>;
   setUserToken: Dispatch<SetStateAction<string | null>>;
 }
 
 const defaultContext: ContextType = {
-  currentUser: {
-    username: "",
-    email: "",
-  },
+  currentUser: null,
   userToken: null,
   setCurrentUser: () => {},
   setUserToken: () => {},
@@ -34,13 +33,32 @@ const defaultContext: ContextType = {
 const StateContext = createContext(defaultContext);
 
 export const ContextProvider = ({ children }: { children: ReactNode }) => {
-  const [currentUser, setCurrentUser] = useState<User>({
-    username: "",
-    email: "",
+  const [currentUser, _setCurrentUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem("USER");
+    if (storedUser) {
+      return JSON.parse(storedUser);
+    } else {
+      return null;
+    }
   });
   const [userToken, _setUserToken] = useState<string | null>(
-    localStorage.getItem("TOKEN") || "",
+    localStorage.getItem("TOKEN") || null,
   );
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const storedUser = localStorage.getItem("USER");
+      const storedToken = localStorage.getItem("TOKEN");
+      _setCurrentUser(storedUser ? JSON.parse(storedUser) : null);
+      _setUserToken(storedToken);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []); // Run effect only once on component mount
 
   const setUserToken = (token: any) => {
     if (token) {
@@ -49,6 +67,15 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
       localStorage.removeItem("TOKEN");
     }
     _setUserToken(token);
+  };
+
+  const setCurrentUser = (user: any) => {
+    if (user) {
+      localStorage.setItem("USER", JSON.stringify(user));
+    } else {
+      localStorage.removeItem("USER");
+    }
+    _setCurrentUser(user);
   };
 
   return (

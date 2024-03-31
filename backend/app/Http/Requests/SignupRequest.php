@@ -20,7 +20,7 @@ class SignupRequest extends FormRequest
     protected function prepareForValidation()
     {
         $this->merge([
-            'secret_name' => $this->generateSecretName(),
+            'user_code' => $this->generateSecretName(),
         ]);
     }
 
@@ -28,7 +28,7 @@ class SignupRequest extends FormRequest
     {
         $generatedSecretName = 'user' . Str::random(10);
 
-        $existingUser = User::where('secret_name', $generatedSecretName)->first();
+        $existingUser = User::where('user_code', $generatedSecretName)->first();
 
         if ($existingUser) {
             // If a user with the generated secret name already exists, generate a new one.
@@ -49,7 +49,7 @@ class SignupRequest extends FormRequest
         return [
             'username' => 'required|string|unique:users,username|max:45|min:3|regex:/^[A-Za-z0-9_]+$/u',
             'email' => 'required|email|string|unique:users,email',
-            'secret_name' => 'nullable|string|unique:users,secret_name',
+            'user_code' => 'nullable|string|unique:users,user_code',
             'password' => [
                 'nullable',
                 'confirmed',

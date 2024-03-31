@@ -7,18 +7,30 @@ use App\Models\VideoType;
 use App\Http\Requests\StoreVideoTypeRequest;
 use App\Http\Requests\UpdateVideoTypeRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 
 class VideoTypeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $user = $request->user();
+
+        $query = $request->input('q');
+
+        $videoTypes = VideoType::where('user_id', $user->id);
+
+        if ($query !== null) {
+            $videoTypes = $videoTypes->where('name', 'like', "%$query%");
+        }
+
+        $videoTypes = $videoTypes->orderBy('created_at', 'desc')
+        ->get();
+
         return VideoTypeResource::collection(
-        VideoType::orderBy('created_at', 'desc')
-            ->get()
+            $videoTypes
         );
     }
 
@@ -37,8 +49,13 @@ class VideoTypeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(VideoType $videoType)
+    public function show(VideoType $videoType, Request $request)
     {
+        $user = $request->user();
+        if ($user->id !== $videoType->user_id) {
+            return abort(403, 'Unauthorized action');
+        }
+
         return new VideoTypeResource($videoType);
     }
 

@@ -8,6 +8,7 @@ use App\Http\Requests\StoreSnippetRequest;
 use App\Http\Requests\UpdateSnippetRequest;
 use App\Models\SnippetTag;
 use App\Models\Video;
+use App\Models\Published;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
@@ -27,10 +28,38 @@ class SnippetController extends Controller
     {
         $user = $request->user();
 
-        $snippets = Snippet::where('user_id', $user->id)
-        ->orderBy('created_at', 'desc')
+        $query = $request->input('q');
+        $tags = $request->input('t');
+        $transcript = $request->input('s');
+
+        $snippets = Snippet::where('user_id', $user->id);
+
+        if ($query !== null || $tags !== null || $transcript !== null) {    
+
+            if ($query !== null) {
+                $snippets = $snippets->where('description', 'like', "%$query%");
+            }
+
+            if ($transcript !== null) {
+                $snippets->where('transcript', 'like', "%$query%");
+            }
+
+            if ($tags !== null) {
+                $tagsIds = explode(',', $tags);
+                $snippets = $snippets->where(function ($query) use ($tagsIds) {
+                    foreach ($tagsIds as $tagId) {
+                        $query->whereHas('snippet_tags', function ($subQuery) use ($tagId) {
+                            $subQuery->where('tag_id', $tagId);
+                        });
+                    }
+                });
+            }
+        } 
+
+        $snippets = $snippets->orderBy('created_at', 'desc')
         ->with('snippet_tags')
-        ->get();
+        ->paginate(16);
+
 
         $snippets = $snippets->map(function ($snippet) {            
             $snippet->video_url = app(StorageController::class)->getFileUrl($snippet->file_path);
@@ -65,13 +94,47 @@ class SnippetController extends Controller
 
     public function getVideoSnippets($video_id)
     {
-        $snippets = Snippet::where('video_id', $video_id)
-        ->orderBy('starts_at', 'asc')
-        ->with('snippet_tags')
-        ->get();
-
+        // Check if the video is in the published table
+        $isPublished = Published::where('video_id', $video_id)->exists();
+    
+        // Retrieve all snippets associated with the video
+        $snippetsQuery = Snippet::where('video_id', $video_id)->orderBy('starts_at', 'asc');
+    
+        // If the video is not published, perform authorization check
+        if (!$isPublished) {
+            // Check if the authenticated user is the owner of the video
+            $user = Auth::user();
+            $video = Video::findOrFail($video_id); // Retrieve the video
+            if ($user->id !== $video->user_id) {
+                return abort(403, 'Unauthorized action');
+            }
+        }
+    
+        // Retrieve snippets based on whether the video is published or not
+        $snippets = $snippetsQuery->with('snippet_tags')->get();
+    
         return SnippetResource::collection($snippets);
     }
+
+    // public function getVideoSnippets($video_id)
+    // {
+    //     $user = Auth::user();
+
+    //     // Check if the video is in the published table
+    //     $isPublished = Published::where('video_id', $video->id)->exists();
+    
+    //     // If the video is not published, perform authorization check
+    //     if (!$isPublished && $user->id !== $video->user_id) {
+    //         return abort(403, 'Unauthorized action');
+    //     }
+        
+    //     $snippets = Snippet::where('video_id', $video_id)
+    //     ->orderBy('starts_at', 'asc')
+    //     ->with('snippet_tags')
+    //     ->get();
+
+    //     return SnippetResource::collection($snippets);
+    // }
 
     /**
      * Store a newly created resource in storage.
@@ -153,7 +216,7 @@ class SnippetController extends Controller
         $videoExtension = $videoPathInfo['extension'];
 
         $videoName = "snippet{$snippet->snippet_code}.{$videoExtension}";
-        $videoFilePath = "app/users/{$user->secret_name}/{$video->video_code}/snippets/{$videoName}";
+        $videoFilePath = "app/users/{$user->user_code}/{$video->video_code}/snippets/{$videoName}";
 
         // Check if the file exists
         // if (!Storage::exists($videoFilePath)) {
@@ -176,7 +239,7 @@ class SnippetController extends Controller
         $videoPathInfo = pathinfo($video->file_path);
         $videoExtension = $videoPathInfo['extension'];
 
-        $videoFolderPath = "{$user->secret_name}/{$video->video_code}";
+        $videoFolderPath = "{$user->user_code}/{$video->video_code}";
 
         $snippetDestination = "{$videoFolderPath}/snippets/snippet{$snippet->snippet_code}.{$videoExtension}";
 
