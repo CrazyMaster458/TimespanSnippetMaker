@@ -7,8 +7,6 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\VideoController;
 use App\Http\Controllers\VideoTypeController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SseController;
-use App\Http\Controllers\SearchController;
 use App\Http\Controllers\PublishedController;
 use App\Http\Controllers\UserController;
 
@@ -38,28 +36,26 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/cut/{snippet}', [SnippetController::class, 'cutVideo']);
     Route::get('/download/{snippet}', [SnippetController::class, 'downloadSnippet']);
 
-    Route::delete('/delete-self/{user}', [SnippetController::class, 'destroy']);
-
     Route::post('/upload-video/{video}',[VideoController::class,'uploadVideo']);
     Route::post('/upload-image/{video}',[VideoController::class,'uploadImage']);
-
-    Route::get('/sse/{snippetId}', [SseController::class, 'handleSse']);
+    Route::post('/videos/{video}/duplicate', [VideoController::class, 'duplicate']);
     
+    Route::get('/influencer-list', [InfluencerController::class, 'indexList']);
+    Route::get('/video-type-list', [VideoTypeController::class, 'indexList']);
+    Route::get('/tag-list', [TagController::class, 'indexList']);
+
+    Route::get('/public', [PublishedController::class, 'index']);
     Route::get('/public', [PublishedController::class, 'index']);
 
-    Route::post('/videos/{video}/duplicate', [VideoController::class, 'duplicate']);
-
-
-    
-    Route::get('/videos/search', [SearchController::class, 'searchVideo']); 
-
-
+    Route::delete('/users/{user}', [UserController::class, 'destroy']);
+    Route::put('/users/{user}', [UserController::class, 'update']);
 
     Route::middleware(['admin'])->group(function () {
         Route::get('/admin', function () {
             return response()->json(['message' => 'Hello World Admin!']);
         });
-        Route::apiResource('users', UserController::class);
+        Route::get('/users', [UserController::class, 'index']);
+        Route::get('/users/{user}', [UserController::class, 'show']);
     });
 });
 

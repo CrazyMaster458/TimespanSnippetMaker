@@ -18,6 +18,20 @@ class VideoTypeController extends Controller
     {
         $user = $request->user();
 
+        $videoTypes = VideoType::where('user_id', $user->id);
+
+        $videoTypes = $videoTypes->orderBy('created_at', 'desc')
+        ->get();
+
+        return VideoTypeResource::collection(
+            $videoTypes
+        );
+    }
+
+    public function indexList(Request $request)
+    {
+        $user = $request->user();
+
         $query = $request->input('q');
 
         $videoTypes = VideoType::where('user_id', $user->id);
@@ -27,12 +41,13 @@ class VideoTypeController extends Controller
         }
 
         $videoTypes = $videoTypes->orderBy('created_at', 'desc')
-        ->get();
+        ->paginate(52);
 
         return VideoTypeResource::collection(
             $videoTypes
         );
     }
+
 
     /**
      * Store a newly created resource in storage.

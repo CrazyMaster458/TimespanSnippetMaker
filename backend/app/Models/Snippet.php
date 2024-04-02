@@ -28,5 +28,9 @@ class Snippet extends Model
     {
         return $this->hasMany(SnippetTag::class);
     }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
 }

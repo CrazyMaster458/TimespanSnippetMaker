@@ -16,15 +16,15 @@ axiosClient.interceptors.request.use((config) => {
 
 axiosClient.interceptors.response.use(
   (response) => {
-    console.log("Axios response: ", response);
     return response;
   },
   (error) => {
-    console.log("Axios error: ", error);
     if (error.response && error.response.status === 401) {
       localStorage.removeItem("TOKEN");
+      localStorage.removeItem("USER");
+      window.location.href = "/login";
+
       router.navigate("/login");
-      return Promise.reject(error);
     }
     return Promise.reject(error);
   },

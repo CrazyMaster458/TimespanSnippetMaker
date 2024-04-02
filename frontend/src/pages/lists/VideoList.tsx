@@ -38,52 +38,36 @@ export default function VideoList() {
     <>
       <section>
         <div className="grid grid-cols-4 gap-4 pb-8">
-          {videoQuery.isLoading || videoQuery.isFetching ? (
-            <>
-              <Skeleton className="h-[250px] w-[full]" />
-              <Skeleton className="h-[250px] w-[full]" />
-              <Skeleton className="h-[250px] w-[full]" />
-              <Skeleton className="h-[250px] w-[full]" />
-              <Skeleton className="h-[250px] w-[full]" />
-              <Skeleton className="h-[250px] w-[full]" />
-              <Skeleton className="h-[250px] w-[full]" />
-              <Skeleton className="h-[250px] w-[full]" />
-              <Skeleton className="h-[250px] w-[full]" />
-              <Skeleton className="h-[250px] w-[full]" />
-              <Skeleton className="h-[250px] w-[full]" />
-              <Skeleton className="h-[250px] w-[full]" />
-            </>
-          ) : videoQuery.data && videoQuery.data.pages.length > 1 ? (
-            videoQuery.data.pages.map((page) =>
-              page.data.map((video: Video) => (
-                <VideoCard
-                  key={video.id}
-                  videoData={video}
-                  user={currentUser}
-                />
-              )),
-            )
-          ) : (
-            !videoQuery.isLoading &&
-            !videoQuery.isFetching &&
-            !videoQuery.isFetchingNextPage && (
-              <EmptyState
-                objectName="Video"
-                onClick={handleRedirect}
-                icon={<VideoOff />}
-              />
-            )
-          )}
+          {videoQuery.isLoading
+            ? Array.from({ length: 16 }).map((_, index) => (
+                <Skeleton key={index} className="h-[270px] w-[full]" />
+              ))
+            : videoQuery.data && videoQuery.data.pages[0].data.length > 0
+              ? videoQuery.data.pages.map((page) =>
+                  page.data.map((video: Video) => (
+                    <VideoCard
+                      key={video.id}
+                      videoData={video}
+                      user={currentUser}
+                    />
+                  )),
+                )
+              : !videoQuery.isLoading &&
+                !videoQuery.isFetching &&
+                !videoQuery.isFetchingNextPage && (
+                  <EmptyState
+                    objectName="Video"
+                    onClick={handleRedirect}
+                    icon={<VideoOff />}
+                  />
+                )}
 
           {!videoQuery.isLoading && videoQuery.isFetching && null}
-          {!videoQuery.isLoading && videoQuery.isFetchingNextPage && (
-            <>
-              <Skeleton className="h-[250px] w-[full]" />
-              <Skeleton className="h-[250px] w-[full]" />
-              <Skeleton className="h-[250px] w-[full]" />
-              <Skeleton className="h-[250px] w-[full]" />
-            </>
-          )}
+          {!videoQuery.isLoading &&
+            videoQuery.isFetchingNextPage &&
+            Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className="h-[270px] w-[full]" />
+            ))}
         </div>
         <div ref={ref}></div>
       </section>

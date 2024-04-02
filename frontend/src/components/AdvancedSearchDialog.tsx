@@ -15,7 +15,7 @@ import {
 import { SimpleSelect } from "./SimpleSelect";
 import { useState } from "react";
 import { Label } from "./ui/label";
-import { AdvancedSearchDialogContent } from "./contexts/AdvancedSearchContext";
+import { AdvancedSearchDialogContent } from "../contexts/AdvancedSearchContext";
 import React from "react";
 
 const contentType = [
@@ -26,16 +26,8 @@ const contentType = [
   { id: 5, name: "Tags", value: "tags" },
 ];
 
-const accessibility = [
-  { id: 1, name: "Private", value: "private" },
-  { id: 2, name: "Public", value: "public" },
-];
-
 export const AdvancedSearchDialog = () => {
   const [selectedContentType, setSelectedContentType] = useState<number[]>([]);
-  const [selectedAccessibility, setSelectedAccessibility] = useState<number[]>(
-    [],
-  );
 
   const [open, setOpen] = React.useState(false);
 
@@ -43,7 +35,6 @@ export const AdvancedSearchDialog = () => {
 
   const handleClick = () => {
     setSelectedContentType([1]);
-    setSelectedAccessibility([1]);
     setFetchRequest(true);
   };
 
@@ -69,34 +60,20 @@ export const AdvancedSearchDialog = () => {
           <DialogHeader className="flex flex-row gap-5">
             <DialogTitle>Advanced search</DialogTitle>
           </DialogHeader>
-          <section className="flex flex-row justify-stretch gap-5">
-            <div className="w-full">
-              <Label>Accessibility</Label>
-              <SimpleSelect
-                data={accessibility}
-                selectedOptions={selectedAccessibility}
-                setSelectedOptions={setSelectedAccessibility}
-                placeholder="Select accessibility"
-                isCleanable={false}
-              />
-            </div>
-
-            <div className="w-full">
-              <Label>Content type</Label>
-              <SimpleSelect
-                data={contentType}
-                selectedOptions={selectedContentType}
-                setSelectedOptions={setSelectedContentType}
-                placeholder="Select content type"
-                isCleanable={false}
-              />
-            </div>
+          <section className="w-full">
+            <Label>Content type</Label>
+            <SimpleSelect
+              data={contentType}
+              selectedOptions={selectedContentType}
+              setSelectedOptions={setSelectedContentType}
+              placeholder="Select content type"
+              isCleanable={false}
+            />
           </section>
 
           {fetchRequest && (
             <AdvancedSearchDialogContent
               selectedContentType={selectedContentType[0]}
-              selectedAccessibility={selectedAccessibility[0]}
               contentType={contentType}
               setOpen={setOpen}
             />

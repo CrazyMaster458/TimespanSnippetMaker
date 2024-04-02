@@ -15,8 +15,10 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\StorageController;
 use App\Http\Controllers\SnippetController;
 use App\Http\Controllers\PublishedController;
+use League\Flysystem\Visibility;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class VideoController extends Controller
 {
@@ -45,7 +47,7 @@ class VideoController extends Controller
             }
     
             if ($host !== null) {
-                $videos = $videos->where('host', 'like', "%$host%");
+                $videos = $videos->where('host_id', 'like', "%$host%");
             }
     
             if ($guests !== null) {
@@ -94,10 +96,8 @@ class VideoController extends Controller
     {
         $user = $request->user();
 
-        // Check if the video is in the published table
         $isPublished = Published::where('video_id', $video->id)->exists();
     
-        // If the video is not published, perform authorization check
         if (!$isPublished && $user->id !== $video->user_id) {
             return abort(403, 'Unauthorized action');
         }
@@ -131,61 +131,62 @@ class VideoController extends Controller
             }
         }
 
-        app(PublishedController::class)->publish($video);
+        if($data['visibility'] == 'public'){
+            app(PublishedController::class)->publish($video);
+        }
+
 
         return new VideoResource($video);
     }
 
-    public function generateVideoID(){
-        $videoID = Str::random(8);
+    public function generateID(int $length){
+        $videoID = Str::random($length);
 
         $video = Video::where('video_code', $videoID)->first();
 
         if($video){
-            return $this->generateVideoID();
+            return $this->generateID($length);
         }
 
         return $videoID;
     }
 
     public function duplicate(Request $request, Video $video)
-    {
-        // Check if the video is public
-        if (!$video->published()->exists()){
-            return response()->json(['message' => 'Cannot duplicate private videos.'], 403);
-        }
-    
-        // Get the authenticated user
-        $user = $request->user();
-    
-        // Duplicate the video
+{
+    if (!$video->published()->exists()){
+        return response()->json(['message' => 'Cannot duplicate private videos.'], 403);
+    }
+
+    $user = $request->user();
+
+    DB::beginTransaction();
+
+    try {
         $duplicatedVideo = $video->replicate();
-        $duplicatedVideo->video_code = $this->generateVideoID();
+        $duplicatedVideo->video_code = $this->generateID(8);
         $duplicatedVideo->user_id = $user->id;
         $duplicatedVideo->file_path = null;
         $duplicatedVideo->thumbnail_path = null;
         $duplicatedVideo->save();
-    
-        // Duplicate associated guests, if any
-        foreach ($video->guests as $guest) {
-            $duplicatedGuest = $guest->replicate();
-            $duplicatedGuest->video_id = $duplicatedVideo->id;
-            $duplicatedGuest->save();
-        }
-    
-        // Copy video file to user's storage directory
+
+
+        DB::commit();
+
         $userFolder = "{$user->user_code}";
         $videoFolder = "{$user->user_code}/{$duplicatedVideo->video_code}";
-    
-        app(StorageController::class)->copyFolder("users/{$video->user->user_code}/{$video->video_code}", "users/{$videoFolder}");
-    
-        // Update file paths for the duplicated video
-        $duplicatedVideo->file_path = "{$videoFolder}/video.mp4"; // Update with the new file path in user's storage
-        $duplicatedVideo->thumbnail_path = "{$videoFolder}/thumbnail.jpg"; // Update with the new thumbnail path in user's storage
+
+        app(StorageController::class)->copyFolder("public/{$video->user->user_code}/{$video->video_code}", "public/{$videoFolder}");
+
+        $duplicatedVideo->file_path = "{$videoFolder}/video.mp4"; 
+        $duplicatedVideo->thumbnail_path = "{$videoFolder}/thumbnail.jpg"; 
         $duplicatedVideo->save();
-    
+
         return new VideoResource($duplicatedVideo);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json(['message' => 'Error duplicating video.'], 500);
     }
+}
 
     /**
      * Remove the specified resource from storage.
@@ -204,7 +205,7 @@ class VideoController extends Controller
         $video->snippets()->delete();
 
         $videoFolder = "{$user->user_code}/{$video->video_code}";
-        app(StorageController::class)->deleteFolder("users/".$videoFolder);
+        app(StorageController::class)->deleteFolder("public/".$videoFolder);
 
         $video->delete();
 

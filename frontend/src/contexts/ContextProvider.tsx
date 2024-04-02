@@ -58,7 +58,7 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       window.removeEventListener("storage", handleStorageChange);
     };
-  }, []); // Run effect only once on component mount
+  }, []);
 
   const setUserToken = (token: any) => {
     if (token) {
@@ -77,6 +77,11 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
     }
     _setCurrentUser(user);
   };
+
+  useEffect(() => {
+    _setCurrentUser(JSON.parse(localStorage.getItem("USER") || "null"));
+    _setUserToken(localStorage.getItem("TOKEN"));
+  }, []);
 
   return (
     <StateContext.Provider

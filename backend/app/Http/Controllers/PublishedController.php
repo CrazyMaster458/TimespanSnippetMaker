@@ -45,7 +45,7 @@ class PublishedController extends Controller
         $videos = Video::whereIn('id', $publicationVideoIds)
             ->with('guests')
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(16);
 
         // Transform the videos into VideoResource instances
         $videos = $videos->map(function ($video) {
@@ -58,5 +58,21 @@ class PublishedController extends Controller
         // Return the collection of VideoResource instances
         return VideoResource::collection($videos);
     }
+
+    // public function index()
+    // {
+    //     // Retrieve published videos with their associated user, video, and other relationships
+    //     $publishedVideos = Published::with('video.user', 'video.video_type', 'video.guests')
+    //         ->orderByDesc('created_at')
+    //         ->paginate(16);
+
+    //     // Transform the published videos into VideoResource instances
+    //     $videos = $publishedVideos->map(function ($published) {
+    //         return new VideoResource($published->video);
+    //     });
+
+    //     // Return the collection of VideoResource instances
+    //     return VideoResource::collection($videos);
+    // }
 
 }

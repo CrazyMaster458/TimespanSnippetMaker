@@ -19,6 +19,21 @@ class TagController extends Controller
     {
         $user = $request->user();
 
+        $tags = Tag::where('user_id', $user->id);
+
+        $tags = $tags->orderBy('created_at', 'desc')
+        ->get();
+
+        return TagResource::collection(
+            $tags
+        );
+
+    }
+
+    public function indexList(Request $request)
+    {
+        $user = $request->user();
+
         $query = $request->input('q');
 
         $tags = Tag::where('user_id', $user->id);
@@ -28,7 +43,7 @@ class TagController extends Controller
         }
 
         $tags = $tags->orderBy('created_at', 'desc')
-        ->get();
+        ->paginate(52);
 
         return TagResource::collection(
             $tags

@@ -22,18 +22,18 @@ class StorageController extends Controller
 
     public function getFullPath($filePath)
     {
-        return Storage::path($filePath);
+        return public_path($filePath);
     }
     
     public function getFileUrl($filePath)
     {
-        return asset("users/$filePath");
+        return asset("public/{$filePath}");
     }
 
     public function copyFolder(string $source, string $destination)
     {
         $filesystem = new Filesystem();
-    
+
         if ($filesystem->exists($source)) {
             $filesystem->makeDirectory($destination);
             $filesystem->copyDirectory($source, $destination);
@@ -55,42 +55,55 @@ class StorageController extends Controller
             $extension = $file->getClientOriginalExtension();   
             $finalName = $fileType === 'image' ? 'thumbnail' : 'video';
 
-            $filePath = "{$this->user->user_code}/{$videoFolder}/{$finalName}.{$extension}";
+            // $filePath = "{$this->user->user_code}/{$videoFolder}/{$finalName}.{$extension}";
 
-            // $file->move("storage/".$filePath);
+            $filePath = "{$this->user->user_code}/{$videoFolder}";
 
-            $file->storeAs("public/{$filePath}");
+            // Move the uploaded file to the public folder
+            $file->move(public_path("public/".$filePath), "{$finalName}.{$extension}");
 
-            // $filePath = "public\\{$this->user->user_code}\\{$videoFolder}\\{$finalName}.{$extension}";
-            // $file->storeAs($filePath);
+            $fullFilePath = "{$filePath}/{$finalName}.{$extension}";
 
-            return $filePath;
+            // $file->storeAs("public/{$filePath}");
+
+            return $fullFilePath;
         } else {
             return null;
         }
     }
 
     public function deleteFile(string $filePath)
-    {     
-        if (Storage::exists($filePath)) {
-            Storage::delete($filePath);
-
-            return true;
+    {
+        $publicPath = public_path($filePath);
+    
+        if (File::exists($publicPath)) {
+            // Delete the file
+            if (File::delete($publicPath)) {
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
     }
 
     public function deleteFolder(string $folderPath)
-    {        
-        if (Storage::exists($folderPath)) {
-            Storage::deleteDirectory($folderPath);
-
-            return response()->json(["message" => "Folder deleted successfully"]);
+    {
+        $publicPath = public_path($folderPath);
+    
+        if (File::exists($publicPath)) {
+            if (File::deleteDirectory($publicPath)) {
+                return response()->json(["message" => "Folder deleted successfully"]);
+            } else {
+                return response()->json(["message" => "Failed to delete folder"]);
+            }
         } else {
             return response()->json(["message" => "Folder not found"]);
         }
     }
+    
+    
     
     public function createFolder(string $folderName)
     {
@@ -105,27 +118,36 @@ class StorageController extends Controller
             $path = "public/{$this->user->user_code}/{$folderName}";
 
         }
-        
-        if (!Storage::exists($path)) {
-            Storage::makeDirectory($path);
 
+        if (!File::exists($path)) {
+            // Create the directory
+            File::makeDirectory(public_path($path), 0777, true); // Third parameter 'true' creates directories recursively if they do not exist
+    
             return response()->json(["message" => "Folder created successfully"]);
         } else {
             return response()->json(["message" => "Folder already exists"]);
         }
+        
+        // if (!Storage::exists($path)) {
+        //     Storage::makeDirectory($path);
+
+        //     return response()->json(["message" => "Folder created successfully"]);
+        // } else {
+        //     return response()->json(["message" => "Folder already exists"]);
+        // }
     }
 
     public function createAudioFile(string $filePath){
 
-        FFMpeg::fromDisk('users')
+        FFMpeg::fromDisk('public')
             ->open($filePath)
             ->export()
-            ->toDisk('local')
+            ->toDisk('temp')
             ->addFilter([
                 '-vn',
             ])
             ->inFormat(new Mp3())
-            ->save('temp/audio.mp3');
+            ->save('audio.mp3');
 
         return true;
     }

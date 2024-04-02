@@ -71,7 +71,7 @@ export const MenuBar = ({ isAdmin }: { isAdmin: number }) => {
           {isAdmin === 1 && (
             <li>
               <Link
-                to="/admin"
+                to="/users"
                 className="tooltip tooltip-right"
                 data-tip="Settings"
               >

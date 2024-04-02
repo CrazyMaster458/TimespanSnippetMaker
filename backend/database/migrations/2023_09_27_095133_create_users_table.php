@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('user_code', 255)->nullable();
             $table->string('email', 255)->unique();
             $table->string('password', 255)->nullable();
+            $table->boolean('fast_cut')->default(1);
             $table->boolean('admin')->default(0);
             $table->timestamps();
         });

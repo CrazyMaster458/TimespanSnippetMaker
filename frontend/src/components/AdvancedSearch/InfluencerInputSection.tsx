@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAdvancedSearchContent } from "../contexts/AdvancedSearchContext";
+import { useAdvancedSearchContent } from "../../contexts/AdvancedSearchContext";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { DialogFooter } from "../ui/dialog";

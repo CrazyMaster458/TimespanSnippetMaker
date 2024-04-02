@@ -2,8 +2,22 @@ import { Link } from "react-router-dom";
 import { User } from "lucide-react";
 import { Settings2 } from "lucide-react";
 import { LogOut } from "lucide-react";
+import axiosClient from "@/services/axios";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const SettingsMenu = () => {
+  const queryClient = useQueryClient();
+
+  const logout = (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    axiosClient.post("/logout").then(() => {
+      queryClient.removeQueries();
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    });
+  };
+
   return (
     <ul className="menu w-56 rounded-box">
       <li>
@@ -17,7 +31,7 @@ export const SettingsMenu = () => {
         </Link>
       </li>
       <li>
-        <Link to="/settings/preferences" data-tip="Log out">
+        <Link onClick={logout} data-tip="Logout" to={""}>
           <LogOut className=" h-5 w-5" viewBox="0 0 24 24" /> Log out
         </Link>
       </li>

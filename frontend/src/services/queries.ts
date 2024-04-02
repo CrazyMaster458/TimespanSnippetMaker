@@ -16,7 +16,7 @@ export function useItemQuery(
 ) {
   if (id) {
     return useQuery({
-      queryKey: [endpoint.slice(0, -1), { id }],
+      queryKey: [endpoint.slice(0, -1), id],
       queryFn: () => getData(`/${endpoint}/${id}`),
       enabled: enabled,
     });
@@ -32,7 +32,7 @@ export function useVideoSnippetsQuery(
 ) {
   if (id) {
     return useQuery({
-      queryKey: ["video", { id }, "snippets"],
+      queryKey: ["video", id, "snippets"],
       queryFn: () => getData(`/${endpoint}/${id}`),
       enabled: enabled,
     });
@@ -78,7 +78,7 @@ export function useSearchQuery(
 
 export function useSearchInfiniteQuery(endpoint: string, queries: string) {
   return useInfiniteQuery({
-    queryKey: [endpoint],
+    queryKey: queries ? [endpoint, queries] : [endpoint],
     queryFn: ({ pageParam }) =>
       getSearchPages({ endpoint, queries, pageParam }),
     initialPageParam: 0,

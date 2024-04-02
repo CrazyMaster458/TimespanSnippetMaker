@@ -34,6 +34,7 @@ class UpdateVideoRequest extends FormRequest
             'host_id' => 'nullable|exists:influencers,id',
             'video_type_id' => 'nullable|exists:video_types,id',
             'guests' => 'nullable|array|exists:influencers,id',
+            'visibility' => 'required|in:public,private',
         ];
     }
 }

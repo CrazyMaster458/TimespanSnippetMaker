@@ -37,27 +37,21 @@ export default function SnippetList() {
     snippetQuery.refetch();
   }, [searchParams]);
 
-  const handleRedirect = () => {};
-
   return (
     <section>
-      <div className="flex flex-col gap-1.5">
-        {snippetQuery.isLoading || snippetQuery.isFetching ? (
+      <div className="flex flex-col gap-1.5 pb-8">
+        {snippetQuery.isLoading || areTagsDataLoading ? (
           <>
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
+            <Skeleton className="w-[full] py-8" />
+            <Skeleton className="w-[full] py-8" />
+            <Skeleton className="w-[full] py-8" />
+            <Skeleton className="w-[full] py-8" />
+            <Skeleton className="w-[full] py-8" />
+            <Skeleton className="w-[full] py-8" />
+            <Skeleton className="w-[full] py-8" />
+            <Skeleton className="w-[full] py-8" />
           </>
-        ) : snippetQuery.data && snippetQuery.data.pages.length > 1 ? (
+        ) : snippetQuery.data && snippetQuery.data.pages[0].data.length > 0 ? (
           snippetQuery.data.pages.map((page) =>
             page.data.map((snippet: Snippet) => (
               <SnippetCard
@@ -69,12 +63,11 @@ export default function SnippetList() {
           )
         ) : (
           !snippetQuery.isLoading &&
-          !snippetQuery.isFetching &&
           !snippetQuery.isFetchingNextPage && (
             <EmptyState
-              objectName="Video"
-              onClick={handleRedirect}
+              objectName="Snippet"
               icon={<Film />}
+              showButton={false}
             />
           )
         )}
@@ -82,10 +75,10 @@ export default function SnippetList() {
         {!snippetQuery.isLoading && snippetQuery.isFetching && null}
         {!snippetQuery.isLoading && snippetQuery.isFetchingNextPage && (
           <>
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
+            <Skeleton className="w-[full] py-8" />
+            <Skeleton className="w-[full] py-8" />
+            <Skeleton className="w-[full] py-8" />
+            <Skeleton className="w-[full] py-8" />
           </>
         )}
       </div>

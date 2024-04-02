@@ -11,7 +11,7 @@ import { LoadingButton } from "./LoadingButton";
 import { putData } from "@/services/api";
 import { useMutation } from "@tanstack/react-query";
 import {
-  BasicData,
+  BasicProp,
   influencerSchema,
   tagSchema,
   videoTypeSchema,
@@ -24,7 +24,7 @@ export const UpdateItemData = ({
   setOpen,
   endpoint,
 }: {
-  itemData: BasicData;
+  itemData: BasicProp;
   queryClient: any;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   endpoint: string;

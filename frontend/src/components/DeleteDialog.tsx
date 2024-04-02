@@ -7,34 +7,35 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
 import { AlertTriangle } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { deleteData } from "@/services/api";
 import { LoadingButton } from "./LoadingButton";
+import { useDeleteItemMutation } from "@/services/mutations";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const DeleteDialog = ({
   itemId,
-  queryClient,
   setOpen,
   endpoint,
+  loginRedirect = false,
 }: {
   itemId: number;
-  queryClient: any;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   endpoint: string;
+  loginRedirect?: boolean;
 }) => {
-  const { mutateAsync: deleteItem, isPending } = useMutation({
-    mutationFn: () => deleteData(`/${endpoint}s/${itemId}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries([`${endpoint}s`]);
-      setOpen(false);
-    },
-    onError: (error) => {
-      console.log(error);
-    },
-  });
+  const { mutateAsync: deleteItem, isPending } = useDeleteItemMutation(
+    `${endpoint}s`,
+  );
+  const queryClient = useQueryClient();
 
   const handleDelete = async () => {
-    await deleteItem();
+    await deleteItem(itemId);
+    setOpen(false);
+    if (loginRedirect) {
+      queryClient.removeQueries();
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    }
   };
 
   return (
@@ -45,8 +46,8 @@ export const DeleteDialog = ({
           <section>
             <DialogTitle className="pb-2">Delete {endpoint}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this {endpoint}? This action
-              cannot be undone.
+              Are you sure you want to delete this {endpoint}? <br />
+              This action cannot be undone.
             </DialogDescription>
           </section>
         </DialogHeader>

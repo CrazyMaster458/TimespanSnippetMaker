@@ -492,8 +492,8 @@ export const VideoPlayer = ({ videoUrl }: { videoUrl: string }) => {
             <source
               // src="https://tecdn.b-cdn.net/img/video/Sail-Away.mp4"
               //src="Lift_run_shoot.mp4"
-              src="https://hugh.cdn.rumble.cloud/video/s8/2/K/F/p/a/KFpaq.caa.mp4?u=3&b=0"
-              // src={videoUrl}
+              // src="https://hugh.cdn.rumble.cloud/video/s8/2/K/F/p/a/KFpaq.caa.mp4?u=3&b=0"
+              src={videoUrl}
               type="video/mp4"
             />
           </video>

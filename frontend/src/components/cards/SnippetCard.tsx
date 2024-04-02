@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import axiosClient from "@/services/axios";
 import { TimespanInput } from "@/components/TimespanInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,16 +16,20 @@ import {
 import { parseTime } from "@/utils/timeUtils";
 import { CreateSelect } from "../CreateSelect";
 import { Option, tagSchema } from "@/lib/types";
-import { deleteData, putData } from "@/services/api";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { LoadingButton } from "../LoadingButton";
-import { AxiosProgressEvent } from "axios";
+import {
+  useCutVideoMutation,
+  useDeleteSnippetMutation,
+  useDownloadVideo,
+  useUpdateMutation,
+} from "@/services/mutations";
 
 type SnippetCardProps = {
   snippetData: Snippet;
   tagsData: Tag[];
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   isEditable?: boolean;
+  parent?: string;
 };
 
 export const SnippetCard: React.FC<SnippetCardProps> = ({
@@ -34,9 +37,8 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
   tagsData,
   onClick,
   isEditable = true,
+  parent = "",
 }) => {
-  const queryClient = useQueryClient();
-
   const [snippetStart, setSnippetStart] = useState<TimeProp>(
     parseTime(snippetData.starts_at),
   );
@@ -59,35 +61,16 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
 
   const handleCardClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
-      onClick(event);
+      onClick?.(event);
     },
     [onClick],
   );
 
-  const { mutateAsync: updateSnippetData } = useMutation({
-    mutationFn: (data: UpdateSnippet) =>
-      putData(`/snippets/${data.id}`, data, updateSnippetSchema),
-    onSuccess: () => {
-      const queryKey = ["videos", snippetData.video_id, "snippets"];
+  const { mutateAsync: updateSnippetData, isPending: isUpdatePending } =
+    useUpdateMutation("snippets", updateSnippetSchema, "videos");
 
-      queryClient.invalidateQueries(queryKey);
-    },
-    onError: (error) => {
-      console.error("Error updating snippet:", error);
-    },
-  });
-
-  const { mutateAsync: deleteSnippet, isPending } = useMutation({
-    mutationFn: () => deleteData(`/snippets/${snippetData.id}`),
-    onSuccess: () => {
-      const queryKey = ["videos", snippetData.video_id, "snippets"];
-
-      queryClient.invalidateQueries(queryKey);
-    },
-    onError: (error) => {
-      console.error("Error updating snippet:", error);
-    },
-  });
+  const { mutateAsync: deleteSnippet, isPending: isDeletePending } =
+    useDeleteSnippetMutation(snippetData.video_id, parent);
 
   const updateData = async () => {
     try {
@@ -108,47 +91,32 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
     }
   };
 
+  const { mutateAsync: cutMutation, isPending: isCutPending } =
+    useCutVideoMutation("cut");
+
   const handleDeleteSnippet = () => {
-    deleteSnippet();
+    deleteSnippet(snippetData.id);
   };
 
   const cutVideo = async () => {
-    try {
-      const response = await axiosClient.post(`/cut/${snippetData.id}`);
-      console.log(response.data);
-    } catch (error) {
-      console.log(error);
-    }
+    cutMutation(snippetData.id);
   };
+
+  const {
+    data: downloadedData,
+    mutateAsync: downloadVideo,
+    isPending: isDownloadPending,
+  } = useDownloadVideo("download");
 
   const downloadSnippet = async () => {
     try {
-      const response = await axiosClient.get(`/download/${snippetData.id}`, {
-        responseType: "blob", // Set the response type to "blob" to handle binary data
-        onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
-          if (progressEvent.event.lengthComputable) {
-            console.log(
-              ((progressEvent.loaded / progressEvent.total!) * 100).toFixed() +
-                "%",
-            );
-          } else {
-            console.log("Download in progress, please wait...");
-          }
-        },
-      });
-      console.log(response);
+      await downloadVideo(snippetData.id);
 
-      // Extract the filename from response headers
-      const filename = response.headers["X-Filename"] || "video.mp4";
-
-      // Create a URL for the blob object received in the response
-      // const url = window.URL.createObjectURL(new Blob([response.data]));
-      const url = window.URL.createObjectURL(response.data);
-
-      // Create a link element to trigger the download
+      const filename = "video.mp4";
+      const url = window.URL.createObjectURL(downloadedData);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", filename); // Set the filename here
+      link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
 
@@ -159,15 +127,6 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
       console.log(error);
     }
   };
-
-  // useEffect(() => {
-  //   if (snippetStart && snippetEnd && !initialLoad) {
-  //     setSnippetTimes({
-  //       starts_at: Object.values(snippetStart).join(":"),
-  //       ends_at: Object.values(snippetEnd).join(":"),
-  //     });
-  //   }
-  // }, [snippetStart, snippetEnd]);
 
   useEffect(() => {
     if (snippetEnd && snippetStart) {
@@ -203,7 +162,7 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
 
   return (
     <div>
-      <div className="collapse-arrow collapse">
+      <div className="collapse collapse-arrow">
         <input type="radio" name="my-accordion-2" onClick={handleCardClick} />
         <div className="collapse-title">
           <div className="flex justify-between">
@@ -275,25 +234,49 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
           <div className="flex w-full place-items-center justify-between pt-5">
             <div className="flex justify-start gap-3">
               {isEditable ? (
-                <Button
-                  className="px-5"
-                  disabled={isPending}
-                  onClick={updateData}
-                  variant="default"
-                >
-                  Save
-                </Button>
+                isUpdatePending ? (
+                  <LoadingButton className="justify-self-end" />
+                ) : (
+                  <Button
+                    className="px-5"
+                    disabled={
+                      isDeletePending || isCutPending || isDownloadPending
+                    }
+                    onClick={updateData}
+                    variant="default"
+                  >
+                    Save
+                  </Button>
+                )
               ) : null}
-              <Button
-                variant="outline"
-                onClick={downloadSnippet}
-                disabled={isPending}
-              >
-                <Download className="pr-2" /> Download
-              </Button>
+              {isCutPending ? (
+                <LoadingButton className="justify-self-end" />
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={cutVideo}
+                  disabled={
+                    isUpdatePending || isDeletePending || isDownloadPending
+                  }
+                >
+                  Cut Video
+                </Button>
+              )}
+
+              {isDownloadPending ? (
+                <LoadingButton className="justify-self-end" />
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={downloadSnippet}
+                  disabled={isDeletePending || isCutPending || isUpdatePending}
+                >
+                  <Download className="pr-2" /> Download
+                </Button>
+              )}
             </div>
             {isEditable ? (
-              isPending ? (
+              isDeletePending ? (
                 <>
                   <LoadingButton className="justify-self-end" />
                 </>
@@ -302,7 +285,10 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
                   <Button
                     variant="outline"
                     onClick={handleDeleteSnippet}
-                    className="justify-self-end bg-red-500"
+                    className="justify-self-end bg-red-500 text-white hover:bg-red-600"
+                    disabled={
+                      isCutPending || isUpdatePending || isDownloadPending
+                    }
                   >
                     DELETE
                   </Button>

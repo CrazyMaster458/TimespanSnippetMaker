@@ -17,7 +17,7 @@ use App\Http\Controllers\TagController;
 use App\Http\Controllers\TranscriptionController;
 use App\Http\Resources\TagResource;
 use App\Models\Tag;
-
+use Illuminate\Support\Facades\Storage;
 
 class SnippetController extends Controller
 {
@@ -58,7 +58,7 @@ class SnippetController extends Controller
 
         $snippets = $snippets->orderBy('created_at', 'desc')
         ->with('snippet_tags')
-        ->paginate(16);
+        ->paginate(12);
 
 
         $snippets = $snippets->map(function ($snippet) {            
@@ -94,47 +94,22 @@ class SnippetController extends Controller
 
     public function getVideoSnippets($video_id)
     {
-        // Check if the video is in the published table
         $isPublished = Published::where('video_id', $video_id)->exists();
     
-        // Retrieve all snippets associated with the video
         $snippetsQuery = Snippet::where('video_id', $video_id)->orderBy('starts_at', 'asc');
     
-        // If the video is not published, perform authorization check
         if (!$isPublished) {
-            // Check if the authenticated user is the owner of the video
             $user = Auth::user();
-            $video = Video::findOrFail($video_id); // Retrieve the video
+            $video = Video::findOrFail($video_id);
             if ($user->id !== $video->user_id) {
                 return abort(403, 'Unauthorized action');
             }
         }
     
-        // Retrieve snippets based on whether the video is published or not
         $snippets = $snippetsQuery->with('snippet_tags')->get();
     
         return SnippetResource::collection($snippets);
     }
-
-    // public function getVideoSnippets($video_id)
-    // {
-    //     $user = Auth::user();
-
-    //     // Check if the video is in the published table
-    //     $isPublished = Published::where('video_id', $video->id)->exists();
-    
-    //     // If the video is not published, perform authorization check
-    //     if (!$isPublished && $user->id !== $video->user_id) {
-    //         return abort(403, 'Unauthorized action');
-    //     }
-        
-    //     $snippets = Snippet::where('video_id', $video_id)
-    //     ->orderBy('starts_at', 'asc')
-    //     ->with('snippet_tags')
-    //     ->get();
-
-    //     return SnippetResource::collection($snippets);
-    // }
 
     /**
      * Store a newly created resource in storage.
@@ -199,7 +174,7 @@ class SnippetController extends Controller
             return abort(403, 'Unauthorized action');
         }
 
-        app(StorageController::class)->deleteFile("users/".$snippet->file_path);
+        app(StorageController::class)->deleteFile("public/".$snippet->file_path);
 
         $snippet->snippet_tags()->delete();
 
@@ -216,12 +191,11 @@ class SnippetController extends Controller
         $videoExtension = $videoPathInfo['extension'];
 
         $videoName = "snippet{$snippet->snippet_code}.{$videoExtension}";
-        $videoFilePath = "app/users/{$user->user_code}/{$video->video_code}/snippets/{$videoName}";
+        $videoFilePath = "public/{$user->user_code}/{$video->video_code}/snippets/{$videoName}";
 
-        // Check if the file exists
-        // if (!Storage::exists($videoFilePath)) {
-        //     return response()->json(["error" => "Video file not found"], 404);
-        // }
+        if (!public_path($videoFilePath)) {
+            return response()->json(["error" => "Video file not found"], 404);
+        }
 
         $headers = [
             'Content-Type' => 'video/mp4', 
@@ -229,7 +203,7 @@ class SnippetController extends Controller
             'X-Filename' => $videoName,
         ];
 
-        return response()->download(storage_path($videoFilePath), $videoName, $headers);
+        return response()->download(public_path($videoFilePath), $videoName, $headers);
     }
 
     public function cutVideo(Snippet $snippet, Request $request) {
@@ -243,13 +217,14 @@ class SnippetController extends Controller
 
         $snippetDestination = "{$videoFolderPath}/snippets/snippet{$snippet->snippet_code}.{$videoExtension}";
 
-        $ffmpeg = FFMpeg::fromDisk('users')
+        $cuttingMode = $user->fast_mode ? 'copy' : 'libx264';
+
+        $ffmpeg = FFMpeg::fromDisk('public')
             ->open("{$videoFolderPath}/video.{$videoExtension}")
             ->export()
-            ->toDisk('users')
-            // ->inFormat(new \FFMpeg\Format\Video\X264)
+            ->toDisk('public')
             ->addFilter([
-                '-c', 'copy',
+                '-c:v', $cuttingMode,
                 '-ss', $snippet->starts_at,
                 '-to', $snippet->ends_at,
             ])
@@ -261,8 +236,6 @@ class SnippetController extends Controller
             'file_path' => $snippetDestination,
             'transcript' => $transcript,
         ]);
-
-        // $this->downloadFullVideo($snippet, $request);
 
         return response()->json(["message" => "Success"]);
     }

@@ -5,7 +5,7 @@ import { Label } from "../ui/label";
 import { useGetQuery } from "@/services/queries";
 import { DialogFooter } from "../ui/dialog";
 import { Button } from "../ui/button";
-import { useAdvancedSearchContent } from "../contexts/AdvancedSearchContext";
+import { useAdvancedSearchContent } from "../../contexts/AdvancedSearchContext";
 import { useNavigate } from "react-router-dom";
 
 export const VideoInputSection = () => {
@@ -16,7 +16,7 @@ export const VideoInputSection = () => {
 
   const navigate = useNavigate();
 
-  const { contentType, selectedAccessibility, selectedContentType, setOpen } =
+  const { contentType, selectedContentType, setOpen } =
     useAdvancedSearchContent();
 
   const { data: videoTypesData, isLoading: areVideoTypesDataLoading } =
@@ -27,7 +27,6 @@ export const VideoInputSection = () => {
   const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
-    const isPublic = selectedAccessibility === 2 ? "public/" : "";
     const isVideoType =
       selectedVideoType.length > 0 ? `&vt=${selectedVideoType}` : "";
     const isHost = selectedHost.length > 0 ? `&h=${selectedHost}` : "";
@@ -35,7 +34,7 @@ export const VideoInputSection = () => {
       selectedGuests.length > 0 ? `&g=${selectedGuests.join(",")}` : "";
 
     navigate(
-      `/${isPublic}${contentType[selectedContentType - 1]?.value}?q=${searchedTitle}${isVideoType}${isHost}${areGuests}`,
+      `/${contentType[selectedContentType - 1]?.value}?q=${searchedTitle}${isVideoType}${isHost}${areGuests}`,
     );
     setOpen(false);
   };

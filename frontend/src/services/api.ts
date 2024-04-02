@@ -6,11 +6,6 @@ import { toast } from "sonner";
 import { Schema } from "zod";
 import { Option } from "@/lib/types";
 
-// type AddNewItemParams = {
-//   endpoint: string;
-//   inputValue: string;
-// };
-
 type AddNewItemParams = {
   endpoint: string;
   data: object;
@@ -21,8 +16,6 @@ export const getData = async (endpoint: string) => {
   // return (await axiosClient.get(endpoint)).data.data;
 
   const response = await axiosClient.get(endpoint);
-
-  console.log("response", response);
   return response.data.data;
 
   // try {
@@ -93,24 +86,23 @@ export const putData = async (
       const response = await axiosClient.put(endpoint, result.data);
       return response.data;
     } catch (error) {
+      //@ts-ignore
       toast.error(error.response.data.message);
       // console.log(error.response.data.message);
     }
   }
 };
 
-export const getQueryData = async (
-  queryClient: any,
-  queryName: string[],
-  objectKey: string,
-) => {
-  try {
-    const queryData = queryClient.getQueryData(queryName);
-    return queryData[objectKey];
-  } catch (error) {
-    console.error("Error fetching query data:", error);
-    throw new Error("Error fetching query data");
-  }
+export const getDownload = async (endpoint: string) => {
+  const response = await axiosClient.get(endpoint, {
+    responseType: "blob",
+  });
+  return response.data;
+};
+
+export const cutVideo = async (endpoint: string) => {
+  const response = await axiosClient.post(endpoint);
+  return response.data;
 };
 
 export const postData = async (
@@ -122,6 +114,7 @@ export const postData = async (
 
   if (errors) {
     Object.values(errors).forEach((errorMessage) => {
+      //@ts-ignore
       toast.error(errorMessage);
     });
 
@@ -144,6 +137,7 @@ export const addNewItem = async ({
 
   if (errors) {
     Object.values(errors).forEach((errorMessage) => {
+      //@ts-ignore
       toast.error(errorMessage);
     });
 
@@ -201,16 +195,6 @@ export const uploadFile = async (
   }
 };
 
-// export const addNewItem = async ({
-//   endpoint,
-//   inputValue,
-// }: AddNewItemParams) => {
-//   const response = await axiosClient.post(endpoint, {
-//     name: inputValue,
-//   });
-//   return response.data.data;
-// };
-
 type QuerySuccessParams = {
   queryClient: any;
   queryName: string[];
@@ -222,7 +206,10 @@ export const handleSuccess = ({
   queryName,
   newItem,
 }: QuerySuccessParams) => {
-  queryClient.setQueryData(queryName, (prevData) => [newItem, ...prevData]);
+  queryClient.setQueryData(queryName, (prevData: any) => [
+    newItem,
+    ...prevData,
+  ]);
 };
 
 export const getPages = async ({ pageParam }: { pageParam: number }) => {

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback } from "react";
 import CreatableSelect from "react-select/creatable";
 // @ts-ignore
 import { ValueType } from "react-select";
@@ -33,10 +33,6 @@ export const CreateSelect: React.FC<SelectComponentProps> = ({
     data.map((item) => ({ value: item.id, label: item.name })),
   );
 
-  useEffect(() => {
-    console.log(selectedOptions);
-  }, [selectedOptions]);
-
   const removeLastItem = (array: Option[], item: BasicProp) => {
     if (array.length > 0 && array[array.length - 1].label === item.name) {
       return array.slice(0, -1);
@@ -64,13 +60,15 @@ export const CreateSelect: React.FC<SelectComponentProps> = ({
       setSelectedOptions(removeLastItem(selectedOptions, newItem));
     },
     onMutate: async (newItem) => {
-      const { endpoint: queryName, data } = newItem;
-      await queryClient.cancelQueries([queryName]);
+      const { endpoint, data } = newItem;
+      const queryName = [endpoint];
+      await queryClient.cancelQueries({ queryKey: queryName });
       const previousData = queryClient.getQueryData<Option[]>([queryName]);
 
+      //@ts-ignore
       const newOption: Option = { value: uuidv4(), label: data.name };
 
-      queryClient.setQueryData<Option[]>([queryName], (prevData) => [
+      queryClient.setQueryData<Option[]>(queryName, (prevData: any) => [
         ...prevData,
         newOption,
       ]);
@@ -81,14 +79,17 @@ export const CreateSelect: React.FC<SelectComponentProps> = ({
     },
     onError: (error, context) => {
       const { endpoint: queryName, data } = context;
+      //@ts-ignore
       queryClient.setQueryData([queryName], context.previousData);
+      //@ts-ignore
       setOptions(removeLastItem(options, data));
+      //@ts-ignore
       setSelectedOptions(removeLastItem(selectedOptions, data));
       console.log("Error creating the item:", error);
     },
     onSettled: () => {
-      const queryName = endpoint;
-      queryClient.invalidateQueries([queryName]);
+      const queryName = [endpoint];
+      queryClient.invalidateQueries({ queryKey: queryName });
     },
   });
 

@@ -17,6 +17,21 @@ class InfluencerController extends Controller
     {
         $user = $request->user();
 
+        $influencers = Influencer::where('user_id', $user->id);
+
+        $influencers = $influencers->orderBy('created_at', 'desc')
+        ->get();
+
+        return InfluencerResource::collection(
+            $influencers
+        );
+    
+    }
+
+    public function indexList(Request $request)
+    {
+        $user = $request->user();
+
         $query = $request->input('q');
 
         $influencers = Influencer::where('user_id', $user->id);
@@ -26,7 +41,7 @@ class InfluencerController extends Controller
         } 
 
         $influencers = $influencers->orderBy('created_at', 'desc')
-        ->get();
+        ->paginate(52);
 
         return InfluencerResource::collection(
             $influencers

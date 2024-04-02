@@ -1,6 +1,7 @@
 import { Influencer } from "@/lib/types";
-import { UpdateDialog } from "../UploadFileDialog copy";
+import { OptionDialog } from "../OptionDialog";
 import { Card, CardContent } from "../ui/card";
+import { Link } from "react-router-dom";
 
 export const InfluencerCard = ({
   influencerData,
@@ -9,13 +10,15 @@ export const InfluencerCard = ({
 }) => {
   return (
     <>
-      <Card className="flex cursor-pointer flex-row drop-shadow-md">
-        <UpdateDialog endpoint="influencer" itemData={influencerData} />
+      <Link to={`/videos?h=${influencerData.id}`} className="no-underline">
+        <Card className="flex cursor-pointer flex-row drop-shadow-md">
+          <OptionDialog endpoint="influencer" itemData={influencerData} />
 
-        <CardContent className="flex flex-row px-4 py-2 text-base font-semibold">
-          {influencerData.name}
-        </CardContent>
-      </Card>
+          <CardContent className="flex flex-row px-4 py-2 text-base font-semibold">
+            {influencerData.name}
+          </CardContent>
+        </Card>
+      </Link>
     </>
   );
 };

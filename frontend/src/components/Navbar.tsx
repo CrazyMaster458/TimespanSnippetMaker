@@ -2,7 +2,7 @@ import { useStateContext } from "@/contexts/ContextProvider";
 import axiosClient from "@/services/axios";
 import { Button } from "./ui/button";
 import { Menu, LogOut } from "lucide-react";
-import { UploadFileDialog } from "./UploadFileDialog";
+import { VideoCreationDialog } from "./VideoCreationDialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LoggedUser } from "@/lib/types";
@@ -37,8 +37,11 @@ export const Navbar = ({ user }: { user?: LoggedUser | null }) => {
     e.preventDefault();
     axiosClient.post("/logout").then(() => {
       queryClient.removeQueries();
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
       setCurrentUser(null);
       setUserToken(null);
+      window.location.href = "/login";
     });
   };
 
@@ -61,7 +64,7 @@ export const Navbar = ({ user }: { user?: LoggedUser | null }) => {
           <SearchBar />
         </div>
         <div className="navbar-end gap-2">
-          <UploadFileDialog />
+          <VideoCreationDialog />
           <Popover>
             <button className="btn btn-circle btn-ghost">
               <TooltipProvider delayDuration={200}>

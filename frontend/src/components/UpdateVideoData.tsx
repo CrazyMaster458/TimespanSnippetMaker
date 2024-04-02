@@ -1,6 +1,5 @@
 import {
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -22,19 +21,17 @@ import {
   Influencer,
   VideoType,
 } from "@/lib/types";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const steps = [
   {
     title: "Details",
-    description: "Upload a viddeo file and fill in details.",
   },
   {
     title: "Host & Guests",
-    description: "Upload a viddeo file and fill in details.",
   },
   {
     title: "Visibility",
-    description: "Upload a viddeo file and fill in details.",
   },
 ];
 
@@ -151,9 +148,16 @@ export const UpdateaVideoData = ({
           ? selectedGuests.map((guest) => guest.value)
           : undefined,
       video_type_id: selectedVideoTypes[0].value,
+      visibility: visibility,
     };
 
     await updateVideoData(data);
+  };
+
+  const [visibility, setVisibility] = useState("private");
+
+  const handleVisibilityChange = () => {
+    setVisibility((prev) => (prev === "private" ? "public" : "private"));
   };
 
   return (
@@ -161,9 +165,6 @@ export const UpdateaVideoData = ({
       <DialogContent className="h-[85vh] min-w-[60vw]">
         <DialogHeader className="mb-0 h-[auto] pb-0">
           <DialogTitle>{steps[stepNum - 1].title}</DialogTitle>
-          <DialogDescription>
-            {steps[stepNum - 1].description}
-          </DialogDescription>
 
           <ul className="steps pt-4">
             {steps.map((step, index) => (
@@ -256,24 +257,43 @@ export const UpdateaVideoData = ({
 
           {stepNum === 3 && (
             <>
-              <p>Not implemented</p>
+              <div className="rounded border-2 px-3 pb-4 pt-2">
+                <Label htmlFor="title">Visibility</Label>
+                <RadioGroup
+                  onValueChange={handleVisibilityChange}
+                  defaultValue={visibility}
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="private" id="r1" />
+                    <Label htmlFor="r1">Private</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="public" id="r2" />
+                    <Label htmlFor="r2">Public</Label>
+                  </div>
+                </RadioGroup>
+              </div>
             </>
           )}
         </form>
         <DialogFooter>
-          {stepNum !== 1 ? (
-            <Button onClick={handleBack} variant="outline">
-              Back
-            </Button>
-          ) : (
-            <p></p>
-          )}
-          {uploadProgress}
-          {stepNum !== 3 ? (
-            <Button onClick={handleNext}>Next</Button>
-          ) : (
-            <Button onClick={updateVideo}>Create</Button>
-          )}
+          <section className="flex w-full flex-row justify-between">
+            <span className="content-center">{uploadProgress}</span>
+            <span className="flex gap-3">
+              {stepNum !== 1 ? (
+                <Button onClick={handleBack} variant="outline">
+                  Back
+                </Button>
+              ) : (
+                <p></p>
+              )}
+              {stepNum !== 3 ? (
+                <Button onClick={handleNext}>Next</Button>
+              ) : (
+                <Button onClick={updateVideo}>Create</Button>
+              )}
+            </span>
+          </section>
         </DialogFooter>
       </DialogContent>
     </>

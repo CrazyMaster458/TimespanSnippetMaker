@@ -23,6 +23,7 @@ class User extends Authenticatable
         'password',
         'admin',
         'user_code',
+        'fast_cut',
     ];
 
     /**
@@ -46,13 +47,29 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function published()
+    {
+        return $this->hasMany(Published::class);
+    }
     public function videos()
     {
         return $this->hasMany(Video::class);
     }
-    public function statuses()
+    public function snippets()
     {
-        return $this->hasMany(Status::class);
+        return $this->hasMany(Snippet::class);
+    }
+    public function tags()
+    {
+        return $this->hasMany(Tag::class);
+    }
+    public function video_types()
+    {
+        return $this->hasMany(VideoType::class);
+    }
+    public function influencers()
+    {
+        return $this->hasMany(Influencer::class);
     }
 
 }

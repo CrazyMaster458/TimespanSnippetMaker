@@ -1,6 +1,6 @@
 import { useGetQuery } from "@/services/queries";
 import { useNavigate } from "react-router-dom";
-import { useAdvancedSearchContent } from "../contexts/AdvancedSearchContext";
+import { useAdvancedSearchContent } from "../../contexts/AdvancedSearchContext";
 import { useState } from "react";
 import { DialogFooter } from "../ui/dialog";
 import { Button } from "../ui/button";

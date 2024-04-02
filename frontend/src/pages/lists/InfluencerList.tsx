@@ -1,47 +1,74 @@
-import { EmptyState } from "@/components/EmptyState";
-import { InfluencerCard } from "@/components/cards/InfluencerCard";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Users } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
-import { useSearchQuery } from "@/services/queries";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect } from "react";
 import { Influencer } from "@/lib/types";
+import { useSearchParams } from "react-router-dom";
+import { EmptyState } from "@/components/EmptyState";
+import { User } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSearchInfiniteQuery } from "@/services/queries";
+import { useInView } from "react-intersection-observer";
+import { InfluencerCard } from "@/components/cards/InfluencerCard";
 
 export default function InfluencerList() {
   const [searchParams] = useSearchParams();
 
   const queries = searchParams.toString();
 
-  const { data: influencersData, isLoading: areInfluencersDataLoading } =
-    useSearchQuery("influencers", queries);
+  const influencerQuery = useSearchInfiniteQuery("influencer-list", queries);
 
-  const handleRedirect = () => {};
+  const { ref, inView } = useInView({});
+
+  useEffect(() => {
+    if (
+      inView &&
+      !influencerQuery.isFetchingNextPage &&
+      influencerQuery.hasNextPage
+    ) {
+      influencerQuery.fetchNextPage();
+    }
+  }, [inView, influencerQuery.isFetchingNextPage]);
+
+  useEffect(() => {
+    influencerQuery.refetch();
+  }, [searchParams]);
 
   return (
-    <>
-      <section className="grid grid-cols-4 gap-2 pb-8">
-        {areInfluencersDataLoading ? (
+    <section>
+      <div className="grid grid-cols-4 gap-2 pb-8">
+        {influencerQuery.isLoading
+          ? Array.from({ length: 40 }).map((_, index) => (
+              <Skeleton key={index} className="w-[full] py-6" />
+            ))
+          : influencerQuery.data &&
+              influencerQuery.data.pages[0].data.length > 0
+            ? influencerQuery.data.pages.map((page) =>
+                page.data.map((influencer: Influencer) => (
+                  <InfluencerCard
+                    key={influencer.id}
+                    influencerData={influencer}
+                  />
+                )),
+              )
+            : !influencerQuery.isLoading &&
+              !influencerQuery.isFetchingNextPage && (
+                <EmptyState
+                  objectName="Influencer"
+                  icon={<User />}
+                  showButton={false}
+                />
+              )}
+
+        {!influencerQuery.isLoading && influencerQuery.isFetching && null}
+        {!influencerQuery.isLoading && influencerQuery.isFetchingNextPage && (
           <>
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
+            <Skeleton className="w-[full] py-4" />
+            <Skeleton className="w-[full] py-4" />
+            <Skeleton className="w-[full] py-4" />
+            <Skeleton className="w-[full] py-4" />
           </>
-        ) : influencersData.length > 0 ? (
-          influencersData.map((influencer: Influencer) => (
-            <InfluencerCard key={influencer.id} influencerData={influencer} />
-          ))
-        ) : (
-          <EmptyState
-            objectName="Influencer"
-            onClick={handleRedirect}
-            icon={<Users />}
-          />
         )}
-      </section>
-    </>
+      </div>
+      <div ref={ref}></div>
+    </section>
   );
 }

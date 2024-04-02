@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
@@ -15,11 +15,11 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         return UserResource::collection(
         User::orderBy('created_at', 'desc')
-            ->paginate(10)
+            ->paginate(12)
         );
     }
 
@@ -60,31 +60,49 @@ class UserController extends Controller
      */
     public function destroy(User $user, Request $request)
     {
-        
         $loggedInUser = Auth::user();
-
-        if ($loggedInUser->id !== $user->id) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+    
+        if ($loggedInUser->id !== $user->id && !$loggedInUser->admin) {
+            return response()->json(['error' => 'Unauthorized'], 403);
         }
-
+    
         try {
             DB::beginTransaction();
     
-            $userFolder = "users/{$user->user_code}";
+            // Delete user folder from storage
+            $userFolder = "public/{$user->user_code}";
             app(StorageController::class)->deleteFolder($userFolder);
     
-            $user->videos()->guests()->delete();
-            $user->videos()->snippets()->snippet_tags()->delete();
-            $user->videos()->snippets()->delete();
-            $user->videos()->delete();
-            $user->snippets()->snippet_tags()->delete();
-            $user->snippets()->delete();
-            $user->tokens()->delete();
+            // Delete associated videos, snippets, and their related entities
+            $user->videos()->each(function ($video) {
+                $video->snippets()->each(function ($snippet) {
+                    $snippet->snippet_tags()->delete();
+                    $snippet->delete();
+                });  
     
+                $video->guests()->delete();
+                $video->delete();
+            });
+    
+            // Delete associated snippets and their related entities
+            $user->snippets()->each(function ($snippet) {
+                $snippet->snippet_tags()->delete();
+                $snippet->delete();
+            });
+
+            $user->tags()->delete();
+            $user->influencers()->delete();
+            $user->video_types()->delete();
+            $user->published()->delete();
+    
+            // Delete user's access tokens
+            $user->tokens()->count() > 0 && $user->tokens()->delete();
+
+            // Delete the user
             $user->delete();
     
             DB::commit();
-    
+                        
             return response('', 204);
         } catch (\Exception $e) {
             DB::rollBack();

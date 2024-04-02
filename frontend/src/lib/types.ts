@@ -37,6 +37,18 @@ const videoSchema = z.object({
   guests: z.array(basicSchema),
 });
 
+const userSchema = z.object({
+  id: z.number(),
+  username: z.string(),
+});
+
+export const meSchema = z.object({
+  id: z.number(),
+  username: z.string(),
+  email: z.string().email(),
+  fast_cut: z.number(),
+});
+
 const timePropSchema = z.object({
   hours: z.string().max(2),
   minutes: z.string().max(2),
@@ -112,6 +124,7 @@ export const updateVideoSchema = z.object({
   host_id: z.number(),
   video_type_id: z.number(),
   guests: z.array(z.number()).optional(),
+  visibility: z.string(),
 });
 
 // AUTH SCHEMAS
@@ -151,7 +164,9 @@ export type UpdateVideo = z.infer<typeof updateVideoSchema>;
 
 export type LoggedUser = z.infer<typeof loggedUserSchema>;
 
+export type Me = z.infer<typeof meSchema>;
 export type Snippet = z.infer<typeof snippetSchema>;
+export type User = z.infer<typeof userSchema>;
 export type Video = z.infer<typeof videoSchema>;
 export type SnippetTag = z.infer<typeof snippetTagSchema>;
 

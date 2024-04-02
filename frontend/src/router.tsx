@@ -13,10 +13,8 @@ import Settings from "./pages/settings/Settings";
 import { Account } from "./pages/settings/Account";
 import { Preferences } from "./pages/settings/Preferences";
 import VideoDetail from "./pages/details/VideoDetail";
-import InfiniteScrollTest from "./pages/lists/__test__InfiniteScroll";
-// import PublicList from "./pages/lists/PublicList";
-// import Test from "./test";
-// import Admin from "./pages/Admin";
+import PublicList from "./pages/lists/PublicList";
+import UserList from "./pages/lists/UserList";
 
 const router = createBrowserRouter([
   {
@@ -27,22 +25,18 @@ const router = createBrowserRouter([
         path: "/",
         element: <Navigate to="/videos" />,
       },
-      // {
-      //   path: "/admin",
-      //   element: <Admin />,
-      // },
+      {
+        path: "/users",
+        element: <UserList />,
+      },
       {
         path: "/detail/:id",
         element: <VideoDetail />,
       },
       {
-        path: "/infinite-scroll",
-        element: <InfiniteScrollTest />,
+        path: "/public",
+        element: <PublicList />,
       },
-      // {
-      //   path: "/public",
-      //   element: <PublicList />,
-      // },
       {
         path: "/videos",
         element: <VideoList />,
@@ -101,10 +95,20 @@ const router = createBrowserRouter([
     path: "*",
     element: <NotFound />,
   },
-  // {
-  //   path: "/test",
-  //   element: <Test />,
-  // },
+  {
+    path: "/settings",
+    element: <Settings />,
+    children: [
+      {
+        path: "account",
+        element: <Account />,
+      },
+      {
+        path: "preferences",
+        element: <Preferences />,
+      },
+    ],
+  },
 ]);
 
 export default router;

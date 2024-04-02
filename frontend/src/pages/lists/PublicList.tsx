@@ -1,109 +1,73 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { VideoCard } from "@/components/cards/VideoCard";
-import { useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
-import { Search, VideoOff } from "lucide-react";
-import { EmptyState } from "@/components/EmptyState.tsx";
-import { useQuery } from "@tanstack/react-query";
-import { getData } from "@/services/api";
+import { Video } from "@/lib/types";
+
 import { useStateContext } from "@/contexts/ContextProvider";
+import { useSearchInfiniteQuery } from "@/services/queries";
+import { useInView } from "react-intersection-observer";
+import { EmptyState } from "@/components/EmptyState";
+import { VideoOff } from "lucide-react";
 
 export default function PublicList() {
-  const navigate = useNavigate();
   const { currentUser } = useStateContext();
-  const { data: videosData, isLoading: areVideosDataLoading } = useQuery({
-    queryKey: ["public-videos"],
-    queryFn: () => getData("/public"),
-  });
 
-  // useEffect(() => {
-  //   console.log(influencersData);
-  // }, [influencersData]);
-  // useEffect(() => {
-  //   console.log(videosData);
-  // }, [videosData]);
-  // useEffect(() => {
-  //   console.log(videoTypesData);
-  // }, [videoTypesData]);
+  const [searchParams] = useSearchParams();
 
-  const [searchParams, setSearchParams] = useSearchParams({
-    q: "",
-  });
-  const searchedQuery = searchParams.get("q");
+  const queries = searchParams.toString();
 
-  const handleRedirect = () => {
-    navigate(`/cardform`);
-  };
+  const videoQuery = useSearchInfiniteQuery("public", queries);
 
-  const filteredVideos = useMemo(() => {
-    if (!videosData) return [];
+  const { ref, inView } = useInView({});
 
-    let filtered = [...videosData];
-
-    if (searchedQuery) {
-      filtered = filtered.filter((video) =>
-        video.title.toLowerCase().includes(searchedQuery.toLowerCase()),
-      );
+  useEffect(() => {
+    if (inView && !videoQuery.isFetchingNextPage && videoQuery.hasNextPage) {
+      videoQuery.fetchNextPage();
     }
+  }, [inView, videoQuery.isFetchingNextPage]);
 
-    return filtered.map((video) => (
-      <VideoCard
-        key={video.id}
-        videoData={video}
-        user={currentUser}
-        publicView={true}
-      />
-    ));
-  }, [videosData, searchedQuery]);
+  useEffect(() => {
+    videoQuery.refetch();
+  }, [searchParams]);
 
   return (
     <>
-      <div className="flex flex-row place-content-center place-items-center content-center items-center justify-between pb-5">
-        <section className="w-[30rem]">
-          <label className="input input-bordered input-md flex items-center gap-2">
-            <input
-              type="search"
-              className="grow"
-              placeholder="Search"
-              value={searchedQuery || ""}
-              onChange={(e) =>
-                setSearchParams(
-                  (prev) => {
-                    prev.set("q", e.target.value);
-                    return prev;
-                  },
-                  { replace: true },
+      <section>
+        <div className="grid grid-cols-4 gap-4 pb-8">
+          {videoQuery.isLoading
+            ? Array.from({ length: 16 }).map((_, index) => (
+                <Skeleton key={index} className="h-[270px] w-[full]" />
+              ))
+            : videoQuery.data && videoQuery.data.pages[0].data.length > 0
+              ? videoQuery.data.pages.map((page) =>
+                  page.data.map((video: Video) => (
+                    <VideoCard
+                      key={video.id}
+                      videoData={video}
+                      user={currentUser}
+                    />
+                  )),
                 )
-              }
-            />
-            <Search className="w-[1.2rem]" />
-          </label>
-          {/* <SearchBar search={searchedTerm} setSearch={setSearchParams} /> */}
-        </section>
-      </div>
+              : !videoQuery.isLoading &&
+                !videoQuery.isFetching &&
+                !videoQuery.isFetchingNextPage && (
+                  <EmptyState
+                    objectName="Video"
+                    icon={<VideoOff />}
+                    showButton={false}
+                  />
+                )}
 
-      <section className="grid grid-cols-4 gap-4 pb-8">
-        {areVideosDataLoading ? (
-          <>
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-          </>
-        ) : filteredVideos.length > 0 ? (
-          filteredVideos
-        ) : (
-          <EmptyState
-            objectName="Video"
-            onClick={handleRedirect}
-            icon={<VideoOff />}
-          />
-        )}
+          {!videoQuery.isLoading && videoQuery.isFetching && null}
+          {!videoQuery.isLoading &&
+            videoQuery.isFetchingNextPage &&
+            Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className="h-[270px] w-[full]" />
+            ))}
+        </div>
+        <div ref={ref}></div>
       </section>
     </>
   );

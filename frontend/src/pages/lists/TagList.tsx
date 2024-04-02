@@ -1,47 +1,70 @@
-import { EmptyState } from "@/components/EmptyState";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tag as TagIcon } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
-import { useSearchQuery } from "@/services/queries";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useEffect } from "react";
 import { Tag } from "@/lib/types";
+import { useSearchParams } from "react-router-dom";
+import { EmptyState } from "@/components/EmptyState";
+import { Tag as TagIcon } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSearchInfiniteQuery } from "@/services/queries";
+import { useInView } from "react-intersection-observer";
 import { TagCard } from "@/components/cards/TagCard";
 
-export default function TagList() {
+export default function InfluencerList() {
   const [searchParams] = useSearchParams();
 
   const queries = searchParams.toString();
 
-  const { data: tagsData, isLoading: areTagsDataLoading } = useSearchQuery(
-    "tags",
-    queries,
-  );
+  const videoTypeQuery = useSearchInfiniteQuery("tag-list", queries);
 
-  const handleRedirect = () => {};
+  const { ref, inView } = useInView({});
+
+  useEffect(() => {
+    if (
+      inView &&
+      !videoTypeQuery.isFetchingNextPage &&
+      videoTypeQuery.hasNextPage
+    ) {
+      videoTypeQuery.fetchNextPage();
+    }
+  }, [inView, videoTypeQuery.isFetchingNextPage]);
+
+  useEffect(() => {
+    videoTypeQuery.refetch();
+  }, [searchParams]);
 
   return (
-    <>
-      <section className="grid grid-cols-4 gap-2 pb-8">
-        {areTagsDataLoading ? (
+    <section>
+      <div className="grid grid-cols-4 gap-2 pb-8">
+        {videoTypeQuery.isLoading
+          ? Array.from({ length: 40 }).map((_, index) => (
+              <Skeleton key={index} className="w-[full] py-6" />
+            ))
+          : videoTypeQuery.data && videoTypeQuery.data.pages[0].data.length > 0
+            ? videoTypeQuery.data.pages.map((page) =>
+                page.data.map((tag: Tag) => (
+                  <TagCard key={tag.id} tagData={tag} />
+                )),
+              )
+            : !videoTypeQuery.isLoading &&
+              !videoTypeQuery.isFetchingNextPage && (
+                <EmptyState
+                  objectName="Tag"
+                  icon={<TagIcon />}
+                  showButton={false}
+                />
+              )}
+
+        {!videoTypeQuery.isLoading && videoTypeQuery.isFetching && null}
+        {!videoTypeQuery.isLoading && videoTypeQuery.isFetchingNextPage && (
           <>
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
-            <Skeleton className="h-[250px] w-[full]" />
+            <Skeleton className="w-[full] py-4" />
+            <Skeleton className="w-[full] py-4" />
+            <Skeleton className="w-[full] py-4" />
+            <Skeleton className="w-[full] py-4" />
           </>
-        ) : tagsData.length > 0 ? (
-          tagsData.map((tag: Tag) => <TagCard key={tag.id} tagData={tag} />)
-        ) : (
-          <EmptyState
-            objectName="Tag"
-            onClick={handleRedirect}
-            icon={<TagIcon />}
-          />
         )}
-      </section>
-    </>
+      </div>
+      <div ref={ref}></div>
+    </section>
   );
 }

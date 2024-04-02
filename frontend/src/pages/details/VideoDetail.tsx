@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { VideoPlayer } from "@/components/VideoPlayer.tsx";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import { Button } from "@/components/ui/button.tsx";
@@ -8,27 +7,21 @@ import { SnippetCard } from "../../components/cards/SnippetCard.tsx";
 import { Snippet } from "@/lib/types.ts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createNewItem, handleSuccess } from "@/services/api.ts";
 import { EmptyState } from "@/components/EmptyState.tsx";
 import { Film } from "lucide-react";
 import { LoadingButton } from "@/components/LoadingButton.tsx";
 import { useStateContext } from "@/contexts/ContextProvider.tsx";
-import axiosClient from "@/services/axios.ts";
 import {
   useItemQuery,
   useGetQuery,
   useVideoSnippetsQuery,
 } from "@/services/queries.ts";
-import { useCreateSnippetMutation } from "@/services/mutations.ts";
-
-type SnippetTime = {
-  starts_at: string;
-  ends_at: string;
-};
+import {
+  useCreateSnippetMutation,
+  useDuplicateMutation,
+} from "@/services/mutations.ts";
 
 export default function VideoDetail() {
-  const queryClient = useQueryClient();
   const { currentUser } = useStateContext();
   const { id } = useParams();
 
@@ -52,34 +45,17 @@ export default function VideoDetail() {
       : false
     : true;
 
-  function handleDuplicate() {
-    axiosClient
-      .post(`/videos/${id}/duplicate`)
-      .then(({ data }) => {
-        console.log(data.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
+  const { mutateAsync: duplicateMutation, isPending: isDuplicationPending } =
+    useDuplicateMutation("videos");
 
-  const { mutate: makeSnippet, isPending } = useCreateSnippetMutation(parsedId);
+  const handleDuplicate = async () => {
+    await duplicateMutation(parsedId!);
+  };
 
-  // const { mutateAsync: createNewSnippet, isPending } = useMutation({
-  //   mutationFn: createNewItem,
-  //   onSuccess: (newItem) => {
-  //     const queryName = ["videos", id, "snippets"];
-  //     handleSuccess({ queryClient, queryName, newItem });
-  //   },
-  //   onError: (error) => {
-  //     console.log(error);
-  //   },
-  // });
+  const { mutateAsync: makeSnippet, isPending } =
+    useCreateSnippetMutation(parsedId);
 
   const handleSnippetCreation = async () => {
-    // const endpoint = "/snippets";
-    // const data = { video_id: id };
-    // createNewSnippet({ endpoint, data });
     await makeSnippet({ video_id: parsedId });
   };
 
@@ -96,9 +72,14 @@ export default function VideoDetail() {
                 <h3 className="text-left font-sans text-xl font-bold">
                   {videoData.title}
                 </h3>
-                <Button variant="outline" onClick={handleDuplicate}>
-                  Duplicate
-                </Button>
+                {!isEditable &&
+                  (isDuplicationPending ? (
+                    <LoadingButton />
+                  ) : (
+                    <Button variant="outline" onClick={handleDuplicate}>
+                      Duplicate
+                    </Button>
+                  ))}
               </div>
             </>
           ) : (
@@ -124,6 +105,7 @@ export default function VideoDetail() {
                       snippetData={snippet}
                       tagsData={tagsData}
                       isEditable={isEditable}
+                      parent="video"
                     />
                   ))}
                   {isPending ? (

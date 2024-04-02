@@ -2,7 +2,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { LoggedUser, Video } from "@/lib/types";
-import { UpdateDialog } from "../UploadFileDialog copy";
+import { OptionDialog } from "../OptionDialog";
 
 export const VideoCard = ({
   videoData,
@@ -32,7 +32,7 @@ export const VideoCard = ({
       <Link to={`/detail/${videoData.id}`} className="no-underline">
         <Card className="flex h-full w-full cursor-pointer flex-col overflow-hidden pb-4 drop-shadow-md">
           {isEditable ? (
-            <UpdateDialog endpoint="video" itemData={videoData} />
+            <OptionDialog endpoint="video" itemData={videoData} />
           ) : null}
 
           <img
@@ -43,12 +43,12 @@ export const VideoCard = ({
           <CardContent className="grow grid-cols-1 pb-3 pt-2">
             <p className="font-medium">{videoData.title}</p>
           </CardContent>
-          <CardFooter className="flex justify-between py-0">
-            <p></p>
-            <Badge className="badge badge-primary">
-              ""
-              {/* {videoData.video_type_id.name || ""} */}
-            </Badge>
+          <CardFooter className="flex flex-row justify-end py-0">
+            {videoData.video_type_id && videoData.video_type_id.name && (
+              <Badge className="badge badge-primary">
+                {videoData.video_type_id.name}
+              </Badge>
+            )}
           </CardFooter>
         </Card>
       </Link>

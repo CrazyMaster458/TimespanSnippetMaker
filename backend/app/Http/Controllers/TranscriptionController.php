@@ -14,7 +14,7 @@ class TranscriptionController extends Controller
         $isAudioCreated = app(StorageController::class)->createAudioFile($snippetPath);
 
         if($isAudioCreated){
-            $file_path = 'temp\audio.mp3';
+            $file_path = 'temp/audio.mp3';
             $fullFilePath = app(StorageController::class)->getFullPath($file_path);
 
             $response = Http::withHeaders([
