@@ -4,7 +4,9 @@
 
 ### Required tools:
 Visual Studio Code: https://code.visualstudio.com/
+
 WAMPServer: https://www.wampserver.com/en/download-wampserver-64bits/
+
 Composer: https://getcomposer.org/download/
 
 #### YouTube guides for installing tools:
