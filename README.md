@@ -1,6 +1,6 @@
-# Timespan SNippet Maker
+# Timespan Snippet Maker
 
-## LOCALHOST INSTALLATION PROCESS:
+## Local installation process:
 
 ### Required tools:
 Visual Studio Code: https://code.visualstudio.com/
