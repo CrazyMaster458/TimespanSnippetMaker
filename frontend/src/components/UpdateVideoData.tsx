@@ -5,7 +5,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { getData, putData, uploadFile, validateNulls } from "@/services/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Label } from "@radix-ui/react-label";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -22,6 +22,10 @@ import {
   VideoType,
 } from "@/lib/types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { toast } from "sonner";
+import { LoadingButton } from "./LoadingButton";
+
+const MAX_THUMBNAIL_SIZE_MB = 2;
 
 const steps = [
   {
@@ -57,46 +61,56 @@ export const UpdateaVideoData = ({
   });
 
   const [title, setTitle] = useState(videoData?.title || "");
-  const [selectedHost, setSelectedHost] = useState<Option[] | []>(
-    videoData
-      ? ([
-          { value: videoData.host_id?.id, label: videoData.host_id?.name },
-        ] as Option[])
-      : [],
-  );
-  const [selectedVideoTypes, setSelectedVideoTypes] = useState<Option[]>(
-    videoData
-      ? ([
-          {
-            value: videoData.video_type_id?.id,
-            label: videoData.video_type_id?.name,
-          },
-        ] as Option[])
+  const [selectedHost, setSelectedHost] = useState<Option[]>(
+    videoData && videoData.host_id
+      ? [{ value: videoData.host_id.id, label: videoData.host_id.name }]
       : [],
   );
 
-  const mappedGuests = videoData?.guests
-    ? videoData.guests.map((guest) => guest.id)
-    : [];
-  const [selectedGuests, setSelectedGuests] = useState<Option[]>(
-    influencersData
-      ? influencersData
+  const [selectedVideoType, setSelectedVideoType] = useState<Option[]>(
+    videoData && videoData.video_type_id
+      ? [
+          {
+            value: videoData.video_type_id.id,
+            label: videoData.video_type_id.name,
+          },
+        ]
+      : [],
+  );
+
+  const [selectedGuests, setSelectedGuests] = useState<Option[]>([]);
+
+  useEffect(() => {
+    if (videoData && videoData.guests && influencersData) {
+      const mappedGuests = videoData.guests.map((guest) => guest.influencer_id);
+      setSelectedGuests(
+        influencersData
           .filter((influencer) => mappedGuests.includes(influencer.id))
           .map(
             (influencer) =>
               ({ value: influencer.id, label: influencer.name }) as Option,
-          )
-      : [],
-  );
+          ),
+      );
+    } else {
+      setSelectedGuests([]);
+    }
+  }, [videoData, influencersData]);
 
   const [stepNum, setStepNum] = useState(1);
 
   const { mutateAsync: uploadImageFile } = useMutation({
     mutationFn: ({ file, id }: { file: File; id: number }) =>
       uploadFile(`/upload-image/${id}`, file, "image"),
-    onSuccess: () => {},
-    onError: (error) => {
-      console.log(error);
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["videos"],
+      });
+      toast.success("Image successfully uploaded");
+    },
+    onError: () => {
+      toast.error(
+        "Something went wrong during the image uploading process. Please try again later.",
+      );
     },
   });
 
@@ -112,28 +126,74 @@ export const UpdateaVideoData = ({
     }
   };
 
-  const handleThumbnailChange = async (e: any) => {
-    if (e.target.files && e.target.files.length > 0) {
-      await uploadImageFile({ file: e.target.files[0], id: videoData.id });
+  const handleThumbnailChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const files = e.target.files;
+
+    if (!files || files.length === 0) {
+      return;
     }
+
+    const file = files[0];
+
+    const acceptedFormats = ["image/jpeg", "image/png", "image/webp"];
+    if (!acceptedFormats.includes(file.type)) {
+      toast.error("Only JPEG, PNG, and WebP formats are allowed");
+      return;
+    }
+
+    const fileSizeMB = file.size / (1024 * 1024);
+    if (fileSizeMB > MAX_THUMBNAIL_SIZE_MB) {
+      toast.error(`File size exceeds the limit of ${MAX_THUMBNAIL_SIZE_MB} MB`);
+      return;
+    }
+
+    const image = new Image();
+    image.src = URL.createObjectURL(file);
+    await new Promise((resolve) => {
+      image.onload = () => {
+        const aspectRatio = image.width / image.height;
+        if (aspectRatio !== 16 / 9) {
+          toast.error("Thumbnail must be in a 16:9 aspect ratio");
+          resolve(false);
+        } else {
+          resolve(true);
+          uploadImageFile({ file, id: videoData.id });
+        }
+      };
+    });
   };
 
-  const { mutateAsync: updateVideoData } = useMutation({
-    mutationFn: (data: UpdateVideo) =>
-      putData(`/videos/${data.id}`, data, updateVideoSchema),
-    onSuccess: (data) => {
-      setOpen(false);
-      const queryKey = ["videos", data.id];
+  const { mutateAsync: updateVideoData, isPending: isUpdatePending } =
+    useMutation({
+      mutationFn: (data: UpdateVideo) =>
+        putData(`/videos/${data.id}`, data, updateVideoSchema),
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries({
+          queryKey: ["videos"],
+        });
+        if (data.data.published && !variables.published) {
+          toast.success("Video successfully published");
 
-      queryClient.invalidateQueries(queryKey);
-    },
-    onError: (error) => {
-      console.error("Error updating snippet:", error);
-    },
-  });
+          queryClient.invalidateQueries({
+            queryKey: ["public"],
+          });
+        }
+
+        setOpen(false);
+      },
+      onError: (error: any) => {
+        if (error.response.data.message) {
+          toast.error(error.response.data.message);
+          return;
+        }
+        toast.error("Something went wrong, please try again later");
+      },
+    });
 
   const updateVideo = async () => {
-    const areErrors = validateNulls([selectedHost, selectedVideoTypes]);
+    const areErrors = validateNulls(selectedHost, selectedVideoType);
 
     if (areErrors) {
       return;
@@ -147,8 +207,9 @@ export const UpdateaVideoData = ({
         selectedGuests.length > 0
           ? selectedGuests.map((guest) => guest.value)
           : undefined,
-      video_type_id: selectedVideoTypes[0].value,
+      video_type_id: selectedVideoType[0].value,
       visibility: visibility,
+      published: videoData.published,
     };
 
     await updateVideoData(data);
@@ -195,6 +256,7 @@ export const UpdateaVideoData = ({
                     type="text"
                     required
                     value={title}
+                    maxLength={120}
                     onChange={(e) => setTitle(e.target.value)}
                   />
                 </div>
@@ -204,8 +266,8 @@ export const UpdateaVideoData = ({
                   <CreateSelect
                     data={videoTypesData || []}
                     endpoint="video_types"
-                    selectedOptions={selectedVideoTypes}
-                    setSelectedOptions={setSelectedVideoTypes}
+                    selectedOptions={selectedVideoType}
+                    setSelectedOptions={setSelectedVideoType}
                     placeholder="Select Video Type"
                     schema={videoTypeSchema}
                   />
@@ -288,9 +350,13 @@ export const UpdateaVideoData = ({
                 <p></p>
               )}
               {stepNum !== 3 ? (
-                <Button onClick={handleNext}>Next</Button>
+                <Button onClick={handleNext} disabled={isUpdatePending}>
+                  Next
+                </Button>
+              ) : isUpdatePending ? (
+                <LoadingButton />
               ) : (
-                <Button onClick={updateVideo}>Create</Button>
+                <Button onClick={updateVideo}>Update</Button>
               )}
             </span>
           </section>

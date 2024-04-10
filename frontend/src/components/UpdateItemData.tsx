@@ -17,6 +17,7 @@ import {
   videoTypeSchema,
 } from "@/lib/types";
 import { Schema } from "zod";
+import { toast } from "sonner";
 
 export const UpdateItemData = ({
   itemData,
@@ -50,12 +51,23 @@ export const UpdateItemData = ({
   const { mutateAsync: updateItemData, isPending } = useMutation({
     mutationFn: (data: any) =>
       putData(`/${endpoint}s/${data.id}`, data, schema),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (data.errors) {
+        return;
+      }
       queryClient.invalidateQueries([`${endpoint}s`]);
       setOpen(false);
     },
-    onError: (error) => {
-      console.log(error);
+    onError: (error: any) => {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+        return;
+      }
+      toast.error("Something went wrong, please try again later");
     },
   });
 
@@ -73,6 +85,7 @@ export const UpdateItemData = ({
           type="text"
           id="name"
           value={name}
+          maxLength={25}
           onChange={(e) => setName(e.target.value)}
         />
         <DialogFooter>

@@ -10,6 +10,7 @@ import { useSearchInfiniteQuery } from "@/services/queries";
 import { useInView } from "react-intersection-observer";
 import { EmptyState } from "@/components/EmptyState";
 import { VideoOff } from "lucide-react";
+import { VideoCreationDialog } from "@/components/VideoCreationDialog";
 
 export default function VideoList() {
   const { currentUser } = useStateContext();
@@ -59,6 +60,7 @@ export default function VideoList() {
                     objectName="Video"
                     onClick={handleRedirect}
                     icon={<VideoOff />}
+                    button={<VideoCreationDialog emptyStateButton={true} />}
                   />
                 )}
 

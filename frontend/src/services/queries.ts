@@ -53,17 +53,6 @@ export function useGetQueries(
   });
 }
 
-// export function useGetQueries(data: Video[], endpoint: string) {
-//   return useQueries({
-//     queries: data.map((item) => ({
-//       queryKey: [endpoint.slice(0, -1), item.id],
-//       queryFn: () => getData(`/${endpoint}/${item.id}`),
-//     })),
-//   });
-// }
-
-// useInfiniteVideosQuery
-
 export function useSearchQuery(
   endpoint: string,
   queries: string,
@@ -106,12 +95,3 @@ export function useInfiniteVideosQuery() {
     },
   });
 }
-
-// export function useInfiniteVideosQuery() {
-//   return useInfiniteQuery({
-//     queryKey: ["videos-infinite"],
-//     queryFn: getPages,
-//     initialPageParam: 0,
-//     getNextPageParam: (lastPage) => lastPage.nextPage,
-//   });
-// }

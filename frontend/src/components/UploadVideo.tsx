@@ -11,9 +11,11 @@ import { LoadingButton } from "./LoadingButton";
 export const UploadVideo = ({
   handleVideoChange,
   isPending,
+  isUploadPending,
 }: {
   handleVideoChange: (e: any) => void;
   isPending: boolean;
+  isUploadPending: boolean;
 }) => {
   return (
     <DialogContent className="h-[85vh] min-w-[60vw]">
@@ -27,10 +29,14 @@ export const UploadVideo = ({
               <ArrowUpFromLine className="uploadArrow h-12" />
               <div className="flex flex-col items-center">
                 <h3 className="text-base font-medium">
-                  {`Drag and drop doesn't work`}
+                  {isUploadPending
+                    ? `Please wait`
+                    : `Drag and drop doesn't work`}
                 </h3>
                 <p className="text-base font-normal text-[#7f858e]">
-                  {`Upload a video file by clicking the button`}
+                  {isUploadPending
+                    ? `Video is being uploaded`
+                    : `Upload a video file by clicking the button`}
                 </p>
               </div>
 
@@ -43,7 +49,7 @@ export const UploadVideo = ({
                 accept=".mp4,.mov,.mkv,.avi"
                 onChange={handleVideoChange}
               />
-              {isPending ? (
+              {isPending || isUploadPending ? (
                 <>
                   <LoadingButton className="" />
                 </>

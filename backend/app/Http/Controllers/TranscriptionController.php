@@ -1,9 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
-use App\Models\Snippet;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\StorageController;
 
@@ -25,6 +22,10 @@ class TranscriptionController extends Controller
               ]);
 
             app(StorageController::class)->deleteFile($file_path);
+
+            if($response->status() !== 200){
+                return null;
+            }
             
             return $response->json()["text"];
         }

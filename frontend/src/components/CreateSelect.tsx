@@ -7,6 +7,7 @@ import { addNewItem, handleSuccess } from "@/services/api";
 import { v4 as uuidv4 } from "uuid";
 import { BasicProp, Option } from "@/lib/types";
 import { Schema } from "zod";
+import { toast } from "sonner";
 
 type SelectComponentProps = {
   data: BasicProp[];
@@ -77,7 +78,7 @@ export const CreateSelect: React.FC<SelectComponentProps> = ({
 
       return { previousData, queryName, data };
     },
-    onError: (error, context) => {
+    onError: (_, context) => {
       const { endpoint: queryName, data } = context;
       //@ts-ignore
       queryClient.setQueryData([queryName], context.previousData);
@@ -85,25 +86,19 @@ export const CreateSelect: React.FC<SelectComponentProps> = ({
       setOptions(removeLastItem(options, data));
       //@ts-ignore
       setSelectedOptions(removeLastItem(selectedOptions, data));
-      console.log("Error creating the item:", error);
     },
     onSettled: () => {
-      const queryName = [endpoint];
-      queryClient.invalidateQueries({ queryKey: queryName });
+      queryClient.invalidateQueries({ queryKey: [endpoint] });
     },
   });
 
   const handleCreateOption = useCallback(
     async (inputValue: string) => {
-      try {
-        const data = { name: inputValue };
-        const newItem = await optimisticUpdate({ endpoint, data, schema });
-        const newOption = { value: newItem.id, label: newItem.name };
+      const data = { name: inputValue };
+      const newItem = await optimisticUpdate({ endpoint, data, schema });
+      const newOption = { value: newItem.id, label: newItem.name };
 
-        updateOptionsAndSelected(newOption);
-      } catch (error) {
-        console.error("Error creating the item:", error);
-      }
+      updateOptionsAndSelected(newOption);
     },
     [optimisticUpdate, endpoint, isMulti],
   );

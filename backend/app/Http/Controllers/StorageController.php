@@ -1,12 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use Illuminate\Http\Request;
 use FFMpeg\Format\Audio\Mp3;
-use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\File;
 
 class StorageController extends Controller
@@ -32,15 +30,13 @@ class StorageController extends Controller
 
     public function copyFolder(string $source, string $destination)
     {
-        $filesystem = new Filesystem();
-
-        if ($filesystem->exists($source)) {
-            $filesystem->makeDirectory($destination);
-            $filesystem->copyDirectory($source, $destination);
+        if (file_exists(public_path($source))) {
+            File::makeDirectory(public_path($destination), 0777, true);
+            File::copyDirectory($source, $destination);
     
-            return response()->json(["message" => "Folder copied successfully"]);
+            return true;
         } else {
-            return response()->json(["message" => "Folder not found"]);
+            return false;
         }
     }
 
@@ -55,16 +51,11 @@ class StorageController extends Controller
             $extension = $file->getClientOriginalExtension();   
             $finalName = $fileType === 'image' ? 'thumbnail' : 'video';
 
-            // $filePath = "{$this->user->user_code}/{$videoFolder}/{$finalName}.{$extension}";
-
             $filePath = "{$this->user->user_code}/{$videoFolder}";
 
-            // Move the uploaded file to the public folder
             $file->move(public_path("public/".$filePath), "{$finalName}.{$extension}");
 
             $fullFilePath = "{$filePath}/{$finalName}.{$extension}";
-
-            // $file->storeAs("public/{$filePath}");
 
             return $fullFilePath;
         } else {
@@ -77,7 +68,6 @@ class StorageController extends Controller
         $publicPath = public_path($filePath);
     
         if (File::exists($publicPath)) {
-            // Delete the file
             if (File::delete($publicPath)) {
                 return true;
             } else {
@@ -120,21 +110,12 @@ class StorageController extends Controller
         }
 
         if (!File::exists($path)) {
-            // Create the directory
             File::makeDirectory(public_path($path), 0777, true); // Third parameter 'true' creates directories recursively if they do not exist
     
-            return response()->json(["message" => "Folder created successfully"]);
+            return true;
         } else {
-            return response()->json(["message" => "Folder already exists"]);
+            return false;
         }
-        
-        // if (!Storage::exists($path)) {
-        //     Storage::makeDirectory($path);
-
-        //     return response()->json(["message" => "Folder created successfully"]);
-        // } else {
-        //     return response()->json(["message" => "Folder already exists"]);
-        // }
     }
 
     public function createAudioFile(string $filePath){

@@ -13,41 +13,16 @@ type AddNewItemParams = {
 };
 
 export const getData = async (endpoint: string) => {
-  // return (await axiosClient.get(endpoint)).data.data;
-
   const response = await axiosClient.get(endpoint);
   return response.data.data;
-
-  // try {
-  //   const response = await axiosClient.get(endpoint);
-  //   return response.data.data;
-  // } catch (error) {
-  //   if (error && error.response && error.response.data) {
-  //     toast(error.response.data.message);
-  //     throw new Error(error.response.data.message);
-  //   }
-  //   console.error("Error fetching data:", error);
-  // }
 };
 
 export const getItemData = async (endpoint: string) => {
   return (await axiosClient.get(endpoint)).data;
-  // try {
-  //   const response = await axiosClient.get(endpoint);
-  //   return response.data;
-  // } catch (error) {
-  //   if (error && error.response && error.response.data) {
-  //     toast(error.response.data.message);
-  //     throw new Error(error.response.data.message);
-  //   }
-  //   console.error("Error fetching data:", error);
-  //   // throw new Error("Error fetching data");
-  // }
 };
 
 export const deleteData = async (endpoint: string) => {
   try {
-    console.log("endpoint deleting", endpoint);
     const response = await axiosClient.delete(endpoint);
     return response.data;
   } catch (error) {
@@ -56,16 +31,16 @@ export const deleteData = async (endpoint: string) => {
   }
 };
 
-export const validateNulls = (data: Option[][]) => {
+export const validateNulls = (...arrays: Option[][]) => {
   let errors = false;
-  Object.values(data).forEach((item) => {
-    if (item.length === 0) {
+  arrays.forEach((array) => {
+    if (array.length === 0) {
       errors = true;
     }
   });
 
   if (errors) {
-    toast.error("Please select a host and video type");
+    toast.error("Please select host and video type");
   }
 
   return errors;
@@ -79,17 +54,15 @@ export const putData = async (
   const { result, errors } = validateData(data, schema);
 
   if (errors) {
-    console.log("errors", errors);
+    Object.values(errors).forEach((errorMessage) => {
+      //@ts-ignore
+      toast.error(errorMessage);
+    });
+
     return { errors: errors };
   } else if (result) {
-    try {
-      const response = await axiosClient.put(endpoint, result.data);
-      return response.data;
-    } catch (error) {
-      //@ts-ignore
-      toast.error(error.response.data.message);
-      // console.log(error.response.data.message);
-    }
+    const response = await axiosClient.put(endpoint, result.data);
+    return response.data;
   }
 };
 
@@ -97,7 +70,7 @@ export const getDownload = async (endpoint: string) => {
   const response = await axiosClient.get(endpoint, {
     responseType: "blob",
   });
-  return response.data;
+  return response;
 };
 
 export const cutVideo = async (endpoint: string) => {
@@ -118,10 +91,8 @@ export const postData = async (
       toast.error(errorMessage);
     });
 
-    // Throw an error with all error messages concatenated
     const errorMessages = Object.values(errors).join("\n");
     throw new Error(errorMessages);
-    // return { errors: errors };
   } else if (result) {
     const response = await axiosClient.post(endpoint, result.data);
     return response.data;
@@ -141,7 +112,6 @@ export const addNewItem = async ({
       toast.error(errorMessage);
     });
 
-    // Throw an error with all error messages concatenated
     const errorMessages = Object.values(errors).join("\n");
     throw new Error(errorMessages);
   } else if (result) {

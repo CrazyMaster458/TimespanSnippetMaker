@@ -13,13 +13,6 @@ export const VideoCard = ({
   user: LoggedUser | null;
   publicView?: boolean;
 }) => {
-  // const isEditable =
-  //   user?.admin === 1
-  //     ? true
-  //     : videoData.published
-  //       ? false
-  //       : videoData.user_id === user?.id;
-
   const isEditable =
     user?.admin === 1
       ? true
@@ -41,7 +34,9 @@ export const VideoCard = ({
             className="aspect-video w-full"
           />
           <CardContent className="grow grid-cols-1 pb-3 pt-2">
-            <p className="font-medium">{videoData.title}</p>
+            <p className="overflow-hidden overflow-ellipsis font-medium">
+              {videoData.title}
+            </p>
           </CardContent>
           <CardFooter className="flex flex-row justify-end py-0">
             {videoData.video_type_id && videoData.video_type_id.name && (

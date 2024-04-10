@@ -17,9 +17,17 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
+        $query = $request->input('q');
+
+        $users = User::orderBy('created_at', 'desc');
+        if ($query !== null) {
+            $users = $users->where('username', 'like', "%$query%");
+        }
+
+        $users = $users->paginate(12);
+        
         return UserResource::collection(
-        User::orderBy('created_at', 'desc')
-            ->paginate(12)
+        $users
         );
     }
 
@@ -63,17 +71,15 @@ class UserController extends Controller
         $loggedInUser = Auth::user();
     
         if ($loggedInUser->id !== $user->id && !$loggedInUser->admin) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
     
         try {
             DB::beginTransaction();
     
-            // Delete user folder from storage
             $userFolder = "public/{$user->user_code}";
             app(StorageController::class)->deleteFolder($userFolder);
     
-            // Delete associated videos, snippets, and their related entities
             $user->videos()->each(function ($video) {
                 $video->snippets()->each(function ($snippet) {
                     $snippet->snippet_tags()->delete();
@@ -84,7 +90,6 @@ class UserController extends Controller
                 $video->delete();
             });
     
-            // Delete associated snippets and their related entities
             $user->snippets()->each(function ($snippet) {
                 $snippet->snippet_tags()->delete();
                 $snippet->delete();
@@ -95,10 +100,8 @@ class UserController extends Controller
             $user->video_types()->delete();
             $user->published()->delete();
     
-            // Delete user's access tokens
             $user->tokens()->count() > 0 && $user->tokens()->delete();
 
-            // Delete the user
             $user->delete();
     
             DB::commit();

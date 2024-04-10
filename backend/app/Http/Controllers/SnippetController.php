@@ -8,16 +8,15 @@ use App\Http\Requests\StoreSnippetRequest;
 use App\Http\Requests\UpdateSnippetRequest;
 use App\Models\SnippetTag;
 use App\Models\Video;
+use App\Models\User;
 use App\Models\Published;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
 use App\Http\Controllers\StorageController;
-use App\Http\Controllers\TagController;
 use App\Http\Controllers\TranscriptionController;
 use App\Http\Resources\TagResource;
 use App\Models\Tag;
-use Illuminate\Support\Facades\Storage;
 
 class SnippetController extends Controller
 {
@@ -187,19 +186,33 @@ class SnippetController extends Controller
     {
         $user = $request->user();
         $video = Video::find($snippet->video_id);
+
+        if($video->published()->exists()){
+            $user = User::find($video->user_id);
+        } else if($user->id !== $video->user_id){
+            return response()->json(['message' => 'Cannot download private videos.'], 403);
+        }
+
         $videoPathInfo = pathinfo($snippet->file_path);
         $videoExtension = $videoPathInfo['extension'];
 
         $videoName = "snippet{$snippet->snippet_code}.{$videoExtension}";
         $videoFilePath = "public/{$user->user_code}/{$video->video_code}/snippets/{$videoName}";
 
-        if (!public_path($videoFilePath)) {
-            return response()->json(["error" => "Video file not found"], 404);
+        if (!file_exists(public_path($videoFilePath))) {
+            return response()->json(["message" => "Video file not found"], 404);
         }
 
+        $mimeTypes = [
+            'mp4' => 'video/mp4',
+            'mov' => 'video/quicktime',
+        ];
+        
+        $contentType = $mimeTypes[$videoExtension] ?? 'application/octet-stream'; 
+
         $headers = [
-            'Content-Type' => 'video/mp4', 
-            'Content-Disposition' => 'attachment; filename="' . $videoName . '"',
+            'Content-Type' => $contentType, 
+            'Content-Disposition' => 'attachment; filename=' . $videoName,
             'X-Filename' => $videoName,
         ];
 
@@ -210,6 +223,13 @@ class SnippetController extends Controller
         $user = $request->user();
         $video = Video::find($snippet->video_id);
 
+        $startsAtInSeconds = strtotime($snippet->starts_at);
+        $endsAtInSeconds = strtotime($snippet->ends_at);
+    
+        if ($endsAtInSeconds <= $startsAtInSeconds) {
+            return response()->json(["message" => "Ending point must be greater than the starting point of the snippet "], 400);
+        }
+
         $videoPathInfo = pathinfo($video->file_path);
         $videoExtension = $videoPathInfo['extension'];
 
@@ -217,7 +237,7 @@ class SnippetController extends Controller
 
         $snippetDestination = "{$videoFolderPath}/snippets/snippet{$snippet->snippet_code}.{$videoExtension}";
 
-        $cuttingMode = $user->fast_mode ? 'copy' : 'libx264';
+        $cuttingMode = $user->fast_cut === 1 ? 'copy' : 'libx264';
 
         $ffmpeg = FFMpeg::fromDisk('public')
             ->open("{$videoFolderPath}/video.{$videoExtension}")
@@ -230,10 +250,14 @@ class SnippetController extends Controller
             ])
             ->save($snippetDestination);
 
-        $transcript = app(TranscriptionController::class)->transcribe($snippetDestination);
-
         $snippet->update([
             'file_path' => $snippetDestination,
+        ]);
+
+        $transcript = app(TranscriptionController::class)->transcribe($snippetDestination);
+
+
+        $snippet->update([
             'transcript' => $transcript,
         ]);
 

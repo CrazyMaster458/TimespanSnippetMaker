@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -36,9 +35,6 @@ class ProviderController extends Controller
             ]);
         }
 
-        // Handle user creation or authentication logic here
         dd($socialUser);
-
-        // return redirect('/dashboard');
     }
 }

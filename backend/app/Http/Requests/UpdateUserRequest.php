@@ -22,7 +22,6 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username' => 'required|string|max:25',
             'fast_cut'  => 'boolean|integer',
         ];
     }

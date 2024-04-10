@@ -19,7 +19,7 @@ class UsersTableData extends Seeder
             'password' => bcrypt('A@dmin123456'),
             'user_code' => 'user7tasli6Kqo',
             'admin' => 1,
-            'fast_cut' => 1,
+            'fast_cut' => 0,
         ]);
 
         DB::table('users')->insert([
@@ -28,7 +28,7 @@ class UsersTableData extends Seeder
             'password' => bcrypt('Us@r123456'),
             'user_code' => 'userJjJbCTnsWi',
             'admin' => 0,
-            'fast_cut' => 1,
+            'fast_cut' => 0,
         ]);
     }
 }

@@ -6,6 +6,7 @@ type EmptyStateProps = {
   objectName?: string;
   onClick?: () => void;
   icon?: React.ReactNode;
+  button?: React.ReactNode;
   isPending?: boolean;
   showButton?: boolean;
 };
@@ -14,6 +15,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   objectName,
   onClick,
   icon,
+  button,
   isPending = false,
   showButton = true,
 }) => {
@@ -30,14 +32,15 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
               <LoadingButton />
             </>
           ) : (
-            showButton && (
-              <>
-                <Button onClick={onClick}>
-                  <Plus className="m-0 h-7 w-7 p-0 pr-2" />
-                  {`Create New ${objectName}`}
-                </Button>
-              </>
-            )
+            showButton &&
+            (button ? (
+              button
+            ) : (
+              <Button onClick={onClick}>
+                <Plus className="m-0 h-7 w-7 p-0 pr-2" />
+                {`Create New ${objectName}`}
+              </Button>
+            ))
           )}
         </div>
       </div>

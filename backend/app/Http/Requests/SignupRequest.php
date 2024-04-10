@@ -31,7 +31,6 @@ class SignupRequest extends FormRequest
         $existingUser = User::where('user_code', $generatedSecretName)->first();
 
         if ($existingUser) {
-            // If a user with the generated secret name already exists, generate a new one.
             return $this->generateSecretName();
         }
 

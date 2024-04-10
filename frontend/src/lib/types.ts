@@ -14,6 +14,11 @@ const snippetTagSchema = z.object({
   snippet_id: z.number(),
 });
 
+const guestsSchema = z.object({
+  influencer_id: z.number(),
+  video_id: z.number(),
+});
+
 const snippetSchema = z.object({
   id: z.number(),
   description: z.string(),
@@ -21,6 +26,7 @@ const snippetSchema = z.object({
   ends_at: z.string(),
   transcript: z.string(),
   video_url: z.string(),
+  file_path: z.string(),
   video_id: z.number(),
   snippet_tags: z.array(snippetTagSchema),
 });
@@ -34,7 +40,7 @@ const videoSchema = z.object({
   user_id: z.number(),
   host_id: basicSchema,
   video_type_id: basicSchema,
-  guests: z.array(basicSchema),
+  guests: z.array(guestsSchema),
 });
 
 const userSchema = z.object({
@@ -68,7 +74,6 @@ const loggedUserSchema = z.object({
 
 // UPDATE/CREATE SCHEMAS
 
-// Generic function to generate schema and type for entities
 const generateSchema = (
   entityName: string,
   regex: RegExp,
@@ -90,7 +95,6 @@ const generateSchema = (
   return { schema };
 };
 
-// Generate schemas and types for different entities
 export const { schema: tagSchema } = generateSchema("Tag", hashTagRegex);
 export const { schema: videoTypeSchema } = generateSchema(
   "Video type",
@@ -119,12 +123,17 @@ export const updateVideoSchema = z.object({
   id: z.number(),
   title: z
     .string()
-    .max(255, "Title must be less than 255 characters")
+    .max(120, "Title must be less than 120 characters")
     .min(3, "Title must be at least 3 characters"),
-  host_id: z.number(),
-  video_type_id: z.number(),
+  host_id: z.number().refine((value) => value !== undefined, {
+    message: "Host must be set",
+  }),
+  video_type_id: z.number().refine((value) => value !== undefined, {
+    message: "Video type must be set",
+  }),
   guests: z.array(z.number()).optional(),
   visibility: z.string(),
+  published: z.boolean(),
 });
 
 // AUTH SCHEMAS

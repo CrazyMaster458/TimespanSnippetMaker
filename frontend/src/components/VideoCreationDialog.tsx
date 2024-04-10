@@ -1,5 +1,5 @@
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { FolderPlus } from "lucide-react";
+import { FolderPlus, Plus } from "lucide-react";
 import { createNewVideo, uploadFile } from "@/services/api";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -13,10 +13,19 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "sonner";
+import { Button } from "./ui/button";
 
-export const VideoCreationDialog = () => {
+const MAX_UPLOAD_SIZE_MB = 2;
+
+export const VideoCreationDialog = ({
+  emptyStateButton = false,
+}: {
+  emptyStateButton?: boolean;
+}) => {
   const [open, setOpen] = React.useState(false);
   const queryClient = useQueryClient();
+  const [isTriggered, setIsTriggered] = useState(false);
 
   const {
     mutateAsync: createNewVideo2,
@@ -26,22 +35,25 @@ export const VideoCreationDialog = () => {
   } = useMutation({
     mutationFn: createNewVideo,
     onSuccess: () => {
-      const queryName = ["videos"];
-      queryClient.invalidateQueries({ queryKey: queryName });
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
+      setIsTriggered(false);
     },
-    onError: (error) => {
-      console.log(error);
+    onError: () => {
+      toast.error("Something went wrong, please try again later");
     },
   });
 
-  const { mutateAsync: uploadVideoFile } = useMutation({
-    mutationFn: ({ file, id }: { file: File; id: number }) =>
-      uploadFile(`/upload-video/${id}`, file, "video", onUploadProgress),
-    onSuccess: () => {},
-    onError: (error) => {
-      console.log(error);
-    },
-  });
+  const { mutateAsync: uploadVideoFile, isPending: isUploadPending } =
+    useMutation({
+      mutationFn: ({ file, id }: { file: File; id: number }) =>
+        uploadFile(`/upload-video/${id}`, file, "video", onUploadProgress),
+      onSuccess: () => {
+        toast.success("Video successfully uploaded");
+      },
+      onError: () => {
+        toast.error("Something went wrong during the uploading process");
+      },
+    });
 
   const onUploadProgress = (progressEvent: AxiosProgressEvent) => {
     if (progressEvent.total !== null && progressEvent.total !== undefined) {
@@ -49,7 +61,6 @@ export const VideoCreationDialog = () => {
         (progressEvent.loaded * 100) / progressEvent.total,
       );
       setUploadProgress(`${percentCompleted}%`);
-      console.log(`Upload Progress: ${percentCompleted}%`);
     }
   };
 
@@ -57,13 +68,21 @@ export const VideoCreationDialog = () => {
 
   const handleVideoChange = async (e: any) => {
     if (e.target.files && e.target.files.length > 0) {
-      try {
-        const data = await createNewVideo2("/videos");
+      const totalSize: number = Array.from<File>(e.target.files).reduce(
+        (acc: number, file: File) => acc + file.size,
+        0,
+      );
+      const totalSizeMB = totalSize / (1024 * 1024);
 
-        await uploadVideoFile({ file: e.target.files[0], id: data.id });
-      } catch (error) {
-        console.error("Error handling video change:", error);
+      if (totalSizeMB > MAX_UPLOAD_SIZE_MB) {
+        toast.error(
+          `Total upload size exceeds the limit of ${MAX_UPLOAD_SIZE_MB} MB`,
+        );
+        return;
       }
+
+      const data = await createNewVideo2("/videos");
+      await uploadVideoFile({ file: e.target.files[0], id: data.id });
     }
   };
 
@@ -73,10 +92,17 @@ export const VideoCreationDialog = () => {
         <DialogTrigger>
           <TooltipProvider delayDuration={200}>
             <Tooltip>
-              <TooltipTrigger>
-                <button className="btn btn-circle btn-ghost">
-                  <FolderPlus />
-                </button>
+              <TooltipTrigger onClick={() => setIsTriggered(true)}>
+                {emptyStateButton ? (
+                  <Button>
+                    <Plus className="m-0 h-7 w-7 p-0 pr-2" />
+                    {`Create New Video`}
+                  </Button>
+                ) : (
+                  <button className="btn btn-circle btn-ghost">
+                    <FolderPlus />
+                  </button>
+                )}
               </TooltipTrigger>
               <TooltipContent>
                 <p>Create video</p>
@@ -84,7 +110,7 @@ export const VideoCreationDialog = () => {
             </Tooltip>
           </TooltipProvider>
         </DialogTrigger>
-        {isSuccess && !isPending && data ? (
+        {!isTriggered && isSuccess && !isPending && data ? (
           <>
             <UpdateaVideoData
               uploadProgress={uploadProgress}
@@ -98,6 +124,7 @@ export const VideoCreationDialog = () => {
             <UploadVideo
               handleVideoChange={handleVideoChange}
               isPending={isPending}
+              isUploadPending={isUploadPending}
             />
           </>
         )}

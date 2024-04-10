@@ -11,12 +11,6 @@ class UploadVideoRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // $video = $this->route('videos');
-
-        // if($this->user()->id !== $video->user_id) {
-        //     return false;
-        // }
-
         return true;
     }
 
@@ -28,7 +22,7 @@ class UploadVideoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'video' => 'required|mimetypes:video/mp4,video/mpeg,video/quicktime',
+            'video' => 'required|mimetypes:video/mp4,video/mpeg,video/quicktime,video/mov',
         ];
     }
 }

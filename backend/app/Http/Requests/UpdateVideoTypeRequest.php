@@ -11,7 +11,6 @@ class UpdateVideoTypeRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // TODO: check permissions
         return true;
     }
 

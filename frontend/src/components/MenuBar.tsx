@@ -49,7 +49,6 @@ export const MenuBar = ({ isAdmin }: { isAdmin: number }) => {
               data-tip="Video Types"
             >
               <Tv className=" h-5 w-5" viewBox="0 0 24 24" />
-              {/* <BadgeCheck className=" h-5 w-5" viewBox="0 0 24 24" /> */}
             </Link>
           </li>
           <li>

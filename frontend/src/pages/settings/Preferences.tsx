@@ -1,34 +1,34 @@
 import { useUserContext } from "@/contexts/UserContext";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { meSchema } from "@/lib/types";
 import { useUpdateMutation } from "@/services/mutations";
+import { LoadingButton } from "@/components/LoadingButton";
+import { useStateContext } from "@/contexts/ContextProvider";
 
 export const Preferences = () => {
-  const userData = useUserContext();
-  const userUpdate = useUpdateMutation("user", meSchema);
+  const userData = useUserContext() as any;
+  const { setCurrentUser } = useStateContext();
+  const userUpdate = useUpdateMutation("users", meSchema);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e?.preventDefault();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
     if (userData) {
-      // Create a new object with the updated fast_cut property
-      //@ts-ignore
       const updatedUserData = { ...userData, fast_cut: cuttingMode ? 1 : 0 };
 
-      // Pass the updated object to the mutation function
-      userUpdate.mutateAsync(updatedUserData);
+      await userUpdate.mutateAsync(updatedUserData);
+
+      if (userUpdate.data) {
+        setCurrentUser(userUpdate.data.data);
+      }
     }
   };
 
-  useEffect(() => {
-    console.log(userData);
-  }, [userData]);
-
   const [cuttingMode, setCuttingMode] = useState(
     //@ts-ignore
-    userData?.fast_cut === 1, // Check if userData exists before accessing fast_cut
+    userData?.fast_cut === 1,
   );
 
   const handleCheckboxChange = (isChecked: boolean) => {
@@ -59,8 +59,11 @@ export const Preferences = () => {
             </p>
           </div>
         </div>
-
-        <Button type="submit">Save</Button>
+        {userUpdate.isPending ? (
+          <LoadingButton />
+        ) : (
+          <Button type="submit">Save</Button>
+        )}
       </form>
     </>
   );

@@ -6,7 +6,6 @@ use App\Http\Resources\VideoTypeResource;
 use App\Models\VideoType;
 use App\Http\Requests\StoreVideoTypeRequest;
 use App\Http\Requests\UpdateVideoTypeRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class VideoTypeController extends Controller

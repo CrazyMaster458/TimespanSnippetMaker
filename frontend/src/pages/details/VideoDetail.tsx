@@ -69,8 +69,15 @@ export default function VideoDetail() {
                 <VideoPlayer videoUrl={videoData.video_url} />
               </AspectRatio>
               <div className="pt-3">
-                <h3 className="text-left font-sans text-xl font-bold">
-                  {videoData.title}
+                <h3 className=" text-left font-sans text-xl font-bold">
+                  <span
+                    style={{
+                      overflowWrap: "break-word",
+                      wordWrap: "break-word",
+                    }}
+                  >
+                    {videoData.title}
+                  </span>
                 </h3>
                 {!isEditable &&
                   (isDuplicationPending ? (
@@ -106,6 +113,7 @@ export default function VideoDetail() {
                       tagsData={tagsData}
                       isEditable={isEditable}
                       parent="video"
+                      maxDuration={videoData.duration}
                     />
                   ))}
                   {isPending ? (
@@ -113,15 +121,17 @@ export default function VideoDetail() {
                       <LoadingButton className="rounded-lg py-7" />
                     </>
                   ) : (
-                    <>
-                      <Button
-                        variant="outline"
-                        className="w-[full] rounded-lg py-7"
-                        onClick={handleSnippetCreation}
-                      >
-                        Create Snippet
-                      </Button>
-                    </>
+                    isEditable && (
+                      <>
+                        <Button
+                          variant="outline"
+                          className="w-[full] rounded-lg py-7"
+                          onClick={handleSnippetCreation}
+                        >
+                          Create Snippet
+                        </Button>
+                      </>
+                    )
                   )}
                 </>
               ) : (
@@ -130,6 +140,10 @@ export default function VideoDetail() {
                   onClick={handleSnippetCreation}
                   isPending={isPending}
                   icon={<Film />}
+                  showButton={
+                    !videoData.published ||
+                    currentUser?.id === videoData.user_id
+                  }
                 />
               )
             ) : (

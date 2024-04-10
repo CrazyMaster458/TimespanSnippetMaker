@@ -8,6 +8,7 @@ import {
   getDownload,
 } from "./api";
 import { Schema } from "zod";
+import { toast } from "sonner";
 
 export function useDeleteItemMutation(endpoint: string) {
   const queryClient = useQueryClient();
@@ -19,8 +20,8 @@ export function useDeleteItemMutation(endpoint: string) {
         queryKey: [endpoint],
       });
     },
-    onError: (error) => {
-      console.error("Error deleting:", error);
+    onError: () => {
+      toast.error("Something went wrong, please try again later");
     },
   });
 }
@@ -28,11 +29,9 @@ export function useDeleteItemMutation(endpoint: string) {
 export function useDownloadVideo(endpoint: string) {
   return useMutation({
     mutationFn: (id: number) => getDownload(`/${endpoint}/${id}`),
-    onSuccess: () => {
-      console.log("success");
-    },
-    onError: (error) => {
-      console.error("Error deleting:", error);
+    onSuccess: () => {},
+    onError: () => {
+      toast.error("Something went wrong, please try again later");
     },
   });
 }
@@ -46,7 +45,7 @@ export function useUpdateMutation(
 
   return useMutation({
     mutationFn: (data: any) => putData(`/${endpoint}/${data.id}`, data, schema),
-    onSuccess: (data) => {
+    onSuccess: (_, data) => {
       if (parent) {
         queryClient.invalidateQueries({
           queryKey: [parent, data.video_id, endpoint],
@@ -57,37 +56,69 @@ export function useUpdateMutation(
         });
       }
     },
-    onError: (error) => {
-      console.error("Error updating snippet:", error);
+    onError: (error: any) => {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+        return;
+      }
+      toast.error("Something went wrong, please try again later");
     },
   });
 }
 
-export function useCutVideoMutation(endpoint: string) {
+export function useCutVideoMutation(endpoint: string, videoId: number) {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (id: number) => cutVideo(`/${endpoint}/${id}`),
     onSuccess: () => {
-      console.log("success");
+      queryClient.invalidateQueries({
+        queryKey: ["video", videoId, "snippets"],
+      });
+      toast.success("Snippet has been successfuly exported");
     },
-    onError: (error) => {
-      console.error("Error deleting:", error);
+    onError: (error: any) => {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+        return;
+      }
+      toast.error("Something went wrong, please try again later");
     },
   });
 }
 
 export function useDuplicateMutation(endpoint: string) {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (id: number) => cutVideo(`/${endpoint}/${id}/duplicate`),
     onSuccess: () => {
-      console.log("success");
+      queryClient.invalidateQueries({
+        queryKey: ["videos"],
+      });
+      toast.success("Video has been successfuly duplicated");
     },
-    onError: (error) => {
-      console.error("Error deleting:", error);
+    onError: (error: any) => {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+        return;
+      }
+      toast.error("Something went wrong, please try again later");
     },
   });
 }
-
-// VIDEO MUTATIONS
 
 export function useCreateVideoMutation(endpoint: string) {
   const queryClient = useQueryClient();
@@ -100,13 +131,11 @@ export function useCreateVideoMutation(endpoint: string) {
         ...prevData,
       ]);
     },
-    onError: (error) => {
-      console.log(error);
+    onError: () => {
+      toast.error("Something went wrong, please try again later");
     },
   });
 }
-
-// SNIPPET MUTATIONS
 
 export function useCreateSnippetMutation(id: number | undefined) {
   const queryClient = useQueryClient();
@@ -119,8 +148,8 @@ export function useCreateSnippetMutation(id: number | undefined) {
         queryKey: ["video", id, "snippets"],
       });
     },
-    onError: (error) => {
-      console.error("Error creating video:", error);
+    onError: () => {
+      toast.error("Something went wrong, please try again later");
     },
     onSettled: async () => {},
   });
@@ -142,8 +171,8 @@ export function useDeleteSnippetMutation(snippetId: number, parent = "") {
         });
       }
     },
-    onError: (error) => {
-      console.error("Error updating snippet:", error);
+    onError: () => {
+      toast.error("Something went wrong, please try again later");
     },
   });
 }

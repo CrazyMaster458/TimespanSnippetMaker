@@ -30,6 +30,18 @@ export const VideoPlayer = ({ videoUrl }: { videoUrl: string }) => {
 
   const [sliderValue, setSliderValue] = useState(1);
 
+  function getVideoType(url: string) {
+    const parts = url.split(".");
+    const extension = parts.length > 0 ? parts.pop()!.toLowerCase() : "";
+    const mimeTypes: Record<string, string> = {
+      mp4: "video/mp4",
+      webm: "video/webm",
+      ogg: "video/ogg",
+      mov: "video/mov",
+    };
+    return mimeTypes[extension as keyof typeof mimeTypes] || "video/mp4";
+  }
+
   function togglePlayPause() {
     const video = videoRef.current!;
 
@@ -67,40 +79,11 @@ export const VideoPlayer = ({ videoUrl }: { videoUrl: string }) => {
     const speedBtnElement = speedBtnRef.current!;
 
     let newPlaybackRate = videoElement.playbackRate + 0.25;
-    console.log(videoElement.playbackRate);
-    console.log(newPlaybackRate);
     if (newPlaybackRate > 2) newPlaybackRate = 0.25;
 
     videoElement.playbackRate = newPlaybackRate;
     speedBtnElement.textContent = `${newPlaybackRate}x`;
   }
-
-  // const convertTimeStringToSeconds = (timeString: string): number => {
-  //   if (timeString) {
-  //     const [hours, minutes, seconds] = timeString.split(":").map(Number);
-  //     return hours * 3600 + minutes * 60 + seconds;
-  //   }
-  //   return 0;
-  // };
-
-  // const handleSectionUpdate = (startTime: string, endTime: string) => {
-  //   const videoElement = videoRef.current!;
-  //   const timelineContainerElement = timelineContainerRef.current!;
-
-  //   const startTimeInSeconds = convertTimeStringToSeconds(startTime);
-  //   const endTimeInSeconds = convertTimeStringToSeconds(endTime);
-
-  //   const startPosition =
-  //     ((startTimeInSeconds / videoElement.duration) * 100).toFixed(2) + "%";
-  //   const endPosition =
-  //     ((endTimeInSeconds / videoElement.duration) * 100).toFixed(2) + "%";
-
-  //   timelineContainerElement.style.setProperty(
-  //     "--start-position",
-  //     startPosition,
-  //   );
-  //   timelineContainerElement.style.setProperty("--end-position", endPosition);
-  // };
 
   useEffect(() => {
     // Video player
@@ -328,7 +311,6 @@ export const VideoPlayer = ({ videoUrl }: { videoUrl: string }) => {
             toggleMiniPlayerMode();
             break;
           case "m":
-            // console.log(videoElement.currentTime);
             toggleMute();
             break;
           case "arrowleft":
@@ -354,10 +336,6 @@ export const VideoPlayer = ({ videoUrl }: { videoUrl: string }) => {
       };
     }
   }, []);
-
-  // useEffect(() => {
-  //   console.log(videoUrl);
-  // }, [videoUrl]);
 
   return (
     <div
@@ -487,15 +465,10 @@ export const VideoPlayer = ({ videoUrl }: { videoUrl: string }) => {
             ref={videoRef}
             className="video-player"
             onClick={togglePlayPause}
+            style={{ objectFit: "contain", width: "100%", height: "100%" }}
           >
             {/* <track kind={"captions"} srcLang="en" src="subtitles.vtt" /> */}
-            <source
-              // src="https://tecdn.b-cdn.net/img/video/Sail-Away.mp4"
-              //src="Lift_run_shoot.mp4"
-              // src="https://hugh.cdn.rumble.cloud/video/s8/2/K/F/p/a/KFpaq.caa.mp4?u=3&b=0"
-              src={videoUrl}
-              type="video/mp4"
-            />
+            <source src={videoUrl} type={getVideoType(videoUrl)} />{" "}
           </video>
         </AspectRatio>
       )}

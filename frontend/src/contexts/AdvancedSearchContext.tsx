@@ -12,7 +12,6 @@ interface AdvancedSearchContextType {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-// Initialize the context with an initial value matching the defined type
 const AdvancedSearchContentContext = createContext<AdvancedSearchContextType>({
   selectedContentType: 0,
   contentType: [],
@@ -59,6 +58,5 @@ export const AdvancedSearchDialogContent: React.FC<
   );
 };
 
-// Function to consume the content section value
 export const useAdvancedSearchContent = () =>
   useContext(AdvancedSearchContentContext);

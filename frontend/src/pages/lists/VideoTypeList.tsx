@@ -42,10 +42,7 @@ export default function InfluencerList() {
           : videoTypeQuery.data && videoTypeQuery.data.pages[0].data.length > 0
             ? videoTypeQuery.data.pages.map((page) =>
                 page.data.map((videoType: VideoType) => (
-                  <VideoTypeCard
-                    key={videoType.id}
-                    videoTypeData={videoType}
-                  />
+                  <VideoTypeCard key={videoType.id} videoTypeData={videoType} />
                 )),
               )
             : !videoTypeQuery.isLoading &&
